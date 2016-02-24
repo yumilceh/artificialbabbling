@@ -1,0 +1,18 @@
+
+%Created on: 15th February 2016
+%by: Juan Manuel Aceveo Valle
+%
+%artStates exits
+
+
+samples=size(artStates,2);
+auditoryState=zeros(6,samples);
+minaf=zeros(1,samples);
+
+for k=1:samples
+    [auditoryState(:,k), ~, ~, af]=diva_synth(artState(1:2:25,k));
+    auditoryState(:,k)=auditoryState(:,k)./outputScale-1;
+    minaf(k)=min(af);
+end
+
+
