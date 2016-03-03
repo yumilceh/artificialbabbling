@@ -5,8 +5,6 @@ Created on Feb 5, 2016
 '''
 from Agent.SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
 
-import numpy as np
-
 if __name__ == '__main__':
     divaAgent=Diva_Proprio2015a()
     divaAgent.setMotorCommand([2,0,2,0,0,0,0,0,0,0,0,0.7,0.7,-3,0,2,0,0,0,0,0,0,0,0,0.7,0.7])
