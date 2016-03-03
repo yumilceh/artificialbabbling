@@ -16,8 +16,9 @@ if __name__ == '__main__':
     divaAgent.vocalize()
     divaAgent.plotAuditoryOutput([1,2,3])
     divaAgent.getSoundWave(1)
-    divaAgent.playSoundWave() 
-    divaAgent.plotSoundWave()
+    divaAgent.plotSoundWave() 
+    divaAgent.playSoundWave()
+    
     
     '''samples=100
     for index in range(samples):
