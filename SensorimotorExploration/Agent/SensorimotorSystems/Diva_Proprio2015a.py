@@ -139,16 +139,25 @@ class Diva_Proprio2015a:
             self.playSoundWave()
 
     def plotSoundWave(self):
-        plt.plot(self.time,self.soundWave)
+        plt.plot(self.soundWave)
         plt.show();
     
     def playSoundWave(self):
+        try:
+            pa = pyaudio.PyAudio()
+        except IOError:
+            pa = pyaudio.PyAudio()
+            print('Hello')
+            pass
         pa = pyaudio.PyAudio()
         stream = pa.open(format=pyaudio.paFloat32,
-                        channels=1,
-                        rate=11025,
-                        output=True)
-        stream.write(self.soundWave.astype(float).tostring())
+                         channels=1,
+                         rate=5512,
+                         output=True)
+        
+        stream.write(self.soundWave.astype(np.float32).tostring())
+        
+        stream.close()
         
 def motorDynamics(y,t,self,m):
     dumpingFactor=1.01
