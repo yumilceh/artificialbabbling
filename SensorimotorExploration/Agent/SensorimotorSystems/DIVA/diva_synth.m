@@ -51,7 +51,7 @@ if isempty(vt)
     load(fullfile(filepath,[filename,'.mat']),'vt');
 end
 
-synth=struct('fs',11025,'update_fs',200); 
+synth=struct('fs',11025,'update_fs',200); %Modify sample frequency
 synth.f0=120;
 synth.samplesperperiod=ceil(synth.fs/synth.f0);
 synth.glottalsource=glotlf(0,(0:1/synth.samplesperperiod:1-1/synth.samplesperperiod)');

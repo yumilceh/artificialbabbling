@@ -6,14 +6,19 @@ This sensorimor system defines the DIVA agent used for the CCIA 2015's paper
 
 #import sys
 #import wave
+import subprocess as sp
 import pyaudio 
 import math
 import numpy as np
 import pymatlab as ml
 import matplotlib.pyplot as plt
+from matplotlib import animation 
 from scipy.integrate import odeint
 from scipy import linspace
-
+from scipy.io.wavfile import write
+from matplotlib.pyplot import autoscale
+from matplotlib.animation import Animation
+from scipy.interpolate.interpolate_wrapper import block
 
 class Diva_Proprio2015a:
     
@@ -44,8 +49,12 @@ class Diva_Proprio2015a:
     def setMotorCommand(self,motorCommand):
         self.motorCommand=motorCommand    
         
-    def getMotorDynamics(self):
-        ts=self.ts
+    def getMotorDynamics(self,sound=0):
+        if sound:
+            ts=0.005;
+        else:
+            ts=self.ts
+            
         durationM1=0.25
         durationM2=0.55
         nSamples=int(0.8/ts+1)
@@ -62,9 +71,12 @@ class Diva_Proprio2015a:
         t2=linspace(0.0,durationM2,nSamples2)
         m2=self.motorCommand[13:]
         artStates2=odeint(motorDynamics,artStates1[-1,:],t2,args=(self,m2))
-        self.artStates= np.zeros((nSamples, 26))
-        self.artStates[:nSamples1,:]=artStates1
-        self.artStates[nSamples1-1:,:]=artStates2
+        if sound:
+            return np.concatenate((artStates1,artStates2))
+        else:
+            self.artStates= np.zeros((nSamples, 26))
+            self.artStates[:nSamples1,:]=artStates1
+            self.artStates[nSamples1-1:,:]=artStates2
     
     def vocalize(self):
         ts=self.ts;
@@ -74,6 +86,7 @@ class Diva_Proprio2015a:
         self.auditoryResult=[0.0]*6
         proprioceptiveAv=[0.0]*2
         self.matlabSession.putvalue('artStates',self.artStates)
+        #self.matlabSession.run('save artStates.mat artStates')
         self.matlabSession.run('mscript_Aud_Proprio')
         auditoryStates=self.matlabSession.getvalue('auditoryStates')
         self.auditoryStates=auditoryStates;
@@ -130,35 +143,93 @@ class Diva_Proprio2015a:
         plt.plot(self.time,self.somatoOutput)
         plt.show;
            
-    def getSoundWave(self, play): #based on explauto
-        self.matlabSession.putvalue('artStates',self.artStates[:,0:13])
-        self.matlabSession.run('save artStates.mat artStates')
-        self.matlabSession.run('soundWave = diva_synth(artStates, \'sound\')')
+    def getVocaltractShape(self,artStates,returnShape=0):
+        self.matlabSession.putvalue('artStates',artStates)
+        self.matlabSession.run('[~, ~, outline] = diva_synth(artStates\', \'audsom\')')
+        if returnShape:
+            return self.matlabSession.getvalue('outline')
+        else:
+            self.vocalTractshape=self.matlabSession.getvalue('outline')
+            
+            
+    def plotVocalTractShape(self,time,plot=1):
+        self.getVocaltractShape(self.artStates)
+        ts=self.ts
+        index=np.round(time/ts)
+        figVocalTract=plt.figure();
+        axVocalTract=figVocalTract.add_subplot(111,autoscale_on=False, xlim=(-75,225),ylim=(-200,100))
+        axVocalTract.plot(np.real(self.outline[:,index]), np.imag(self.outline[:,index]))
+        figVocalTract.show()
+        '''try:
+            input('Press any key to continue...')
+        except:
+            pass'''
+        
+    def getVocalizationVideo(self,show=0):
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=1/0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
+        figVocalTract=plt.figure()
+        
+        artStates=self.getSoundWave(save=1,returnArtStates=1)
+        outline=self.getVocaltractShape(artStates, returnShape=1)
+        nSamples=artStates.shape[0]
+        print(nSamples)
+        sequence=[]
+        for index in range(nSamples):
+            sequence.append((plt.plot(np.real(outline[:,index]), np.imag(outline[:,index]))))
+        im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False,blit=True)
+        im_ani.save('vt.mp4', writer=writer)
+        command = ["ffmpeg",
+                   '-i', 'vt.wav',
+                   '-i','vt.mp4',
+                   '-vcodec', 'copy', 'vtaudio.mp4']
+        sp.call(command)
+        if(show):
+            figVocalTract.show();
+            
+        
+               
+    def getSoundWave(self, play=0,save=0,returnArtStates=0): #based on explauto
+        soundArtStates=self.getMotorDynamics(sound=1)
+        #print('ts=0.005')
+        #print(soundArtStates.shape)
+        #print('ts=0.01')
+        #print(self.artStates.shape)
+        self.matlabSession.putvalue('artStates',soundArtStates[:,0:13])
+        #self.matlabSession.run('save artStates.mat artStates')
+        self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
         self.soundWave=self.matlabSession.getvalue('soundWave');
         if(play):
             self.playSoundWave()
+        if(save):
+            scaled = np.int16(self.soundWave/np.max(np.abs(self.soundWave)) * 32767)
+            write('vt.wav', 11025, scaled)
+        if(returnArtStates):
+           return soundArtStates  
 
     def plotSoundWave(self):
         plt.plot(self.soundWave)
         plt.show();
     
-    def playSoundWave(self):
-        try:
-            pa = pyaudio.PyAudio()
-        except IOError:
-            pa = pyaudio.PyAudio()
-            print('Hello')
-            pass
-        pa = pyaudio.PyAudio()
-        stream = pa.open(format=pyaudio.paFloat32,
+    def playSoundWave(self): #keep in mind that DIVA works with ts=0.005
+        
+        self.pa = pyaudio.PyAudio() #If pa and stream are not elements of the self object then sound does not play
+        self.stream = self.pa.open(format=pyaudio.paFloat32,
                          channels=1,
-                         rate=5512,
+                         rate=11025,
                          output=True)
+        self.stream.start_stream()
+        self.stream.write(self.soundWave.astype(np.float32).tostring())
+    
+    def releaseAudioDevice(self): #any sound in the buffer will be removed
+        try:
+            self.pa.terminate()
+        except:
+            pass
         
-        stream.write(self.soundWave.astype(np.float32).tostring())
-        
-        stream.close()
-        
+    def stop(self):
+        del self.matlabSession
+
 def motorDynamics(y,t,self,m):
     dumpingFactor=1.01
     w0=2*math.pi/0.8
