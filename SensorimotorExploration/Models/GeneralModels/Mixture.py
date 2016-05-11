@@ -22,7 +22,6 @@ class GMM(object):
                        params='wmc', 
                        init_params='wmc' 
                        )
-        
         self.model=GMMtmp;
 
     def train(self,data):

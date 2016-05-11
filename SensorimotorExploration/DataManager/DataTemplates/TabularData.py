@@ -23,4 +23,5 @@ class TabularData(object):
     def appendData(self,newData):
         data_tmp=pd.DataFrame([newData],columns=self.varNames)
         self.data=pd.concat([self.data, data_tmp],ignore_index=True); 
+        
             

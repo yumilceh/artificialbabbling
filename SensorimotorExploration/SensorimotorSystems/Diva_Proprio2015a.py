@@ -16,9 +16,9 @@ from matplotlib import animation
 from scipy.integrate import odeint
 from scipy import linspace
 from scipy.io.wavfile import write
-from matplotlib.pyplot import autoscale
-from matplotlib.animation import Animation
-from scipy.interpolate.interpolate_wrapper import block
+#from matplotlib.pyplot import autoscale
+#from matplotlib.animation import Animation
+#from scipy.interpolate.interpolate_wrapper import block
 
 class Diva_Proprio2015a:
     
@@ -43,7 +43,7 @@ class Diva_Proprio2015a:
         self.sensorOutput=[0.0] * n_sensor
         self.somatoOutput=[0.0] * n_somato
         self.matlabSession=ml.session_factory()        
-        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/Agent/SensorimotorSystems/DIVA/') #Path to DIVA functions
+        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/SensorimotorSystems/DIVA/') #Path to DIVA functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
     def setMotorCommand(self,motorCommand):
@@ -125,7 +125,7 @@ class Diva_Proprio2015a:
         self.somatoOutput=0.0
         if((proprioceptiveAv[0]<0.0) or (proprioceptiveAv[1]<0.0)):
             self.somatoOutput=1.0
-              
+        self.sensorOutput=self.auditoryResult;     
             
     def plotArticulatoryEvolution(self,arts):
         for index in range(len(arts)):
@@ -205,7 +205,7 @@ class Diva_Proprio2015a:
             scaled = np.int16(self.soundWave/np.max(np.abs(self.soundWave)) * 32767)
             write('vt.wav', 11025, scaled)
         if(returnArtStates):
-           return soundArtStates  
+            return soundArtStates  
 
     def plotSoundWave(self):
         plt.plot(self.soundWave)
