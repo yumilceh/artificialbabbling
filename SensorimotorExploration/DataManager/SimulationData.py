@@ -22,7 +22,7 @@ class SimulationData(object):
         self.sensor_data.appendData(Agent.sensorOutput)
         self.somato_data.appendData(Agent.somatoOutput)
 
-    def plotSimulatedData(self,src1,column1,src2,column2):
+    def plotSimulatedData(self,fig,axes,src1,column1,src2,column2):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)
         somato_names=list(self.somato_data.data.columns.values)
@@ -45,9 +45,9 @@ class SimulationData(object):
         elif src2=='somato':
             y_name=somato_names[column2]
             data2=self.somato_data.data[[y_name]]
-            
+        
+        plt.figure(fig.number)
+        plt.sca(axes)    
         plt.plot(data1,data2,"o")
-        plt.show()
-        
-        
+        return fig,axes    
         
