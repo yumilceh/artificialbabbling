@@ -6,55 +6,88 @@ Created on Feb 5, 2016
 from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
 from DataManager.SimulationData import SimulationData
 from Models.GMM_SM  import GMM_SM
+from Models.GMM_SS  import GMM_SS
+from Models.GMM_IM  import GMM_IM 
 from DataVisualization.PlotTools import *
-import numpy as np
+from Algorithm.SupportFunctions import *
+
 
 if __name__ == '__main__':
     
     diva_agent=Diva_Proprio2015a()
     
-    n_vocalizations=28;
+    n_vocalizations=100;
     
     simulation_data=SimulationData(diva_agent);
     
     n_motor_commands=diva_agent.n_motor;
     
-    motor_commands=np.random.random((n_vocalizations,n_motor_commands))
+    motor_commands=get_random_motor_set(diva_agent,n_vocalizations)
     
-    gmm_sm=GMM_SM(diva_agent,28);
+    gmm_sm=GMM_SM(diva_agent,28)
+    gmm_ss=GMM_SS(diva_agent,28)
+    gmm_im=GMM_IM(diva_agent,50)
     
     for i in range(n_vocalizations):
         diva_agent.setMotorCommand(motor_commands[i,:])
         diva_agent.getMotorDynamics()
         diva_agent.vocalize()
         simulation_data.appendData(diva_agent)
-        print(i)
-     
-    #===========================================================================
-    # gmm_sm.train(simulation_data)
-    #===========================================================================
-    
-    
-    #======================================================8=====================
-    # print(simulation_data.motor_data.data)
-    # print(simulation_data.sensor_data.data)
-    #===========================================================================
-    gmm_sm.train(simulation_data)
-    
+        print('Random initialization, vocalization: {}'.format(i))
 
-    #------------------------------------------ print(gmm_sm.GMM.model.weights_)
-    #-------------------------------------------- print(gmm_sm.GMM.model.means_)
-    #------------------------------------------- print(gmm_sm.GMM.model.covars_)
-       
+    gmm_sm.train(simulation_data)
+
     f,ax=initializeFigure();
+    f,ax=simulation_data.plotSimulatedData2D(f,ax,'sensor', 0, 'sensor', 3,"ob")
     
-    f,ax=simulation_data.plotSimulatedData(f,ax,'sensor', 0, 'sensor', 3)
     
-    f,ax=gmm_sm.GMM.plotGMM_SMProjection(f,ax,0, 3)
+    n_random_examples=50
+    random_indexes=np.random.randint(n_vocalizations,size=n_random_examples)
     
-    plt.show();          
-    #===========================================================================
-    # diva_agent.stop()
-    # del(diva_agent)
-    #===========================================================================
-     
+    sensor_goals=simulation_data.sensor_data.data.as_matrix()
+    sensor_goals=sensor_goals[random_indexes,:]
+    
+    # simulation_data.sensor_data.data.drop(simulation_data.sensor_data.data.index[:])
+    # simulation_data.motor_data.data.drop(simulation_data.motor_data.data.index[:])
+    # simulation_data.somato_data.data.drop(simulation_data.somato_data.data.index[:])
+    simulation_data=SimulationData(diva_agent);
+
+    #----------------------------------------------------- print(random_indexes)
+    #------------------------------------------------------------------------------ 
+    #------------------------------------------------------- print(sensor_goals)
+    #------------------------------------------- print(diva_agent.motor_command)
+    
+    for i in range(n_random_examples):
+        diva_agent.sensor_goal=sensor_goals[i]
+        gmm_sm.getMotorCommand(diva_agent)
+        diva_agent.getMotorDynamics()
+        diva_agent.vocalize()
+        get_competence_Moulin2013(diva_agent)
+        simulation_data.appendData(diva_agent)
+        print('Testing random model, vocalization: {}'.format(i))
+        #--------------------------------------- print(diva_agent.motor_command)
+
+    
+    g,ax2=initializeFigure();
+    g,ax2=simulation_data.plotSimulatedData2D(g,ax2,'sensor', 0, 'sensor', 3,"or")
+        
+    gmm_im.train(simulation_data)
+    n_chosen_experiments=50
+    
+    for i in range(n_chosen_experiments):
+        diva_agent.sensor_goal=gmm_im.get_interesting_goal()
+        gmm_sm.getMotorCommand(diva_agent)
+        diva_agent.getMotorDynamics()
+        diva_agent.vocalize()
+        get_competence_Moulin2013(diva_agent)
+        simulation_data.appendData(diva_agent)
+        print('Testing interesting model, vocalization: {}'.format(i))
+        #--------------------------------------- print(diva_agent.motor_command)
+         
+    h,ax3=initializeFigure();
+    h,ax3=simulation_data.plotSimulatedData2D(h,ax3,'sensor', 0, 'sensor', 3,"or")
+    
+    plt.show();
+    
+    
+    

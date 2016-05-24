@@ -3,8 +3,8 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from Agent.SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
-import numpy as np
+from SensorimotorExploration.SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+
 
 
 

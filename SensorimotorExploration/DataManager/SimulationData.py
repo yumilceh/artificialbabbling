@@ -15,14 +15,18 @@ class SimulationData(object):
     def __init__(self, Agent):
         self.motor_data=TabularData(Agent.motor_names)
         self.sensor_data=TabularData(Agent.sensor_names)
+        self.sensor_goal_data=TabularData(Agent.sensor_names)
         self.somato_data=TabularData(Agent.somato_names)
+        self.competence_data=TabularData(['Competence'])
     
     def appendData(self,Agent):
-        self.motor_data.appendData(Agent.motorCommand)
+        self.motor_data.appendData(Agent.motor_command)
         self.sensor_data.appendData(Agent.sensorOutput)
+        self.sensor_goal_data.appendData(Agent.sensor_goal)
         self.somato_data.appendData(Agent.somatoOutput)
+        self.competence_data.appendData(Agent.competence_result)
 
-    def plotSimulatedData(self,fig,axes,src1,column1,src2,column2):
+    def plotSimulatedData2D(self,fig,axes,src1,column1,src2,column2,color):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)
         somato_names=list(self.somato_data.data.columns.values)
@@ -48,6 +52,29 @@ class SimulationData(object):
         
         plt.figure(fig.number)
         plt.sca(axes)    
-        plt.plot(data1,data2,"o")
-        return fig,axes    
+        plt.plot(data1,data2,color)
+        return fig,axes
+    
+    def plotTemporalSimulatedData(self,fig,axes,src,column,color):
+        motor_names=list(self.motor_data.data.columns.values)
+        sensor_names=list(self.sensor_data.data.columns.values)
+        somato_names=list(self.somato_data.data.columns.values)
+        if src=='motor':
+            x_name=motor_names[column]
+            data=self.motor_data.data[[x_name]]
+        elif src=='sensor':
+            x_name=sensor_names[column]
+            data=self.sensor_data.data[[x_name]]
+        elif src=='somato':
+            x_name=somato_names[column]
+            data=self.somato_data.data[[x_name]]
+        elif src=='competence':
+            data=self.competence_data.data[['competence']]
+        
+        
+        plt.figure(fig.number)
+        plt.sca(axes)    
+        plt.plot(data,color)
+        return fig,axes
+            
         

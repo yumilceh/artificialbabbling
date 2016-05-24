@@ -9,6 +9,7 @@ import numpy as np
 from scipy import linalg 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import pandas as pd
 
 class GMM(object):
     '''
@@ -32,9 +33,51 @@ class GMM(object):
     def train(self,data):
         self.model.fit(data)
         
-   
+    def predict(self,x_dims, y_dims, y):
+        '''
+            This method returns the value of x that maximaze the probability P(x|y)
+        '''
+        y=np.mat(y)
+        n_dimensions=np.amax(len(x_dims))+np.amax(len(y_dims))
+        n_components=self.model.n_components
+        gmm=self.model
+        likely_x=np.mat(np.zeros((len(x_dims),n_components)))
+        sm=np.mat(np.zeros((len(x_dims)+len(y_dims),n_components)))
+        p_xy=np.mat(np.zeros((n_components,1)))
         
-    def plotGMM_SMProjection(self,fig,axes,column1,column2):
+        for k,(Mu, Sigma) in enumerate(zip(gmm.means_, gmm._get_covars())):
+            Mu=np.transpose(Mu)
+            #----------------------------------------------- Sigma=np.mat(Sigma)
+            Sigma_yy=Sigma[:,y_dims]
+            Sigma_yy=Sigma_yy[y_dims,:]
+            
+            Sigma_xy=Sigma[x_dims,:]
+            Sigma_xy=Sigma_xy[:,y_dims]
+            tmp1=linalg.inv(Sigma_yy)*np.transpose(y-Mu[y_dims])
+            tmp2=np.transpose(Sigma_xy*tmp1)
+            likely_x[:,k]=np.transpose(Mu[x_dims]+tmp2)
+            
+            #----------- sm[:,k]=np.concatenate((likely_x[:,k],np.transpose(y)))
+            likely_x_tmp=pd.DataFrame(likely_x[:,k],index=x_dims)
+            y_tmp=pd.DataFrame(np.transpose(y),index=y_dims)
+            tmp3=pd.concat([y_tmp, likely_x_tmp])
+            tmp3=tmp3.sort_index()
+            
+            sm[:,k]=tmp3.as_matrix()
+            
+            tmp4=1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
+            tmp5=np.transpose(sm[:,k])-(Mu)
+            tmp6=linalg.inv(Sigma)
+            tmp7=np.exp((-1.0/2.0)*(tmp5*tmp6*np.transpose(tmp5))) #Multiply time GMM.Priors????
+            p_xy[k,:]=np.reshape(tmp4*tmp7,(1))
+            #- print('Warning: Priors are not be considering to compute P(x,y)')
+            
+        k_ok=np.argmax(p_xy);
+        x=likely_x[:,k_ok];
+        
+        return np.array(x.transpose())[0]
+        
+    def plotGMMProjection(self,fig,axes,column1,column2):
         '''
             Display Gaussian distributions with a 95% interval of confidence
         '''
@@ -48,18 +91,15 @@ class GMM(object):
         plt.sca(axes)        
     
         
-        for i,(mean, covar, color) in enumerate(zip(
-            gmm.means_, gmm._get_covars(), color_iter)):
+        for i,(mean, covar, color) in enumerate(zip(gmm.means_, gmm._get_covars(), color_iter)):
             covar_plt=np.zeros((2,2))
             print(covar_plt)
             covar_plt[0,0]=covar[column1,column1]
             covar_plt[1,1]=covar[column2,column2]
             covar_plt[0,1]=covar[column1,column2]
             covar_plt[1,0]=covar[column2,column1]
-            print(covar_plt)
             
             mean_plt=[mean[column1], mean[column2]]
-            print(mean_plt)
             
             v, w = linalg.eigh(covar_plt)
             u = w[0] / linalg.norm(w[0])
@@ -76,7 +116,7 @@ class GMM(object):
             ell.set_alpha(0.5)
             
             axes.add_patch(ell)
-    
+            
         axes.set_xlim(-1, 1)
         axes.set_ylim(-1, 1)
         axes.set_title(title)

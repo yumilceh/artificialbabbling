@@ -3,10 +3,10 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
-from DataManager.SimulationData import SimulationData
-from Models.GMM_SM  import GMM_SM
-from DataVisualization.PlotTools import *
+from SensorimotorExploration.SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+from SensorimotorExploration.DataManager.SimulationData import SimulationData
+from SensorimotorExploration.Models.GMM_SM  import GMM_SM
+from SensorimotorExploration.DataVisualization.PlotTools import *
 import numpy as np
 
 if __name__ == '__main__':
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     
     f,ax=simulation_data.plotSimulatedData(f,ax,'sensor', 0, 'sensor', 3)
     
-    f,ax=gmm_sm.GMM.plotGMM_SMProjection(f,ax,0, 3)
+    f,ax=gmm_sm.GMM.plotGMMProjection(f,ax,0, 3)
     
     plt.show();          
     #===========================================================================

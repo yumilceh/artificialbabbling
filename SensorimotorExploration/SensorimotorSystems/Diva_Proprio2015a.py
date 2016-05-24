@@ -30,6 +30,9 @@ class Diva_Proprio2015a:
         n_sensor=6
         n_somato=1
         outputScale=[100.0,500.0,1500.0,3000.0];
+        min_motor_values=np.array([-3,-3,-3,-3,-3,-3,-3,-3,-3,-3,-0.25,-0.25,-0.25]*2)
+        max_motor_values=np.array([3,3,3,3,3,3,3,3,3,3,1,1,1]*2)
+        
         ts=0.01;
         self.ts=ts;
         self.time=linspace(0, .8, int(.8/ts)+1)
@@ -39,15 +42,21 @@ class Diva_Proprio2015a:
         self.motor_names=motor_names
         self.sensor_names=sensor_names
         self.somato_names=somato_names
-        self.motorCommand=[0.0] * n_motor
+        
+        self.min_motor_values=min_motor_values
+        self.max_motor_values=max_motor_values
+        
+        self.motor_command=[0.0] * n_motor
         self.sensorOutput=[0.0] * n_sensor
+        self.sensor_goal=[0.0] * n_sensor
         self.somatoOutput=[0.0] * n_somato
+        self.competence_result=0.0;
         self.matlabSession=ml.session_factory()        
         self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/SensorimotorSystems/DIVA/') #Path to DIVA functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
-    def setMotorCommand(self,motorCommand):
-        self.motorCommand=motorCommand    
+    def setMotorCommand(self,motor_command):
+        self.motor_command=motor_command    
         
     def getMotorDynamics(self,sound=0):
         if sound:
@@ -65,11 +74,11 @@ class Diva_Proprio2015a:
         y_neutral[12]=-0.25
         y0=[0.0]*26
         y0[:13]=y_neutral
-        m1=self.motorCommand[:13]
+        m1=self.motor_command[:13]
         t1=linspace(0.0,durationM1,nSamples1)
         artStates1=odeint(motorDynamics,y0,t1,args=(self,m1))
         t2=linspace(0.0,durationM2,nSamples2)
-        m2=self.motorCommand[13:]
+        m2=self.motor_command[13:]
         artStates2=odeint(motorDynamics,artStates1[-1,:],t2,args=(self,m2))
         if sound:
             return np.concatenate((artStates1,artStates2))
