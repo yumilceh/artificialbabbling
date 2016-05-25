@@ -19,7 +19,7 @@ class GMM(object):
     def __init__(self, n_components):
         self.type='GMM'
         GMMtmp=mix.GMM(n_components=n_components,
-                       covariance_type='diag',
+                       covariance_type='full',
                        random_state=None,
                        thresh=None, 
                        min_covar=0.001, 

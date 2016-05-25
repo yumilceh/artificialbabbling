@@ -41,21 +41,22 @@ class GMM_IM(object):
         gmm=self.GMM.model
 
         covariances = self.sortInterestingGaussians();
-        if covariances!=None:
+        if type(covariances)!=type(None):
             gmm_covars=gmm._get_covars()
             gmm_means=gmm.means_
 
             #------------------- n_interesting_models=len(covariances.index)
             random=0.99999999999*np.random.random(1);
             
-            print(random)
+            #----------------------------------------------------- print(random)
             cumulated_cov=0;
             for (INDEX,COVARIANCE) in (zip(covariances['INDEX'],covariances['COVARIANCE'])):
-                if (random>=cumulated_cov & random<(cumulated_cov+COVARIANCE)):
-                    selected_gauss=INDEX      
-                    y_g_tmp = np.random.multivariate_normal(gmm_means[:selected_gauss], gmm_covars[:,:,selected_gauss], 1)
-                    y_g=y_g_tmp[1:1+goal_size]           
+                if ((random>=cumulated_cov) and (random<(cumulated_cov+COVARIANCE))):
+                    selected_gauss=int(INDEX)      
+                    y_g_tmp = np.random.multivariate_normal(gmm_means[selected_gauss,:], gmm_covars[selected_gauss], 1)
+                    y_g=y_g_tmp[0,1:1+goal_size]           
                 cumulated_cov=cumulated_cov+COVARIANCE
+                #------------------------------------------ print(cumulated_cov)
         
         else:
             greatest_cov=-sys.float_info.max
@@ -84,7 +85,6 @@ class GMM_IM(object):
         time_index=self.time_index
         
         for k,(Covar,Mean) in enumerate(zip(gmm._get_covars(),gmm.means_)):
-            print(Covar)
             if(Covar[time_index,competence_index]>0):
                 index_interesting_gauss[n_interesting_gauss]=k;
                 cov_interesting_gauss[n_interesting_gauss]=Covar[competence_index,time_index]; #abs(sum(GMM_IM.Sigma(1:6,7,k)));    %based on covariance respect to time/ covariance respect to auditory goals7
@@ -99,8 +99,7 @@ class GMM_IM(object):
             total_cov=np.sum(cov_interesting_gauss);
             cov_interesting_gauss=cov_interesting_gauss[0:n_interesting_gauss]*(1/total_cov);
             covariances=pd.DataFrame({'INDEX':index_interesting_gauss,'COVARIANCE':cov_interesting_gauss})
-            covariances.sort(['COVARIANCE'])
-            print(covariances)
+            covariances=covariances.sort(['COVARIANCE'])
         
         else:
             covariances=None

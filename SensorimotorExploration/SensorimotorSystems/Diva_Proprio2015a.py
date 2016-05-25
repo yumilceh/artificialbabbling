@@ -7,7 +7,6 @@ This sensorimor system defines the DIVA agent used for the CCIA 2015's paper
 #import sys
 #import wave
 import subprocess as sp
-import pyaudio 
 import math
 import numpy as np
 import pymatlab as ml
@@ -136,6 +135,9 @@ class Diva_Proprio2015a:
             self.somatoOutput=1.0
         self.sensorOutput=self.auditoryResult;     
             
+    def executeMotorCommand(self):
+        self.vocalize()
+    
     def plotArticulatoryEvolution(self,arts):
         for index in range(len(arts)):
             plt.plot(self.time,self.artStates[:,arts[index]-1])
@@ -221,7 +223,7 @@ class Diva_Proprio2015a:
         plt.show();
     
     def playSoundWave(self): #keep in mind that DIVA works with ts=0.005
-        
+        import pyaudio 
         self.pa = pyaudio.PyAudio() #If pa and stream are not elements of the self object then sound does not play
         self.stream = self.pa.open(format=pyaudio.paFloat32,
                          channels=1,

@@ -5,6 +5,8 @@ Created on May 23, 2016
 '''
 import numpy as np
 import numpy.linalg as linalg
+
+
 def get_random_motor_set(agent,n_samples,
                                  min_values=None,
                                  max_values=None,

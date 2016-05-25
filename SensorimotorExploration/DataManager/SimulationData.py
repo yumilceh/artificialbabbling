@@ -17,7 +17,7 @@ class SimulationData(object):
         self.sensor_data=TabularData(Agent.sensor_names)
         self.sensor_goal_data=TabularData(Agent.sensor_names)
         self.somato_data=TabularData(Agent.somato_names)
-        self.competence_data=TabularData(['Competence'])
+        self.competence_data=TabularData(['competence'])
     
     def appendData(self,Agent):
         self.motor_data.appendData(Agent.motor_command)

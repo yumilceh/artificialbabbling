@@ -23,7 +23,6 @@ class GMM_SM(object):
         self.n_sensor=Agent.n_sensor;
         self.GMM=GMM(n_gauss_components)
         
-        
     def train(self,simulation_data):
         train_data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
         self.GMM.train(train_data_tmp.as_matrix(columns=None))
