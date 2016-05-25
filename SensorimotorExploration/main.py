@@ -6,9 +6,11 @@ Created on Feb 5, 2016
 from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
 from Algorithm.Algorithm1 import Algorithm1 
 from DataVisualization.PlotTools import *
-
+import os,sys
 
 if __name__ == '__main__':
+    
+    sys.path.insert(0,os.getcwd())
     
     diva_agent=Diva_Proprio2015a()
     
