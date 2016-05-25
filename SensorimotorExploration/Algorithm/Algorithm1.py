@@ -3,28 +3,30 @@ Created on May 23, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-
-from SensorimotorExploration.DataManager.SimulationData import SimulationData
-from SensorimotorExploration.Models.GMM_SM  import GMM_SM
-from SensorimotorExploration.Models.GMM_SS  import GMM_SS
-from SensorimotorExploration.Models.GMM_IM  import GMM_IM 
-from SensorimotorExploration.Algorithm.SupportFunctions import get_random_motor_set, get_competence_Moulin2013
+from DataManager.SimulationData import SimulationData
+from Models.GMM_SM  import GMM_SM
+from Models.GMM_SS  import GMM_SS
+from Models.GMM_IM  import GMM_IM 
+from Algorithm.SupportFunctions import get_random_motor_set, get_competence_Moulin2013
 
 import numpy as np
 import numpy.linalg as linalg
 
+
 class Algorithm1(object):
+
+
     '''
     classdocs
     '''
 
     def __init__(self,  agent, 
-                        n_initialization_experiments=1000,
-                        n_experiments=1000000,
+                        n_initialization_experiments=100,
+                        n_experiments=100000,
                         random_seed=np.random.random((1,1)),
                         k_sm=28,
                         k_ss=28,
-                        k_im=50,
+                        k_im=15,
                         g_im_initialization_method='non-zero'):
         '''
         Constructor
@@ -60,10 +62,11 @@ class Algorithm1(object):
         
         g_im_initialization_method=self.g_im_initialization_method
         if (g_im_initialization_method=='non-zero'):
+            sensor_goals=self.initialization_data_sm_ss.sensor_data.data.as_matrix()
             for i in range(n_init):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
-                if(linalg.norm(motor_commands[i,:])>0):
-                    agent.sensor_goal=self.initialization_data_sm_ss.sensor_data.data.loc[i].as_matrix()
+                if(linalg.norm(sensor_goals[i])>0):
+                    agent.sensor_goal=sensor_goals[i]
                     self.gmm_sm.getMotorCommand(agent)
                     agent.getMotorDynamics()
                     agent.executeMotorCommand()
@@ -81,9 +84,11 @@ class Algorithm1(object):
             agent.executeMotorCommand()
             get_competence_Moulin2013(agent)
             self.simulation_data.appendData(agent)
-            self.gmm_im.train(self.simulation_data)
-            self.gmm_sm.train(self.simulation_data)
-            self.gmm_ss.train(self.simulation_data)
+            if ((i+1)%100)==0:
+                self.gmm_im.train(self.simulation_data)
+                self.gmm_sm.train(self.simulation_data)
+                self.gmm_ss.train(self.simulation_data)
+                print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Models')
             print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: {} of {}'.format(i,n_experiments))
 
 

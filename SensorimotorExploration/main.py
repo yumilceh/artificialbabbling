@@ -3,14 +3,17 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
-from Algorithm.Algorithm1 import Algorithm1 
-from DataVisualization.PlotTools import *
-import os,sys
 
 if __name__ == '__main__':
-    
-    sys.path.insert(0,os.getcwd())
+    import os,sys
+     
+    print(os.getcwd())
+    sys.path.append(os.getcwd())
+
+    from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+    from Algorithm.Algorithm1 import Algorithm1  
+    from DataVisualization.PlotTools import *
+   
     
     diva_agent=Diva_Proprio2015a()
     
