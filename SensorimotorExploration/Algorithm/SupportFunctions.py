@@ -30,9 +30,4 @@ def get_random_motor_set(agent,n_samples,
 
     return motor_commands
 
-def get_competence_Moulin2013(agent):
-    y=agent.sensorOutput
-    y_g=agent.sensor_goal    
-    err_norm=linalg.norm(y_g-y)
-    c=np.exp(-err_norm)
-    agent.competence_result=c
+def compress

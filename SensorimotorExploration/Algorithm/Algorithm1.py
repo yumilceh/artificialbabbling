@@ -4,10 +4,10 @@ Created on May 23, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from DataManager.SimulationData import SimulationData
-from Models.GMM_SM  import GMM_SM
-from Models.GMM_SS  import GMM_SS
-from Models.GMM_IM  import GMM_IM 
-from Algorithm.SupportFunctions import get_random_motor_set, get_competence_Moulin2013
+from Models.GMM_SM import GMM_SM
+from Models.GMM_SS import GMM_SS
+from Models.GMM_IM import GMM_IM
+from Algorithm.SupportFunctions import get_random_motor_set
 
 import numpy as np
 import numpy.linalg as linalg
