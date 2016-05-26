@@ -14,10 +14,11 @@ class GMM_IM(object):
     '''
 
 
-    def __init__(self, Agent, n_gauss_components):
+    def __init__(self, Agent, n_gauss_components, im_step=4600):
         '''
         Constructor
         '''
+        self.im_step=im_step
         self.size_data=2*Agent.n_sensor+1
         self.goal_size=Agent.n_sensor
         self.competence_index=2*Agent.n_sensor+1; #Considering that one column will be time
@@ -27,7 +28,14 @@ class GMM_IM(object):
         
         
     def train(self,simulation_data):
-        train_data_tmp=pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
+        im_step=self.im_step
+        data_size=len(simulation_data.sensor_data.data.index)
+        if data_size>simulation_data:
+            sensor_data=simulation_data.sensor_data.data[data_size-im_step:-1]
+            sensor_goal_data=simulation_data.sensor_goal_data.data[data_size-im_step:-1]
+            train_data_tmp=pd.concat([sensor_goal_data, sensor_data],axis=1)
+        else:
+            train_data_tmp=pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
         train_data_tmp.reindex()
         train_data_tmp=train_data_tmp.reset_index()
         self.GMM.train(train_data_tmp.as_matrix(columns=None))

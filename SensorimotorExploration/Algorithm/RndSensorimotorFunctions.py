@@ -1,11 +1,9 @@
 '''
-Created on May 23, 2016
+Created on May 26, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
 import numpy as np
-import numpy.linalg as linalg
-
 
 def get_random_motor_set(agent,n_samples,
                                  min_values=None,
@@ -29,5 +27,3 @@ def get_random_motor_set(agent,n_samples,
     motor_commands=min_values+raw_rnd_data*(max_values-min_values)
 
     return motor_commands
-
-def compress

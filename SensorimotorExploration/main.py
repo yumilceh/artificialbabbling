@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
     from Algorithm.Algorithm1 import Algorithm1  
-    from DataVisualization.PlotTools import *
+    from DataManager.PlotTools import *
    
     
     diva_agent=Diva_Proprio2015a()
@@ -24,10 +24,6 @@ if __name__ == '__main__':
     initialization_data_sm_ss=simulation1.initialization_data_sm_ss
     initialization_data_im=simulation1.initialization_data_im
     simulation_data=simulation1.simulation_data
-         
-    initialization_data_sm_ss.to_pickle('initialization_sm_ss.p')
-    initialization_data_im.to_pickle('initialization_im.p')     
-    simulation_data.to_pickle('simulation.p')
 
     h,ax3=initializeFigure();
     h,ax3=simulation_data.plotSimulatedData2D(h,ax3,'sensor', 0, 'sensor', 3,"or")

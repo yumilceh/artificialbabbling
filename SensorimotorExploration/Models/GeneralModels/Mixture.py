@@ -33,6 +33,14 @@ class GMM(object):
     def train(self,data):
         self.model.fit(data)
         
+    def trainIncrementalLearning(self,new_data,alpha):
+        self.model.init_params='';
+        n_new_samples=np.size(new_data,0)
+        n_persistent_samples=np.round(((1-alpha)*n_new_samples)/alpha)
+        persistent_data=self.model.sample(n_persistent_samples)
+        data=np.concatenate((persistent_data,new_data),axis=0)
+        self.model.fit(data)
+        
     def predict(self,x_dims, y_dims, y):
         '''
             This method returns the value of x that maximaze the probability P(x|y)

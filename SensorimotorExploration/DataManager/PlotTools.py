@@ -12,3 +12,6 @@ def initializeFigure():
     fig, ax = plt.subplots(1, 1) # or what ever layout you want
     ax.hold(True)
     return fig, ax     
+
+def movingaverage():
+    pass

@@ -5,9 +5,11 @@ Created on Feb 22, 2016
 '''
 
 from DataManager.DataTemplates.TabularData import TabularData
-import gzip
-import shutil
-import os
+#===============================================================================
+# import gzip
+# import shutil
+# import os
+#===============================================================================
 import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
 
@@ -30,19 +32,12 @@ class SimulationData(object):
         self.competence_data.appendData(Agent.competence_result)
         
     def saveData(self,file_name):
-        self.motor_data.data.to_hdf('motor_data.h5')
-        self.sensor_data.data.to_hdf('sensor_data.h5')
-        self.sensor_goal_data.data.to_hdf('sensor_goal_data.h5')
-        self.somato_data.data.to_hdf('somato_data.h5')
-        self.competence_data.data.to_hdf('competence_data.h5')
-        for data_file in ['motor_data.h5', 
-                     'sensor_data.h5',
-                      'sensor_goal_data.h5',
-                      'somato_data.h5',
-                      'competence_data.h5']:
-            with open(data_file,'rb') as f_in, gzip.open(file_name,'wb') as f_out:
-                shutil.copyfileobj(f_in,f_out)
-            os.remove(data_file)
+        self.motor_data.data.to_hdf(file_name,'motor_data')
+        self.sensor_data.data.to_hdf(file_name,'sensor_data')
+        self.sensor_goal_data.data.to_hdf(file_name,'sensor_goal_data')
+        self.somato_data.data.to_hdf(file_name,'somato_data')
+        self.competence_data.data.to_hdf(file_name,'competence_data')
+       
 
     def plotSimulatedData2D(self,fig,axes,src1,column1,src2,column2,color):
         motor_names=list(self.motor_data.data.columns.values)
