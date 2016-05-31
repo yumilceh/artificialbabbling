@@ -7,12 +7,12 @@ from DataManager.SimulationData import SimulationData
 from Models.GMM_SM import GMM_SM
 from Models.GMM_SS import GMM_SS
 from Models.GMM_IM import GMM_IM
-from RndSensorimotorFunctions import get_random_motor_set
-from CompetenceFunctions import get_competence_Moulin2013
+from Algorithm.RndSensorimotorFunctions import get_random_motor_set
+from Algorithm.CompetenceFunctions import get_competence_Moulin2013
 
 import numpy as np
 import numpy.linalg as linalg
-from SensorimotorExploration.Algorithm.StorageDataFunctions import saveSimulationData
+from Algorithm.StorageDataFunctions import saveSimulationData
 
 
 class Algorithm1(object):
@@ -24,11 +24,11 @@ class Algorithm1(object):
 
     def __init__(self,  agent, 
                         n_initialization_experiments=100,
-                        n_experiments=1000,
+                        n_experiments=1000000,
                         random_seed=np.random.random((1,1)),
                         k_sm=28,
                         k_ss=28,
-                        k_im=15,
+                        k_im=12,
                         g_im_initialization_method='non-zero'):
         '''
         Constructor
@@ -89,7 +89,7 @@ class Algorithm1(object):
             get_competence_Moulin2013(agent)
             self.simulation_data.appendData(agent)
             if ((i+1)%self.gmm_im.im_step)==0:
-                self.gmm_im.trainIncrementalLearning(self.simulation_data)
+                self.gmm_im.train(self.simulation_data)
             if ((i+1)%self.gmm_sm.sm_step)==0:
                 self.gmm_sm.trainIncrementalLearning(self.simulation_data)
             if ((i+1)%self.gmm_ss.ss_step)==0:

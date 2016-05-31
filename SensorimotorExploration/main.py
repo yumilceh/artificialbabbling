@@ -29,7 +29,7 @@ if __name__ == '__main__':
     h,ax3=simulation_data.plotSimulatedData2D(h,ax3,'sensor', 0, 'sensor', 3,"or")
     
     j,ax4=initializeFigure();
-    j,ax4=simulation_data.plotTemporalSimulatedData(j,ax4,'competence', 0,"r")
+    j,ax4=simulation_data.plotTemporalSimulatedData(j,ax4,'competence', 0,"r",moving_average=5000)
     
     plt.show();
     

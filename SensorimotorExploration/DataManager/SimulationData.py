@@ -12,6 +12,7 @@ from DataManager.DataTemplates.TabularData import TabularData
 #===============================================================================
 import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
+from DataManager.PlotTools import movingAverage
 
 class SimulationData(object):
     '''
@@ -68,7 +69,7 @@ class SimulationData(object):
         plt.plot(data1,data2,color)
         return fig,axes
     
-    def plotTemporalSimulatedData(self,fig,axes,src,column,color):
+    def plotTemporalSimulatedData(self,fig,axes,src,column,color,moving_average=0):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)
         somato_names=list(self.somato_data.data.columns.values)
@@ -84,7 +85,9 @@ class SimulationData(object):
         elif src=='competence':
             data=self.competence_data.data[['competence']]
         
-        
+        if moving_average>0:
+            data=moving_average(data,moving_average)
+
         plt.figure(fig.number)
         plt.sca(axes)    
         plt.plot(data,color)

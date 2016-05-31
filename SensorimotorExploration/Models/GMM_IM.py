@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from GeneralModels.Mixture import GMM
+from Models.GeneralModels.Mixture import GMM
 import pandas as pd
 import numpy as np 
 import sys
@@ -14,11 +14,12 @@ class GMM_IM(object):
     '''
 
 
-    def __init__(self, Agent, n_gauss_components, im_step=4600):
+    def __init__(self, Agent, n_gauss_components, im_step=12, n_training_samples=2400):
         '''
         Constructor
         '''
         self.im_step=im_step
+        self.n_training_samples=n_training_samples
         self.size_data=2*Agent.n_sensor+1
         self.goal_size=Agent.n_sensor
         self.competence_index=2*Agent.n_sensor+1; #Considering that one column will be time
@@ -28,12 +29,13 @@ class GMM_IM(object):
         
         
     def train(self,simulation_data):
-        im_step=self.im_step
+        n_training_samples=self.n_training_samples
         data_size=len(simulation_data.sensor_data.data.index)
-        if data_size>simulation_data:
-            sensor_data=simulation_data.sensor_data.data[data_size-im_step:-1]
-            sensor_goal_data=simulation_data.sensor_goal_data.data[data_size-im_step:-1]
-            train_data_tmp=pd.concat([sensor_goal_data, sensor_data],axis=1)
+        if data_size>n_training_samples:
+            sensor_data=simulation_data.sensor_data.data[data_size-n_training_samples:-1]
+            sensor_goal_data=simulation_data.sensor_goal_data.data[data_size-n_training_samples:-1]
+            competence_data=simulation_data.competence_data.data[data_size-n_training_samples:-1]
+            train_data_tmp=pd.concat([sensor_goal_data, sensor_data, competence_data],axis=1)
         else:
             train_data_tmp=pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
         train_data_tmp.reindex()
@@ -67,7 +69,7 @@ class GMM_IM(object):
                 #------------------------------------------ print(cumulated_cov)
         
         else:
-            greatest_cov=-sys.float_info.max
+            greatest_cov=-sys.float_info.min
             competence_index=self.competence_index
             time_index=self.time_index
             for (Mean,Covar) in (zip(gmm.means_, gmm._get_covars())):
@@ -99,7 +101,7 @@ class GMM_IM(object):
                 n_interesting_gauss=n_interesting_gauss+1;
 
         #normalizing
-        if (n_interesting_gauss>=1):
+        if (n_interesting_gauss>1):
             index_interesting_gauss=index_interesting_gauss[0:n_interesting_gauss]
             cov_interesting_gauss=cov_interesting_gauss[0:n_interesting_gauss]
             min_cov=cov_interesting_gauss[np.argmin(cov_interesting_gauss)];
@@ -108,7 +110,17 @@ class GMM_IM(object):
             cov_interesting_gauss=cov_interesting_gauss[0:n_interesting_gauss]*(1/total_cov);
             covariances=pd.DataFrame({'INDEX':index_interesting_gauss,'COVARIANCE':cov_interesting_gauss})
             covariances=covariances.sort(['COVARIANCE'])
-        
+            
+        elif(n_interesting_gauss==1):
+            index_interesting_gauss=index_interesting_gauss[0:n_interesting_gauss]
+            cov_interesting_gauss=cov_interesting_gauss[0:n_interesting_gauss]
+            min_cov=cov_interesting_gauss[np.argmin(cov_interesting_gauss)];
+
+            total_cov=np.sum(cov_interesting_gauss);
+            cov_interesting_gauss=cov_interesting_gauss[0:n_interesting_gauss]*(1/total_cov);
+            covariances=pd.DataFrame({'INDEX':index_interesting_gauss,'COVARIANCE':cov_interesting_gauss})
+            covariances=covariances.sort(['COVARIANCE'])
+            
         else:
             covariances=None
     

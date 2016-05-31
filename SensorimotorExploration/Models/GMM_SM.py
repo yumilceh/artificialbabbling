@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from GeneralModels.Mixture import GMM
+from Models.GeneralModels.Mixture import GMM
 import numpy as np
 import pandas as pd
 class GMM_SM(object):

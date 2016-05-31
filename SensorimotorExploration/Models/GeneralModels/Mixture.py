@@ -4,6 +4,7 @@ Created on Feb 16, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from sklearn import mixture as mix
+from sklearn.cluster import KMeans
 import itertools
 import numpy as np
 from scipy import linalg 
@@ -40,6 +41,9 @@ class GMM(object):
         persistent_data=self.model.sample(n_persistent_samples)
         data=np.concatenate((persistent_data,new_data),axis=0)
         self.model.fit(data)
+        
+    def train_K_means(self,data):
+        pass
         
     def predict(self,x_dims, y_dims, y):
         '''
