@@ -14,4 +14,4 @@ def initializeFigure():
     return fig, ax     
 
 def movingAverage(vector, n_samples):
-    return np.convolve(vector, np.ones((n_samples,))/n_samples, mode='valid') #modes={'full', 'same', 'valid'}
+    return np.convolve(vector[:,0], np.ones((n_samples,))/n_samples, mode='valid') #modes={'full', 'same', 'valid'}

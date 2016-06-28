@@ -34,4 +34,16 @@ if __name__ == '__main__':
     plt.show();
     
     
+    #Testing unfinished simulation  
+#===============================================================================
+#     from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+#     from Algto
+#     from DataManager.PlotTools import *
+# 
+#     initialization_data_sm_ss=simulation1.initialization_data_sm_ss
+#     initialization_data_im=simulation1.initialization_data_im
+#     simulation_data=simulation1.simulation_data
+#===============================================================================
+
+
     

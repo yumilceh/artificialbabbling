@@ -46,8 +46,17 @@ class GMM_SM(object):
         sensor_goal=Agent.sensor_goal  #s_g
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
-        Agent.motor_command=self.GMM.predict(m_dims, s_dims, sensor_goal)
+        Agent.motor_command=boundMotorCommand(Agent,self.GMM.predict(m_dims, s_dims, sensor_goal))
         
                 
-
-        
+def boundMotorCommand(Agent,motor_command):
+    n_motor=Agent.n_motor;
+    min_motor_values = Agent.min_motor_values;
+    max_motor_values = Agent.max_motor_values;
+    for i in range(n_motor):
+        if (motor_command[i] < min_motor_values[i]):
+            motor_command[i] = min_motor_values[i]
+        elif (motor_command[i] > max_motor_values[i]):
+            motor_command[i] = max_motor_values[i]
+    return motor_command
+ 

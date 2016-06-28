@@ -86,7 +86,7 @@ class SimulationData(object):
             data=self.competence_data.data[['competence']]
         
         if moving_average>0:
-            data=moving_average(data,moving_average)
+            data=movingAverage(data.as_matrix(),moving_average)
 
         plt.figure(fig.number)
         plt.sca(axes)    

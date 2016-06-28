@@ -4,7 +4,6 @@ Created on Feb 16, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from sklearn import mixture as mix
-from sklearn.cluster import KMeans
 import itertools
 import numpy as np
 from scipy import linalg 

@@ -16,6 +16,10 @@
 	</natures>
 	<variableList>
 		<variable>
+			<name>IMLE_lib</name>
+			<value>file:/home/yumilceh/Documents/IMLE/imleLib</value>
+		</variable>
+		<variable>
 			<name>SENSORIMOTOR_EXP</name>
 			<value>file:/home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration</value>
 		</variable>

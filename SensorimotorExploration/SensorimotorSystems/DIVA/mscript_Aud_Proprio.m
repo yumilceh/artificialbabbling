@@ -8,7 +8,7 @@ auditoryStates=zeros(4,samples);
 minaf=zeros(1,samples);
 for k=1:samples
     [auditoryStates(:,k), som, ~, af]=diva_synth(artStates(k,1:13)');
-    auditoryStates(:,k)=auditoryStates(:,k)./outputScale-1;
+    auditoryStates(:,k)=auditoryStates(:,k)./outputScale;
     minaf(k)=min(af);
     clear af;
 end
