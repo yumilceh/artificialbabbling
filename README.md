@@ -1,0 +1,2 @@
+# README #
+Autonomous Sensorimotor Exploration.
