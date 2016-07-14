@@ -53,15 +53,14 @@ class IMLE(object):
         if 'sigma0' not in kwargs_imle:  # sigma0 is None:
             kwargs_imle['sigma0'] = 1./30. # (conf.m_maxs[0] - conf.m_mins[0]) / 30.
         if 'Psi0' not in kwargs_imle:  # if psi0 is None:
-            kwargs_imle['Psi0'] = array([1./30.] * params.out_dims) ** 2 # ((conf.s_maxs - conf.s_mins) / 30.)**2
+            kwargs_imle['Psi0'] = array([1./30.] * params.n_dims) ** 2 # ((conf.s_maxs - conf.s_mins) / 30.)**2
         self.mode = mode
-        self.t = 0
-        self.imle = imle.Imle(d=len(self.m_dims), D=len(self.s_dims), **kwargs_imle) #sigma0=sigma0, Psi0=psi0)
+        self.imle = imle.Imle(d=len(self.in_dims), D=len(self.out_dims), **kwargs_imle) #sigma0=sigma0, Psi0=psi0)
         self.normalizer = Normalizer(params)
 
     def infer(self, in_dims, out_dims, x_):
         x = self.normalizer.normalize(x_, in_dims)
-        if in_dims == self.s_dims and out_dims == self.m_dims:
+        if in_dims == self.out_dims and out_dims == self.in_dims:
             # try:
             res = self.imle.predict_inverse(x, var=True, weight=True)
             sols = res['prediction']
@@ -86,22 +85,23 @@ class IMLE(object):
         # elif in_dims == self.m_dims and out_dims==self.s_dims:
         #     return self.imle.predict(x.flatten()).reshape(-1,1)
         else:
-            return self.normalizer.denormalize(self.imle.to_gmm().inference(in_dims, out_dims, x).sample().flatten(), out_dims)
+            return self.normalizer.denormalize(self.to_gmm().inference(in_dims, out_dims, x).sample().flatten(), out_dims)
 
     def update(self, x_, y_):
-        x = self.normalizer.normalize(x_, self.conf.in_dims)
-        y = self.normalizer.normalize(y_, self.conf.out_dims)
+        x = self.normalizer.normalize(x_, self.in_dims)
+        y = self.normalizer.normalize(y_, self.out_dims)
         self.imle.update(x, y)
-    
+        
+        
     def to_gmm(self):
-        n = self.number_of_experts
+        n = self.imle.number_of_experts
         gmm = GMM(n_components=n, covariance_type='full')
-        gmm.means_ = zeros((n, self.d+self.D))
-        gmm.covars_ = zeros((n, self.d+self.D, self.d+self.D))
+        gmm.means_ = zeros((n, self.imle.d+self.imle.D))
+        gmm.covars_ = zeros((n, self.imle.d+self.imle.D, self.imle.d+self.imle.D))
 
         for k in range(n):
-            gmm.means_[k, :] = self.get_joint_mu(k)
-            gmm.covars_[k, :, :] = self.get_joint_sigma(k)
+            gmm.means_[k, :] = self.imle.get_joint_mu(k)
+            gmm.covars_[k, :, :] = self.imle.get_joint_sigma(k)
         gmm.weights_ = (1.*ones((n,)))/n
         return gmm
 

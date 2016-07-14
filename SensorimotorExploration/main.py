@@ -5,7 +5,7 @@ Created on Feb 5, 2016
 '''
 
 if __name__ == '__main__':
-    import os,sys
+    import os,sys,random
      
     print(os.getcwd())
     sys.path.append(os.getcwd())
@@ -14,6 +14,8 @@ if __name__ == '__main__':
     from Algorithm.Algorithm1 import Algorithm1  
     from DataManager.PlotTools import *
    
+    random.seed(1234)
+    
     
     diva_agent=Diva_Proprio2015a()
     

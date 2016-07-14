@@ -10,6 +10,6 @@ import numpy.linalg as linalg
 def get_competence_Moulin2013(agent):
     y=agent.sensorOutput
     y_g=agent.sensor_goal    
-    err_norm=linalg.norm(y_g-y)
+    err_norm=linalg.norm(np.asarray(y_g)-np.asarray(y))
     c=np.exp(-err_norm)
     agent.competence_result=c

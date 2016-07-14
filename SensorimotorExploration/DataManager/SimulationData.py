@@ -39,7 +39,14 @@ class SimulationData(object):
         self.somato_data.data.to_hdf(file_name,'somato_data')
         self.competence_data.data.to_hdf(file_name,'competence_data')
        
-
+    def cutData(self, agent, start, stop):
+        simulationdata_tmp=SimulationData(agent)
+        simulationdata_tmp.motor_data.data=self.motor_data.data.iloc[start:stop]
+        simulationdata_tmp.sensor_data.data=self.sensor_data.data.iloc[start:stop]
+        simulationdata_tmp.somato_data.data=self.somato_data.data.iloc[start:stop]
+        simulationdata_tmp.competence_data.data=self.competence_data.data.iloc[start:stop]
+        return simulationdata_tmp
+    
     def plotSimulatedData2D(self,fig,axes,src1,column1,src2,column2,color):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)

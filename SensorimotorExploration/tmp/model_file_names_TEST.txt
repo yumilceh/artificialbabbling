@@ -1,0 +1,4 @@
+GMM_priors_test.txt
+GMM_mu_test.txt
+GMM_sigma_test.txt
+var_names_TEST.txt
