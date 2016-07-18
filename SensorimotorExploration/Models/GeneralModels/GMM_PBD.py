@@ -60,19 +60,21 @@ class GMM(object):
         GMM.model.weights_=np.array(self.model.Priors)
         GMM.model.covars_=np.array(self.model.Sigma)
         GMM.model.means_=np.array(self.model.Mu)
-        return pd.DataFrame(GMM.model.sample(n_samples))
+        return GMM.model.sample(n_samples)
         
     def trainIncrementalLearning(self,new_data,alpha):
-        if self.initialized:
-            n_new_samples=np.size(new_data,0)
-            n_persistent_samples=np.round(((1-alpha)*n_new_samples)/alpha)
-            persistent_data=self.getRandomSamples(n_persistent_samples)
-            data=pd.concat((persistent_data,new_data),axis=0)
-            self.train(data)
-        else:
-            self.initializeMixture(new_data)
-            self.initialized=True
-            self.train(new_data)
+        #=======================================================================
+        # if self.initialized:
+        #     n_new_samples=np.size(new_data,0)
+        #     n_persistent_samples=np.round(((1-alpha)*n_new_samples)/alpha)
+        #     persistent_data=pd.DataFrame(self.getRandomSamples(n_persistent_samples),columns=new_data.columns)
+        #     data=pd.concat([persistent_data,new_data],axis=0)
+        #     self.train(data)
+        # else:
+        #=======================================================================
+        self.initializeMixture(new_data)
+        self.initialized=True
+        self.train(new_data)
                
     def predict(self,x_dims, y_dims, y):
         '''

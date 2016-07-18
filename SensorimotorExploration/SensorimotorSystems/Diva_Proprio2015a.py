@@ -141,6 +141,7 @@ class Diva_Proprio2015a:
         self.sensorOutput=self.auditoryResult;     
             
     def executeMotorCommand(self):
+        self.getMotorDynamics()
         self.vocalize()
     
     def plotArticulatoryEvolution(self,arts):

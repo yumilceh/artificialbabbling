@@ -22,7 +22,7 @@ class GMM(object):
                        covariance_type='full',
                        random_state=None,
                        thresh=None,
-                       tol = 0.01,
+                       tol = 0.001,
                        min_covar=0.0001,  
                        n_iter=100, 
                        n_init=1,      
