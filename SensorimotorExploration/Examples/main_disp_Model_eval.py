@@ -23,7 +23,9 @@ if __name__ == '__main__':
 
     agent=Diva_Proprio2015a();
 
-    simulation_results=loadSimulationData('simulation_data_1stAttempt.tar.gz', agent)
+    file_name='simulation_data_1stAttempt.tar.gz'
+    
+    simulation_results=loadSimulationData(file_name, agent)
     initialization_data_sm_ss=simulation_results['initialization_data_sm_ss']
     initialization_data_im=simulation_results['initialization_data_im']
     simulation_data=simulation_results['simulation_data']

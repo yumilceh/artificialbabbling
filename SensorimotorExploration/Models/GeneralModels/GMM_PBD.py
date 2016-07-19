@@ -43,18 +43,23 @@ class GMM(object):
         self.generateFilesandFNames()
         saveModel(self)
         
-    def train(self,data):  
-        self.generateParamsAndDataFile(data)
-        self.getDataDimension(data)
-        self.generateFilesandFNames()
-        command = "/home/yumilceh/Documents/pbdlib/build/examples/update_gmm "  #Automatize
-        command = command + self.files.model_files_names + ' '
-        command = command + self.files.data + ' '
-        command = command + self.files.var_names  + ' '
-        command = command + self.files.params     
-        os.system( command )
-        loadModel(self)
-        
+    def train(self,data):
+        if self.initialized:
+            self.generateParamsAndDataFile(data)
+            self.getDataDimension(data)
+            self.generateFilesandFNames()
+            command = "/home/yumilceh/Documents/pbdlib/build/examples/update_gmm "  #Automatize
+            command = command + self.files.model_files_names + ' '
+            command = command + self.files.data + ' '
+            command = command + self.files.var_names  + ' '
+            command = command + self.files.params     
+            os.system( command )
+            loadModel(self)
+        else:
+            self.initialized=True
+            self.initializeMixture(data)
+            self.train(data)
+            
     def getRandomSamples(self, n_samples):
         GMM=Mixture(self.params.n_components)
         GMM.model.weights_=np.array(self.model.Priors)
@@ -63,18 +68,16 @@ class GMM(object):
         return GMM.model.sample(n_samples)
         
     def trainIncrementalLearning(self,new_data,alpha):
-        #=======================================================================
-        # if self.initialized:
-        #     n_new_samples=np.size(new_data,0)
-        #     n_persistent_samples=np.round(((1-alpha)*n_new_samples)/alpha)
-        #     persistent_data=pd.DataFrame(self.getRandomSamples(n_persistent_samples),columns=new_data.columns)
-        #     data=pd.concat([persistent_data,new_data],axis=0)
-        #     self.train(data)
-        # else:
-        #=======================================================================
-        self.initializeMixture(new_data)
-        self.initialized=True
-        self.train(new_data)
+        if self.initialized:
+            n_new_samples=np.size(new_data,0)
+            n_persistent_samples=np.round(((1-alpha)*n_new_samples)/alpha)
+            persistent_data=pd.DataFrame(self.getRandomSamples(n_persistent_samples),columns=new_data.columns)
+            data=pd.concat([persistent_data,new_data],axis=0)
+            self.train(data)
+        else:
+            self.initialized=True
+            self.initializeMixture(new_data)
+            self.train(new_data)
                
     def predict(self,x_dims, y_dims, y):
         '''

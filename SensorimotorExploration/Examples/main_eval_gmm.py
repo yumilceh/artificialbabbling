@@ -39,6 +39,8 @@ if __name__ == '__main__':
     eva_train_set = 0.2
     
     model_eval = SM_ModelEvaluation(agent,data,model,ratio_samples_val)
+    model_eval.setValidationEvaluationSets()
+    model_eval.trainModel()
     validation_trainSet_data, validation_valSet_data = model_eval.evaluateModel(saveData, eva_train_set)    
     
     fig1,ax1=initializeFigure();

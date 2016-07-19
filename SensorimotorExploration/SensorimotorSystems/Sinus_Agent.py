@@ -23,9 +23,9 @@ class Sinus_Agent:
         n_sensor = 1
         n_somato = 1
         min_motor_values = np.array([ 0.0 ])
-        max_motor_values = np.array([ 20.0 * math.pi ])
+        max_motor_values = np.array([ 2.0 * math.pi ])
         
-        min_sensor_values = np.array([0.0])
+        min_sensor_values = np.array([-1.0])
         max_sensor_values = np.array([1.0])
         
         self.n_motor = n_motor
@@ -40,10 +40,10 @@ class Sinus_Agent:
         self.min_sensor_values = min_sensor_values
         self.max_sensor_values = max_sensor_values
         
-        self.motor_command = [0.0] * n_motor
-        self.sensorOutput = [0.0] * n_sensor
-        self.sensor_goal = [0.0] * n_sensor
-        self.somatoOutput = [0.0] * n_somato
+        self.motor_command =np.array( [0.0] * n_motor )
+        self.sensorOutput = np.array( [0.0] * n_sensor )
+        self.sensor_goal = np.array([ 0.0] * n_sensor )
+        self.somatoOutput = np.array( [0.0] * n_somato )
         self.competence_result = 0.0;
         
     def setMotorCommand(self,motor_command):

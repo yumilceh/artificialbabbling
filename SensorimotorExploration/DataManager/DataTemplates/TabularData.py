@@ -4,6 +4,7 @@ Created on Feb 18, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 import pandas as pd
+import numpy as np
 
 class TabularData(object):
     '''
@@ -21,7 +22,12 @@ class TabularData(object):
         self.data=pd.DataFrame(columns=varNames)
         
     def appendData(self,newData):
-        data_tmp=pd.DataFrame([newData],columns=self.varNames)
-        self.data=pd.concat([self.data, data_tmp],ignore_index=True); 
+        n_samples=np.size(newData)
+        if n_samples==1:
+            data_tmp=pd.DataFrame([newData],columns=self.varNames)
+            self.data=pd.concat([self.data, data_tmp],ignore_index=True);
+        else:
+            data_tmp=pd.DataFrame(newData,columns=self.varNames)
+            self.data=pd.concat([self.data, data_tmp],ignore_index=True);
         
             

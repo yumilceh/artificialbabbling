@@ -29,7 +29,7 @@ class DATA(object):
         self.initialization_data_im = SimulationData(alg.agent)
         self.simulation_data = SimulationData(alg.agent)
    
-class Algorithm1(object):
+class Algorithm_CCIA2015(object):
 
     '''
     classdocs

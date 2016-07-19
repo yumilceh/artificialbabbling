@@ -10,9 +10,11 @@ import random
 from DataManager.SimulationData import SimulationData
 from Algorithm.CompetenceFunctions import get_competence_Moulin2013
 from Algorithm.StorageDataFunctions import saveSimulationData, loadSimulationData
+from Algorithm.RndSensorimotorFunctions import get_random_sensor_set
 
-        
-
+class PARAMS(object):        
+    def __init__(self):
+        pass
 class SM_ModelEvaluation(object):
     '''
         This class uses data in order to estimate a sensorimotor model and evaluate it.
@@ -20,27 +22,42 @@ class SM_ModelEvaluation(object):
     def __init__(self,  agent, 
                         data,
                         model,
-                        ratio_samples_val=0.2):
+                        file_prefix = '',
+                        ratio_samples_val = 0.2):
         '''
             Initialize
         '''
-        self.agent=agent;
-        self.data=data;
-        self.n_samples=len(data.motor_data.data)
-        self.model=model;
-        self.ratio_samples_val=ratio_samples_val;
+        self.agent = agent;
+        self.data = PARAMS()
+        self.data = data;
+        
+        self.files=PARAMS()
+        self.files.file_prefix = file_prefix;
+        self.model = model;
+        self.ratio_samples_val = ratio_samples_val;
 
     def setValidationEvaluationSets(self):
-        ratio_samples_val=self.ratio_samples_val
-        n_samples=self.n_samples
-        n_samples_val=np.ceil(ratio_samples_val*n_samples).astype(int)
-        n_samples_train=n_samples-n_samples_val;
-        random_indexes_val=random.sample(xrange(0,n_samples),n_samples_val)
-        random_indexes_train=[index for index in range(0,n_samples) if index not in random_indexes_val]
-        self.n_samples_val=n_samples_val
-        self.n_samples_train=n_samples_train
-        self.random_indexes_val=random_indexes_val
-        self.random_indexes_train=random_indexes_train
+        
+        if isinstance(self.data,int):
+            n_samples = self.data
+            rnd_data = get_random_sensor_set(self.agent,n_samples)
+            data = SimulationData(self.agent);
+            data.sensor_data.appendData(rnd_data)
+            self.data = data
+            self.n_samples_val = n_samples
+            self.random_indexes_val = range(n_samples)
+        else:
+            n_samples = len(self.data.motor_data.data)
+            self.n_samples = n_samples
+            ratio_samples_val = self.ratio_samples_val
+            n_samples_val = np.ceil(ratio_samples_val*n_samples).astype(int)
+            n_samples_train = n_samples-n_samples_val;
+            random_indexes_val = random.sample(xrange(0,n_samples),n_samples_val)
+            random_indexes_train = [index for index in range(0,n_samples) if index not in random_indexes_val]
+            self.n_samples_val = n_samples_val
+            self.n_samples_train = n_samples_train
+            self.random_indexes_val = random_indexes_val
+            self.random_indexes_train = random_indexes_train
     
     def trainModel(self):
         #Training
@@ -54,9 +71,7 @@ class SM_ModelEvaluation(object):
             progress=progress+1;
         
     def evaluateModel(self, saveData = False, eva_train_set = 0):    
-        #Validation against Training set
-        self.setValidationEvaluationSets()
-        self.trainModel()
+        #Validation against Training set        
         if (eva_train_set>0):
             n_samples_evatrain = np.ceil(eva_train_set*self.n_samples_train).astype(int)
             random_indexes_evatrain = random.sample(self.random_indexes_train,n_samples_evatrain)
@@ -75,7 +90,7 @@ class SM_ModelEvaluation(object):
                 progress=progress+1;
             
             if (saveData):
-                validation_trainSet_data.saveData('validation_trainSet_data.h5')
+                validation_trainSet_data.saveData([self.files.file_prefix + 'validation_trainSet_data.h5'])
             
             
         #Validation against Validation set
@@ -87,19 +102,18 @@ class SM_ModelEvaluation(object):
             
             self.agent.sensor_goal = y_
             self.model.getMotorCommand(self.agent)
-            self.agent.getMotorDynamics()
             self.agent.executeMotorCommand()
             get_competence_Moulin2013(self.agent)
             validation_valSet_data.appendData(self.agent)
             progress=progress+1;
             
         if (saveData):
-            validation_valSet_data.saveData('validation_valSet_data.h5')
+            validation_valSet_data.saveData(self.files.file_prefix + 'validation_valSet_data.h5')
             if (eva_train_set>0):
-                saveSimulationData(['validation_trainSet_data.h5', 'validation_valSet_data.h5'], 'validation_results.tar.gz')
+                saveSimulationData([self.files.file_prefix + 'validation_trainSet_data.h5', self.files.file_prefix + 'validation_valSet_data.h5'], [self.files.file_prefix + 'validation_results.tar.gz'])
                 return validation_trainSet_data, validation_valSet_data
             else:
-                saveSimulationData(['validation_valSet_data.h5'], 'validation_results.tar.gz')
+                saveSimulationData([self.files.file_prefix +'validation_valSet_data.h5'], self.files.file_prefix  + 'validation_results.tar.gz')
                 return validation_valSet_data
          
 def loadEvaluationResults(file_name, agent):

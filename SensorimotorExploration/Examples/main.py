@@ -11,7 +11,7 @@ if __name__ == '__main__':
     sys.path.append(os.getcwd())
 
     from SensorimotorSystems.Sinus_Agent import Sinus_Agent
-    from Algorithm.Algorithm1 import Algorithm1, MODELS 
+    from Algorithm.Algorithm_Random import Algorithm_Random, MODELS 
     from Models.GMM_SM import GMM_SM
     from Models.GMM_SS import GMM_SS
     from Models.GMM_IM import GMM_IM
@@ -31,15 +31,12 @@ if __name__ == '__main__':
     models.f_sm = GMM_SM(agent,k_sm)
     models.f_ss = GMM_SS(agent,k_ss)
     models.f_im = GMM_IM(agent,k_im)
-
-
     
-    simulation1=Algorithm1(agent,
+    simulation1=Algorithm_Random(agent,
                            models,
                            file_prefix='Sinus_GMM_',
-                           n_experiments = 10000,
-                           n_initialization_experiments = 100,
-                           g_im_initialization_method = 'all')
+                           n_experiments = 10000
+                           )
     
     simulation1.runNonProprioceptiveAlgorithm()
     

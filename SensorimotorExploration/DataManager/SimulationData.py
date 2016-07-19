@@ -60,6 +60,9 @@ class SimulationData(object):
         elif src1=='somato':
             x_name=somato_names[column1]
             data1=self.somato_data.data[[x_name]]
+        elif src1=='sensor_goal':
+            x_name=sensor_names[column1]
+            data1=self.sensor_goal_data.data[[x_name]]
         
         if src2=='motor':
             y_name=motor_names[column2]
@@ -70,6 +73,9 @@ class SimulationData(object):
         elif src2=='somato':
             y_name=somato_names[column2]
             data2=self.somato_data.data[[y_name]]
+        elif src2=='sensor_goal':
+            y_name=sensor_names[column2]
+            data2=self.sensor_goal_data.data[[y_name]]
         
         plt.figure(fig.number)
         plt.sca(axes)    
@@ -91,6 +97,9 @@ class SimulationData(object):
             data=self.somato_data.data[[x_name]]
         elif src=='competence':
             data=self.competence_data.data[['competence']]
+        elif src=='sensor_goal':
+            x_name=sensor_names[column]
+            data=self.sensor_goal_data.data[[x_name]]
         
         if moving_average>0:
             data=movingAverage(data.as_matrix(),moving_average)

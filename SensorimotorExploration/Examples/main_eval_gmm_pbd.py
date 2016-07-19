@@ -6,9 +6,12 @@ Created on Feb 5, 2016
 import sys, os
 import matplotlib.pyplot as plt
 import random    
-        
+from numpy import random as np_rnd
+
+      
 if __name__ == '__main__':
     random.seed(1234)
+    np_rnd.seed(1234)
     
     #Adding required paths
     print(os.getcwd())
