@@ -175,7 +175,7 @@ class Diva_Proprio2015a:
         index=np.round(time/ts)
         figVocalTract=plt.figure();
         axVocalTract=figVocalTract.add_subplot(111,autoscale_on=False, xlim=(-75,225),ylim=(-200,100))
-        axVocalTract.plot(np.real(self.outline[:,index]), np.imag(self.outline[:,index]))
+        axVocalTract.plot(np.real(self.vocalTractshape[:,index]), np.imag(self.vocalTractshape[:,index]))
         figVocalTract.show()
         '''try:
             input('Press any key to continue...')

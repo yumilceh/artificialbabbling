@@ -3,17 +3,23 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
-from DataManager.SimulationData import SimulationData
-from Models.GMM_SM  import GMM_SM
-from Models.GMM_SS  import GMM_SS
-from Models.GMM_IM  import GMM_IM 
-from DataVisualization.PlotTools import *
-from Algorithm.SupportFunctions import *
+
 
 
 if __name__ == '__main__':
+    ## Adding the projects folder to the path##
+    import os,sys,random
+    sys.path.append(os.getcwd())
+    from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+    from DataManager.SimulationData import SimulationData
+    from Models.GMM_SM  import GMM_SM
+    from Models.GMM_SS  import GMM_SS
+    from Models.GMM_IM  import GMM_IM 
+    from DataManager.PlotTools import *
+    from Algorithm.RndSensorimotorFunctions import *
     
+    
+        
     diva_agent=Diva_Proprio2015a()
     
     n_vocalizations=100;

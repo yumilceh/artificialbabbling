@@ -3,13 +3,23 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from SensorimotorExploration.SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
-from SensorimotorExploration.DataManager.SimulationData import SimulationData
-from SensorimotorExploration.Models.GMM_SM  import GMM_SM
-from SensorimotorExploration.DataVisualization.PlotTools import *
+
 import numpy as np
 
 if __name__ == '__main__':
+    
+    
+        ## Adding the projects folder to the path##
+    import os,sys,random
+    sys.path.append(os.getcwd())
+    
+    from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a
+    from DataManager.SimulationData import SimulationData
+    from Models.GMM_SM  import GMM_SM
+    from DataManager.PlotTools import *
+    
+    random.seed(1234)
+    np.random.seed(1234)
     
     diva_agent=Diva_Proprio2015a()
     

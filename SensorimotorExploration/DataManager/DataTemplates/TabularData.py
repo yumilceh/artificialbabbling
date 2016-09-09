@@ -22,10 +22,11 @@ class TabularData(object):
         self.data=pd.DataFrame(columns=varNames)
         
     def appendData(self,newData):
-        n_samples=np.size(newData)
-        if n_samples==1:
+        single_sample=np.size(np.shape(newData))
+        if single_sample==1 or single_sample==0:
             data_tmp=pd.DataFrame([newData],columns=self.varNames)
             self.data=pd.concat([self.data, data_tmp],ignore_index=True);
+            
         else:
             data_tmp=pd.DataFrame(newData,columns=self.varNames)
             self.data=pd.concat([self.data, data_tmp],ignore_index=True);

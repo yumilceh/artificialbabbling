@@ -43,11 +43,27 @@ class GMM_SS(object):
         new_data=pd.concat([motor_data,somato_data],axis=1)
         self.model.trainIncrementalLearning(new_data, alpha)
         
-        
-    def predictPriprioceptiveEffect(self,Agent):
+    def predictProprioceptiveEffect(self,Agent,motor_command = None):
         n_motor=Agent.n_motor;
         n_somato=Agent.n_somato;
-        motor_command=Agent.motor_command  #s_g
-        m_dims=np.arange(0, n_motor-1, n_motor)
-        s_dims= np.arange(n_motor, n_motor+n_somato-1, n_somato),
-        Agent.motor_command=self.model.predict(s_dims, m_dims, motor_command)
+        
+        if motor_command == None:
+            motor_command=Agent.motor_command  #s_g
+        
+        m_dims=np.arange(0, n_motor, 1)
+        s_dims=np.arange(n_motor, n_motor+n_somato, 1)
+        Agent.proprioceptive_prediction=self.model.predict(s_dims, m_dims, motor_command)
+        return boundProprioceptivePrediction(Agent,self.model.predict(s_dims, m_dims, motor_command))
+    
+def boundProprioceptivePrediction(Agent, proprioceptive_prediction):
+    n_somato=Agent.n_somato;
+    min_somato_values = Agent.min_somato_values
+    max_somato_values = Agent.max_somato_values
+    somato_threshold = Agent.somato_threshold
+    for i in range(n_somato):
+        if ((proprioceptive_prediction[i] < min_somato_values[i]) or (proprioceptive_prediction[i] <= somato_threshold)):
+            proprioceptive_decision = 0
+   
+        elif ((proprioceptive_prediction[i] > max_somato_values[i]) or (proprioceptive_prediction[i] > somato_threshold)):
+            proprioceptive_decision = 1
+    return proprioceptive_decision

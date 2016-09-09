@@ -8,6 +8,10 @@ import numpy as np
 from Models.GeneralModels.Mixture import GMM as Mixture 
 import pandas as pd
 from scipy import linalg 
+#-------------------------------------------------------------- import itertools
+#----------------------------------------------- import matplotlib.pyplot as plt
+#------------------------------------------------------ import matplotlib as mpl
+
 
 
 class PARAMS(object):
@@ -18,8 +22,11 @@ class MODEL(object):
     def __init__(self):
         pass;
     
+    def _get_covars(self):
+        return self.Sigma
     
-class GMM(object):
+    
+class GMM(Mixture):
     '''
     classdocs
     '''
@@ -59,14 +66,30 @@ class GMM(object):
             self.initialized=True
             self.initializeMixture(data)
             self.train(data)
+        self.gmmpbd_to_mix()
+
             
     def getRandomSamples(self, n_samples):
+        return self.get_mix().model.sample(n_samples)
+        
+    def gmmpbd_to_mix(self):
+        self.model.weights_=np.array(self.model.Priors)
+        self.model.covars_=np.array(self.model.Sigma)
+        self.model.means_=np.array(self.model.Mu)
+    
+    def get_mix(self):
         GMM=Mixture(self.params.n_components)
         GMM.model.weights_=np.array(self.model.Priors)
         GMM.model.covars_=np.array(self.model.Sigma)
         GMM.model.means_=np.array(self.model.Mu)
-        return GMM.model.sample(n_samples)
-        
+        return GMM
+    
+    
+    def mix_to_gmmpbd(self, mix):
+        self.model.Priors=mix.weights_
+        self.model.Mu=mix.means_
+        self.model.Sigma=mix._get_covars()
+    
     def trainIncrementalLearning(self,new_data,alpha):
         if self.initialized:
             n_new_samples=np.size(new_data,0)
@@ -78,6 +101,8 @@ class GMM(object):
             self.initialized=True
             self.initializeMixture(new_data)
             self.train(new_data)
+        self.gmmpbd_to_mix()
+
                
     def predict(self,x_dims, y_dims, y):
         '''
@@ -87,8 +112,7 @@ class GMM(object):
         n_dimensions=np.amax(len(x_dims))+np.amax(len(y_dims))
         n_components=self.params.n_components
         gmm=self.model
-        
-        
+    
         likely_x=np.mat(np.zeros((len(x_dims),n_components)))
         sm=np.mat(np.zeros((len(x_dims)+len(y_dims),n_components)))
         p_xy=np.mat(np.zeros((n_components,1)))
@@ -113,20 +137,19 @@ class GMM(object):
              
             sm[:,k]=tmp3.as_matrix()
              
-            tmp4=1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
-            tmp5=np.transpose(sm[:,k])-(Mu)
-            tmp6=linalg.inv(Sigma)
-            tmp7=np.exp((-1.0/2.0)*(tmp5*tmp6*np.transpose(tmp5))) #Multiply time GMM.Priors????
-            p_xy[k,:]=np.reshape(tmp4*tmp7,(1))
+            tmp4 = 1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
+            tmp5 = np.transpose(sm[:,k])-(Mu)
+            tmp6 = linalg.inv(Sigma)
+            tmp7 = np.exp((-1.0/2.0)*(tmp5*tmp6*np.transpose(tmp5))) #Multiply time GMM.Priors????
+            p_xy[k,:] = np.reshape(tmp4*tmp7,(1))
             #- print('Warning: Priors are not be considering to compute P(x,y)')
              
-        k_ok=np.argmax(p_xy);
-        x=likely_x[:,k_ok];
+        k_ok = np.argmax(p_xy);
+        x = likely_x[:,k_ok];
          
         return np.array(x.transpose())[0]
-        pass
+        pass    
     
-        
     def generateFilesandFNames(self):
         self.files.var_names = 'var_names_' + self.params.model_id + '.txt'
         self.files.model_files_names = 'model_file_names_' + self.params.model_id + '.txt'
@@ -168,8 +191,11 @@ class GMM(object):
             var_names.append('x' + str(i))
         self.params.var_names = var_names
         self.params.n_dims = n_dims    
-            
     
+        
+    def plotGMMProjection(self,fig,axes,column1,column2):
+        self.gmmpbd_to_mix()
+        return Mixture.plotGMMProjection(self, fig, axes, column1, column2)
     
 def loadModel(GMM): 
     Priors = np.loadtxt(GMM.files.Priors)
@@ -201,8 +227,9 @@ def saveModel(GMM):
     np.savetxt(GMM.files.Priors,raw_Priors,fmt='%f')
     np.savetxt(GMM.files.Mu,raw_Mu,fmt='%f')
     np.savetxt(GMM.files.Sigma,raw_Sigma,fmt='%f')
+
     
-    
+        
     
     
     

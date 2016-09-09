@@ -4,6 +4,7 @@ Created on Feb 22, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from Models.GeneralModels.Mixture import GMM
+from sklearn import mixture 
 import pandas as pd
 import numpy as np 
 import sys
@@ -32,17 +33,19 @@ class GMM_IM(object):
         self.params.competence_index = 2*agent.n_sensor+1; #Considering that one column will be time
         self.params.time_index = 0;
         self.params.sensor_names = agent.sensor_names
+        self.params.n_components=n_gauss_components
+        
         
         self.model = GMM(n_gauss_components)
-        
+        self.model.Active=np.array([1]*n_gauss_components)
         
     def train(self,simulation_data):
         n_training_samples = self.params.n_training_samples
         data_size=len(simulation_data.sensor_data.data.index)
         if data_size > n_training_samples:
-            sensor_data = simulation_data.sensor_data.data[data_size-n_training_samples:-1]
-            sensor_goal_data = simulation_data.sensor_goal_data.data[data_size-n_training_samples:-1]
-            competence_data = simulation_data.competence_data.data[data_size-n_training_samples:-1]
+            sensor_data = simulation_data.sensor_data.data[data_size-n_training_samples:]
+            sensor_goal_data = simulation_data.sensor_goal_data.data[data_size-n_training_samples:]
+            competence_data = simulation_data.competence_data.data[data_size-n_training_samples:]
             train_data_tmp = pd.concat([sensor_goal_data, sensor_data, competence_data],axis=1)
         else:
             train_data_tmp = pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
@@ -51,6 +54,7 @@ class GMM_IM(object):
         self.model.train(train_data_tmp.as_matrix(columns=None))
         
     def get_interesting_goal(self,agent):
+        
         goal_size=self.params.goal_size
                                 
         #selecting randomly a GM to draw a sample s_g
@@ -59,6 +63,7 @@ class GMM_IM(object):
         gmm=self.model.model
 
         covariances, non_positive_covariances = self.sortInterestingGaussians();
+        
         if non_positive_covariances!=True:
             gmm_covars=gmm._get_covars()
             gmm_means=gmm.means_
@@ -70,9 +75,10 @@ class GMM_IM(object):
             cumulated_cov=0;
             for (INDEX,COVARIANCE) in (zip(covariances['INDEX'],covariances['COVARIANCE'])):
                 if ((random>=cumulated_cov) and (random<(cumulated_cov+COVARIANCE))):
-                    selected_gauss=int(INDEX)      
+                    selected_gauss=int(INDEX) 
                     y_g_tmp = np.random.multivariate_normal(gmm_means[selected_gauss,:], gmm_covars[selected_gauss], 1)
-                    y_g=y_g_tmp[0,1:1+goal_size]           
+                    y_g=y_g_tmp[0,1:1+goal_size]
+                    return boundSensorGoal(agent,y_g)           
                 cumulated_cov=cumulated_cov+COVARIANCE
                 #------------------------------------------ print(cumulated_cov)
         
@@ -85,7 +91,61 @@ class GMM_IM(object):
                     greatest_cov=Covar[time_index,competence_index]#Why absolute value???
                     y_g_tmp = np.random.multivariate_normal(Mean,Covar, 1);
                     y_g=y_g_tmp[1:1+goal_size];
-        return boundSensorGoal(agent,y_g) 
+            return boundSensorGoal(agent,y_g)
+        
+    def get_interesting_goal_proprioception(self,agent,sm_model,ss_model):
+        
+        goal_size=self.params.goal_size
+                                
+        #selecting randomly a GM to draw a sample s_g
+        y_g=None
+        
+        gmm=self.model.model
+
+        covariances, non_positive_covariances = self.sortInterestingGaussians();
+        
+        if np.sum(self.model.Active)==0:
+            non_positive_covariances=True # Forces the model to take the highest covariance 
+        
+        if non_positive_covariances!=True:
+            gmm_covars=gmm._get_covars()
+            gmm_means=gmm.means_
+
+            #------------------- n_interesting_models=len(covariances.index)
+            random=0.999999999999999999*np.random.random(1);
+            
+            #----------------------------------------------------- print(random)
+            cumulated_cov=0;
+            for (INDEX,COVARIANCE) in (zip(covariances['INDEX'],covariances['COVARIANCE'])):
+                if ((random>=cumulated_cov) and (random<(cumulated_cov+COVARIANCE))):
+                    if self.model.Active[int(INDEX)] == 0:
+                        return self.get_interesting_goal(agent)
+                    selected_gauss=int(INDEX) 
+                    self.model.Active[selected_gauss]=0     
+                    y_g_tmp = np.random.multivariate_normal(gmm_means[selected_gauss,:], gmm_covars[selected_gauss], 1)
+                    y_g=y_g_tmp[0,1:1+goal_size]
+                    motor_command_tmp=sm_model.getMotorCommand(agent, boundSensorGoal(agent, y_g))
+                    if ss_model.predictProprioceptiveEffect(agent, motor_command_tmp)==0:
+                        return boundSensorGoal(agent,y_g)
+                    else:
+                        return self.get_interesting_goal(agent)          
+                cumulated_cov=cumulated_cov+COVARIANCE
+                #------------------------------------------ print(cumulated_cov)
+        
+        else: #Returns and element that does not produce contact or has the maximum covariance
+            greatest_cov= -1.0 * sys.float_info.max  
+            competence_index=self.params.competence_index
+            time_index=self.params.time_index
+            for (Mean,Covar) in (zip(gmm.means_, gmm._get_covars())):
+                if(Covar[time_index,competence_index]>greatest_cov):
+                    greatest_cov=Covar[time_index,competence_index]#Why absolute value???
+                    y_g_tmp = np.random.multivariate_normal(Mean,Covar, 1);
+                    y_g = y_g_tmp[1:1+goal_size]
+                    motor_command_tmp=sm_model.getMotorCommand(agent, boundSensorGoal(agent, y_g))
+                    if ss_model.getProprioceptivePrediction(agent, motor_command_tmp)==0:
+                        return boundSensorGoal(agent,y_g)
+            return boundSensorGoal(agent,y_g)
+         
     
     def get_interesting_goals(self,agent,n_goals=1):
         ''' This function returns as many goals as requested according to the interest model, including the gausian generators'''
@@ -111,7 +171,8 @@ class GMM_IM(object):
             cumulated_cov=0;
             for (INDEX,COVARIANCE) in (zip(covariances['INDEX'],covariances['COVARIANCE'])):
                 if ((random>=cumulated_cov) and (random<(cumulated_cov+COVARIANCE))):
-                    selected_gauss=int(INDEX)      
+                    selected_gauss=int(INDEX)
+                    self.model.Active[selected_gauss]=0      
                     y_g_tmp = np.random.multivariate_normal(gmm_means[selected_gauss,:], gmm_covars[selected_gauss], 1)
                     y_g[k_sample,:]=boundSensorGoal(agent,y_g_tmp[0,1:1+goal_size])
                     y_g_indexes[k_sample,0]=INDEX           
@@ -120,12 +181,12 @@ class GMM_IM(object):
             
         return y_g, y_g_indexes
     
-    def sortInterestingGaussians(self):
+    def sortInterestingGaussians(self,active_comp=None):
         ''' If all covariances are negative flag must be turned on'''
-        gmm=self.model.model
-        
-        K_IM=gmm.n_components    
-           
+        if active_comp == None:
+            gmm=self.model.model
+            K_IM=gmm.n_components
+            
         n_interesting_gauss=0
         
         index_interesting_gauss=np.zeros((K_IM))
@@ -181,6 +242,10 @@ class GMM_IM(object):
             covariances=covariances.sort(['COVARIANCE'])
      
         return covariances, non_positive_covariances
+    
+    def activateAllComponents(self):
+        self.model.Active=np.array([1]*self.params.n_components)
+
     
 def boundSensorGoal(agent,y_g):
     n_sensor=agent.n_sensor;

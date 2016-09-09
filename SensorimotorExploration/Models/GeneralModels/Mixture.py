@@ -10,6 +10,7 @@ from scipy import linalg
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D
 
 class GMM(object):
     '''
@@ -36,7 +37,7 @@ class GMM(object):
         if self.model.converged_:
             self.initialized=True
         else:
-            print('The EM-algorith did not converged...')
+            print('The EM-algorithm did not converged...')
         
     def trainIncrementalLearning(self,new_data,alpha):
         if self.initialized:
@@ -52,7 +53,7 @@ class GMM(object):
             self.train(new_data)
             
         
-    def predict(self,x_dims, y_dims, y):
+    def predict(self, x_dims, y_dims, y):
         '''
             This method returns the value of x that maximaze the probability P(x|y)
         '''
@@ -108,22 +109,21 @@ class GMM(object):
         
         plt.figure(fig.number)
         plt.sca(axes)        
-    
         
         for i,(mean, covar, color) in enumerate(zip(gmm.means_, gmm._get_covars(), color_iter)):
             covar_plt=np.zeros((2,2))
-            print(covar_plt)
-            covar_plt[0,0]=covar[column1,column1]
-            covar_plt[1,1]=covar[column2,column2]
-            covar_plt[0,1]=covar[column1,column2]
-            covar_plt[1,0]=covar[column2,column1]
             
-            mean_plt=[mean[column1], mean[column2]]
+            covar_plt[0,0] = covar[column1,column1]
+            covar_plt[1,1] = covar[column2,column2]
+            covar_plt[0,1] = covar[column1,column2]
+            covar_plt[1,0] = covar[column2,column1]
+            
+            mean_plt = [mean[column1], mean[column2]]
             
             v, w = linalg.eigh(covar_plt)
             u = w[0] / linalg.norm(w[0])
-            v[0]=2*np.sqrt(5.991*v[0]);
-            v[1]=2*np.sqrt(5.991*v[1]);
+            v[0] = 2*np.sqrt(5.991*v[0]);
+            v[1] = 2*np.sqrt(5.991*v[1]);
             # as the DP will not use every component it has access to
             # unless it needs it, we shouldn't plot the redundant
             # components.
@@ -136,9 +136,67 @@ class GMM(object):
             
             axes.add_patch(ell)
             
-        axes.set_xlim(-1, 1)
-        axes.set_ylim(-1, 1)
+        #=======================================================================
+        # axes.set_xlim(-1, 1)
+        # axes.set_ylim(-1, 1)
+        #=======================================================================
         axes.set_title(title)
         return fig,axes
     
-        
+    def plotGMM3DProjection(self,fig,axes,column1,column2,column3):
+        '''
+            Display Gaussian distributions with a 95% interval of confidence
+        '''
+        # Number of samples per component
+        gmm=self.model;
+        color_iter = itertools.cycle(['r', 'g', 'b', 'c', 'm'])
+         
+        title='GMM'
+         
+        plt.figure(fig.number)
+        plt.sca(axes)        
+         
+        for i,(mean, covar, color) in enumerate(zip(gmm.means_, gmm._get_covars(), color_iter)):
+            covar_plt=np.zeros((3,3))
+            
+            covar_plt[0,0] = covar[column1,column1]
+            covar_plt[0,1] = covar[column1,column2]
+            covar_plt[0,2] = covar[column1,column3]
+            covar_plt[1,0] = covar[column2,column1]
+            covar_plt[1,1] = covar[column2,column2]
+            covar_plt[1,2] = covar[column2,column3]
+            covar_plt[2,0] = covar[column3,column1]
+            covar_plt[2,1] = covar[column3,column2]
+            covar_plt[2,2] = covar[column3,column3]
+             
+             
+            center = [mean[column1], mean[column2], mean[column3]]
+             
+            U, s, rotation = linalg.svd(covar_plt)
+            radii = 1 / np.sqrt(s)
+            
+            # now carry on with EOL's answer
+            u = np.linspace(0.0, 2.0 * np.pi, 100)
+            v = np.linspace(0.0, np.pi, 100)
+            x = radii[0] * np.outer(np.cos(u), np.sin(v))
+            y = radii[1] * np.outer(np.sin(u), np.sin(v))
+            z = radii[2] * np.outer(np.ones_like(u), np.cos(v))
+            for j in range(len(x)):
+                for k in range(len(x)):
+                    [x[j,k],y[j,k],z[j,k]] = np.dot([x[j,k],y[j,k],z[j,k]], rotation) + center
+             
+            axes.plot_wireframe(x, y, z,  rstride=4, cstride=4, color='b', alpha=0.2)
+             
+            axes.set_xlabel('x')
+            axes.set_ylabel('y')
+            axes.set_zlabel('z')
+        #=======================================================================
+        # axes.set_xlim(-1, 1)
+        # axes.set_ylim(-1, 1)
+        #=======================================================================
+        axes.set_title(title)
+        return fig,axes
+     
+         
+    
+  

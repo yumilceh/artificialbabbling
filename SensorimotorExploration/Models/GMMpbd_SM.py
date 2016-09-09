@@ -45,18 +45,23 @@ class GMM_SM(object):
         sensor_data_size=len(simulation_data.sensor_data.data.index)
         sensor_data=simulation_data.sensor_data.data[sensor_data_size-sm_step:]
         new_data=pd.concat([motor_data,sensor_data],axis=1)
-        print(len(new_data.index))
+        #-------------------------------------------- print(len(new_data.index))
         self.model.trainIncrementalLearning(new_data, alpha)
          
     
-    def getMotorCommand(self,Agent):
-        n_motor=Agent.n_motor;
-        n_sensor=Agent.n_sensor;
-        sensor_goal=Agent.sensor_goal  #s_g
+    def getMotorCommand(self, Agent, sensor_goal = None):
+        n_motor = Agent.n_motor
+        n_sensor = Agent.n_sensor
+        
+        if sensor_goal==None:
+            sensor_goal=Agent.sensor_goal  #s_g
+        
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
-        Agent.motor_command=boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal))
         
+        Agent.motor_command=boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal))
+        return boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal))
+
                 
 def boundMotorCommand(Agent,motor_command):
     n_motor=Agent.n_motor;

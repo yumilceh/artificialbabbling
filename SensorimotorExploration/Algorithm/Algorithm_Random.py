@@ -5,8 +5,7 @@ Created on May 23, 2016
 '''
 from DataManager.SimulationData import SimulationData
 
-from Algorithm.RndSensorimotorFunctions import get_random_motor_set,\
-    get_random_sensor_set
+from Algorithm.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
 from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
 
 import numpy as np
@@ -83,7 +82,9 @@ class Algorithm_Random(object):
             print('Random motor babbling (Non-proprioceptive): Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
-                                
+        
+        self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+        self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)                        
         self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'simulation_data.h5'],'simulation_data.tar.gz')
         
@@ -109,8 +110,8 @@ class Algorithm_Random(object):
                 self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data.h5')
                         
         self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data.h5')
-        self.models.f_sm.train(self.data.initialization_data_sm_ss)
-        self.models.f_ss.train(self.data.initialization_data_sm_ss)
+        self.models.f_sm.trainIncrementalLearning(self.data.initialization_data_sm_ss)
+        self.models.f_ss.trainIncrementalLearning(self.data.initialization_data_sm_ss)
         
         for i in range(n_experiments):
             self.agent.sensor_goal = sensor_goals[i,:]
@@ -127,6 +128,8 @@ class Algorithm_Random(object):
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
                 
+        self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+        self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
         self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'initialization_data.h5', self.data.file_prefix + 'simulation_data.h5'],'simulation_data.tar.gz')
         
