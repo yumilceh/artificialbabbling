@@ -1,0 +1,4 @@
+GMM_priors_7221.txt
+GMM_mu_7221.txt
+GMM_sigma_7221.txt
+var_names_7221.txt
