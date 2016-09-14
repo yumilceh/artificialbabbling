@@ -34,8 +34,8 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         nSamples1=int(durationM1/ts)+1
         nSamples2=int(durationM2/ts)+1
         y_neutral=[0.0]*13
-        y_neutral[11]=-0.25
-        y_neutral[12]=-0.25
+        y_neutral[11]=0
+        y_neutral[12]=0
         y0=[0.0]*26
         y0[:13]=y_neutral
         m1=self.motor_command[:13]
@@ -53,7 +53,7 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
     
     def vocalize(self):
         ts=self.ts;
-        perceptionWindowDuration = 0.4;
+        perceptionWindowDuration = 0.38;
         perceptionTime = linspace(ts,perceptionWindowDuration, int(perceptionWindowDuration/ts))
         nPerceptionSamples = (len(perceptionTime))
         self.auditoryResult = [0.0]*6
@@ -74,11 +74,11 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         for index in range(nPerceptionSamples):
             #print(index)
             #print(nPerceptionSamples)
-            if (self.artStates[index,11]>0) and (self.artStates[index,12]>0) and (minaf[index]>0):
-                self.auditoryResult[0]=self.auditoryResult[0]+auditoryStates[index,1]
-                self.auditoryResult[1]=self.auditoryResult[1]+auditoryStates[index,2]
+            if (self.artStates[index+2,11]>0) and (self.artStates[index+2,12]>0) and (minaf[index+2]>0):
+                self.auditoryResult[0]=self.auditoryResult[0]+auditoryStates[index+2,1]
+                self.auditoryResult[1]=self.auditoryResult[1]+auditoryStates[index+2,2]
                 self.auditoryResult[2]=self.auditoryResult[2]+1.0
-            proprioceptiveAv[0]=proprioceptiveAv[0]+(minaf[index]/nPerceptionSamples)
+            proprioceptiveAv[0]=proprioceptiveAv[0]+(minaf[index+2]/nPerceptionSamples)
         self.auditoryResult[0]=self.auditoryResult[0]/nPerceptionSamples
         self.auditoryResult[1]=self.auditoryResult[1]/nPerceptionSamples
         self.auditoryResult[2]=self.auditoryResult[2]/nPerceptionSamples   
@@ -86,11 +86,11 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         #Second perception time window
         for index in range(nPerceptionSamples):
             #print(index)
-            if (self.artStates[index+41,11]>0) and (self.artStates[index+41,12]>0) and (minaf[index+41]>0):
-                self.auditoryResult[3]=self.auditoryResult[3]+auditoryStates[index+41,1]
-                self.auditoryResult[4]=self.auditoryResult[4]+auditoryStates[index+41,2]
+            if (self.artStates[index+43,11]>0) and (self.artStates[index+43,12]>0) and (minaf[index+43]>0):
+                self.auditoryResult[3]=self.auditoryResult[3]+auditoryStates[index+43,1]
+                self.auditoryResult[4]=self.auditoryResult[4]+auditoryStates[index+43,2]
                 self.auditoryResult[5]=self.auditoryResult[5]+1.0
-            proprioceptiveAv[1]=proprioceptiveAv[1]+(minaf[index+41]/nPerceptionSamples)
+            proprioceptiveAv[1]=proprioceptiveAv[1]+(minaf[index+43]/nPerceptionSamples)
         self.auditoryResult[3]=self.auditoryResult[3]/nPerceptionSamples
         self.auditoryResult[4]=self.auditoryResult[4]/nPerceptionSamples
         self.auditoryResult[5]=self.auditoryResult[5]/nPerceptionSamples
@@ -103,7 +103,7 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
     
 def motorDynamics(y,t,self,m):
     dumpingFactor=1.01
-    w0=2*math.pi/0.2
+    w0=2*math.pi/0.01
     
     dy1=y[13]
     dy2=y[14]

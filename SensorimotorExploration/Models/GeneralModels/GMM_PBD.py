@@ -39,6 +39,8 @@ class GMM(Mixture):
         self.params.model_id=str(np.random.randint(10000))
         self.initialized=False;
         print('Model ID: ' + str(self.params.model_id) + ' has been created.')
+        if not os.path.exists('tmp_pbd'):
+            os.makedirs('tmp_pbd')
         
     def initializeMixture(self,data):
         self.getDataDimension(data)    
@@ -48,13 +50,17 @@ class GMM(Mixture):
         self.model.Mu = GMM_tmp.model.means_
         self.model.Sigma = GMM_tmp.model._get_covars()
         self.generateFilesandFNames()
+        os.chdir('tmp_pbd')
         saveModel(self)
+        os.chdir('..')
+        
         
     def train(self,data):
         if self.initialized:
             self.generateParamsAndDataFile(data)
             self.getDataDimension(data)
             self.generateFilesandFNames()
+            os.chdir('tmp_pbd')
             command = "/home/yumilceh/Documents/pbdlib/build/examples/update_gmm "  #Automatize
             command = command + self.files.model_files_names + ' '
             command = command + self.files.data + ' '
@@ -62,6 +68,8 @@ class GMM(Mixture):
             command = command + self.files.params     
             os.system( command )
             loadModel(self)
+            os.chdir('..')
+
         else:
             self.initialized=True
             self.initializeMixture(data)
@@ -160,6 +168,7 @@ class GMM(Mixture):
         self.files.Sigma = 'GMM_sigma_'  + self.params.model_id + '.txt'
         self.files.Mu = 'GMM_mu_'  + self.params.model_id + '.txt'
         
+        os.chdir('tmp_pbd')
         f = open(self.files.var_names, 'w')
         for i in range(len(self.params.var_names)-1):
             f.write(self.params.var_names[i] + ' ')
@@ -172,9 +181,13 @@ class GMM(Mixture):
         f.write(self.files.Sigma + '\n')
         f.write(self.files.var_names)
         f.close()
+        os.chdir('..')
+
     
     def generateParamsAndDataFile(self, data):
         n_data = len(data.index)
+        
+        os.chdir('tmp_pbd')
         f = open(self.files.params, 'w')
         f.write(str(self.params.n_dims))
         f.write('\n')
@@ -183,7 +196,8 @@ class GMM(Mixture):
         f.write(str(self.params.n_components))
         f.close()
         np.savetxt( self.files.data, np.transpose(data.values), delimiter=' ',fmt='%f')
-    
+        os.chdir('..')
+
     def getDataDimension(self, data):
         n_dims = len(data.columns)
         var_names = []

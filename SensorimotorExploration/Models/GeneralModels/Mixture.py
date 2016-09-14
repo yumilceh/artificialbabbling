@@ -10,7 +10,6 @@ from scipy import linalg
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
 
 class GMM(object):
     '''
@@ -38,6 +37,33 @@ class GMM(object):
             self.initialized=True
         else:
             print('The EM-algorithm did not converged...')
+     
+    def getBestGMM(self,data, lims=[1,10]):         
+        lowest_bic = np.infty
+        bic = []
+        n_components_range = range(lims[0],lims[1]+1,1)
+        for n_components in n_components_range:
+            # Fit a mixture of Gaussians with EM, beware for cazes when te model is not found in any case
+            gmm = mix.GMM(n_components=n_components,
+                           covariance_type='full',
+                           random_state=None,
+                           thresh=None,
+                           tol = 0.001,
+                           min_covar=0.0001,  
+                           n_iter=100, 
+                           n_init=1,      
+                           params='wmc',   
+                           init_params='wmc')
+            gmm.fit(data)
+            bic.append(gmm.bic(data))
+            if bic[-1] < lowest_bic:
+                lowest_bic = bic[-1]
+                best_gmm = gmm
+        
+        self.model.weights_ = best_gmm.weights_
+        self.model.covars_ = best_gmm._get_covars()
+        self.model.means_ = best_gmm.means_
+        self.model.n_components = best_gmm.n_components 
         
     def trainIncrementalLearning(self,new_data,alpha):
         if self.initialized:
@@ -51,7 +77,9 @@ class GMM(object):
                 print('The EM-algorith did not converged...')
         else:
             self.train(new_data)
-            
+    
+    def getBIC(self,data):
+        return self.model.bic(data)        
         
     def predict(self, x_dims, y_dims, y):
         '''

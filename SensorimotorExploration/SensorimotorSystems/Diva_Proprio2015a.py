@@ -30,7 +30,7 @@ class Diva_Proprio2015a:
         n_somato=1
         outputScale=[100.0,500.0,1500.0,3000.0];
         min_motor_values=np.array([-3,-3,-3,-3,-3,-3,-3,-3,-3,-3,-0.25,-0.25,-0.25]*2)
-        max_motor_values=np.array([3.0,3,3,3,3,3,3,3,3,3,1,1,1]*2)
+        max_motor_values=np.array([3.3,3,3,3,3,3,3,3,3,3,1,1,1]*2)
         
         min_sensor_values=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         max_sensor_values=np.array([2.0, 2.0, 1.0, 2.0, 2.0, 1.0])
