@@ -182,12 +182,13 @@ class Diva_Proprio2015a:
         except:
             pass'''
         
-    def getVocalizationVideo(self,show=0):
+    def getVocalizationVideo(self,show=0, file_name='vt'):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=1/0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
         figVocalTract=plt.figure()
         
-        artStates=self.getSoundWave(save=1,returnArtStates=1)
+        artStates=self.getSoundWave(save=1,returnArtStates=1, file_name = file_name)
+        
         outline=self.getVocaltractShape(artStates, returnShape=1)
         nSamples=artStates.shape[0]
         print(nSamples)
@@ -195,18 +196,18 @@ class Diva_Proprio2015a:
         for index in range(nSamples):
             sequence.append((plt.plot(np.real(outline[:,index]), np.imag(outline[:,index]))))
         im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False,blit=True)
-        im_ani.save('vt.mp4', writer=writer)
+        im_ani.save(file_name + '.mp4', writer=writer)
         command = ["ffmpeg",
-                   '-i', 'vt.wav',
-                   '-i','vt.mp4',
-                   '-vcodec', 'copy', 'vtaudio.mp4']
+                   '-i', file_name + '.wav',
+                   '-i',file_name + '.mp4',
+                   '-vcodec', 'copy', file_name + '_audio.mp4']
         sp.call(command)
         if(show):
             figVocalTract.show();
             
         
                
-    def getSoundWave(self, play=0,save=0,returnArtStates=0): #based on explauto
+    def getSoundWave(self, play=0,save=0,returnArtStates=0, file_name='vt'): #based on explauto
         soundArtStates=self.getMotorDynamics(sound=1)
         #print('ts=0.005')
         #print(soundArtStates.shape)
@@ -215,12 +216,12 @@ class Diva_Proprio2015a:
         self.matlabSession.putvalue('artStates',soundArtStates[:,0:13])
         #self.matlabSession.run('save artStates.mat artStates')
         self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
-        self.soundWave=self.matlabSession.getvalue('soundWave');
+        self.soundWave = self.matlabSession.getvalue('soundWave')
         if(play):
             self.playSoundWave()
         if(save):
             scaled = np.int16(self.soundWave/np.max(np.abs(self.soundWave)) * 32767)
-            write('vt.wav', 11025, scaled)
+            write(file_name + '.wav', 11025, scaled)
         if(returnArtStates):
             return soundArtStates  
 
