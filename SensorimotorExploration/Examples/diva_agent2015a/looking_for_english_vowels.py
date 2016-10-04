@@ -11,7 +11,7 @@ import numpy as np
 # Experiment report and videos
 #
 #=======================================================================================
-if __name__ == '__main__' and True:
+if __name__ == '__main__' and False:
      
     sys.path.append(os.getcwd())
     from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a
@@ -26,18 +26,26 @@ if __name__ == '__main__' and True:
               
     system = Diva_Proprio2016a()    
     
-    distance_to_unit = np.load('distances_result_lev.npy').all()
-    articulations = np.load('articulations_data_lev.npy').all()
-    best_perception_window = np.load('best_perception_window_lev.npy').all()
-    
-    
-    best_perception_window = distance_to_unit
-    
+    distance_to_unit = np.load('looking_for_english_vowel_results/distances_result_lev.npy').all()
+    articulations = np.load('looking_for_english_vowel_results/articulations_data_lev.npy').all()
+    best_perception_window = np.load('looking_for_english_vowel_results/best_perception_window_lev.npy').all()
+        
     for vowel in english_vowels_keys:
-        ref_formants = english_vowels[vowel]
-        system.setMotorCommand(articulations[vowel].motor_data.data.iloc[-1].as_matrix())
+        motor_command_tmp = system.motor_command
+        if best_perception_window[vowel]==1:
+            motor_command_tmp[0:13] = articulations[vowel].motor_data.data.iloc[-1][0:13].as_matrix()
+            motor_command_tmp[13:] = articulations[vowel].motor_data.data.iloc[-1][0:13].as_matrix()
+            system.setMotorCommand(motor_command_tmp)
+        if best_perception_window[vowel]==2:
+            motor_command_tmp[0:13] = articulations[vowel].motor_data.data.iloc[-1][13:].as_matrix()
+            motor_command_tmp[13:] = articulations[vowel].motor_data.data.iloc[-1][13:].as_matrix()
+            system.setMotorCommand(motor_command_tmp)
         system.executeMotorCommand()
-        system.getVocalizationVideo(show=0, file_name='vt'+vowel) #no extension in files        
+        system.getVocalizationVideo(show=0, file_name='looking_for_english_vowel_results/vt'+vowel) #no extension in files        
+
+    for key, val in distance_to_unit.items():
+        print("minimum distance to {} is {}".format(key, val))
+        
              
 #=======================================================================================
 #
@@ -45,7 +53,7 @@ if __name__ == '__main__' and True:
 #
 #=======================================================================================
 
-if __name__ == '__main__' and False:
+if __name__ == '__main__' and True:
 
     sys.path.append(os.getcwd())
     from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a
@@ -63,7 +71,7 @@ if __name__ == '__main__' and False:
 
     distance_to_unit = {key: None for key in english_vowels_keys}
     articulation_dict = {key: None for key in english_vowels_keys}
-
+    best_perception_window = {key: None for key in english_vowels_keys}
 
 
     file_name = 'looking_for_english_vowel_results/looking_english_vowels.h5'
@@ -72,7 +80,8 @@ if __name__ == '__main__' and False:
     system = Diva_Proprio2016a()
 
     for vowel in english_vowels_keys:
-        distance_to_unit[vowel] =   np.finfo(np.float64).max
+        distance_to_unit[vowel] =   [np.infty] 
+        best_perception_window[vowel] = []
         articulation_dict[vowel] = SimulationData(system)
 
     simulation_data = SimulationData(system)
@@ -102,33 +111,34 @@ if __name__ == '__main__' and False:
                 F1 = auditory_output[0]*diva_output_scale[1]
                 F2 = auditory_output[1]*diva_output_scale[2]
                 distance1 = np.sqrt( (F1-ref_formants[0])**2 + (F2-ref_formants[1])**2)
-                if distance1 < distance_to_unit[vowel]:
-                    distance_to_unit[vowel] = distance1
+                if distance1 < distance_to_unit[vowel][-1]:
+                    distance_to_unit[vowel] = np.append(distance_to_unit[vowel],distance1)
                     articulation_dict[vowel].appendData(system)
 
                 #Perception window 2
                 F1 = auditory_output[3]*diva_output_scale[1]
                 F2 = auditory_output[4]*diva_output_scale[2]
                 distance2 = np.sqrt( (F1-ref_formants[0])**2 + (F2-ref_formants[1])**2)
-                if distance2 < distance_to_unit[vowel]:
-                    distance_to_unit[vowel] = distance2
+                if distance2 < distance_to_unit[vowel][-1]:
+                    distance_to_unit[vowel] = np.append(distance_to_unit[vowel],distance2)
                     articulation_dict[vowel].appendData(system)
 
 
                 if distance1 < distance2:
-                    best_perception_window[vowel] = 1
+                    best_perception_window[vowel] =  np.append(best_perception_window[vowel],1)
                 else:
-                    best_perception_window[vowel] = 2  
+                    best_perception_window[vowel] = np.append(best_perception_window[vowel],2)  
 
         print('Looking for vowels. Experiment: {} of {}'.format(i+1,n_experiments))
 
 
-    simulation_data.saveData('looking_english_vowels.h5')
+    distance_to_unit = np.delete(distance1, 0, axis=0) #Delete the infty element
+    simulation_data.saveData('looking_for_english_vowel_results/looking_english_vowels.h5')
 
-    np.save('distances_result_lev.npy', distance_to_unit)
-    np.save('articulations_data_lev.npy', articulation_dict)
-    np.save('best_perception_window_lev.npy', best_perception_window)
+    np.save('looking_for_english_vowel_results/distances_result_lev.npy', distance_to_unit)
+    np.save('looking_for_english_vowel_results/articulations_data_lev.npy', articulation_dict)
+    np.save('looking_for_english_vowel_results/best_perception_window_lev.npy', best_perception_window)
     
     for key, val in distance_to_unit.items():
-        print("minimum distance to {} is {} for articulation:".format(key, val))
+        print("minimum distance to {} is {}".format(key, val))
         print(articulation_dict[key].motor_data.data)
