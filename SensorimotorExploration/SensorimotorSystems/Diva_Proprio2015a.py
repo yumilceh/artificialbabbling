@@ -182,7 +182,7 @@ class Diva_Proprio2015a:
         except:
             pass'''
         
-    def getVocalizationVideo(self,show=0, file_name='vt'):
+    def getVocalizationVideo(self,show=0, file_name='vt',keep_audio=0):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=1/0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
         figVocalTract=plt.figure()
@@ -202,6 +202,11 @@ class Diva_Proprio2015a:
                    '-i',file_name + '.mp4',
                    '-vcodec', 'copy', file_name + '_audio.mp4']
         sp.call(command)
+        if keep_audio==0:
+            command =  ["rm",
+                        file_name + '.wav',
+                        file_name + '.mp4']
+            sp.call(command)
         if(show):
             figVocalTract.show();
             
