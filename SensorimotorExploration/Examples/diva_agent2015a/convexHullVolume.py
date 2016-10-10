@@ -49,7 +49,7 @@ if __name__ == '__main__' and True:
         mat = h5py.File(directory + 'SMdata.mat','r')
         data = np.array(mat.get('SMdata'))
         motor_data = data[6:,:]
-        sensor_data = data[0:6,:]
+        sensor_data = data[[0,1,3,4],:]
         print('Working on ' + directory)
          
         hull = ConvexHull(np.transpose(sensor_data))
