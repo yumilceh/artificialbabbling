@@ -37,6 +37,13 @@ class GMM(object):
             self.initialized=True
         else:
             print('The EM-algorithm did not converged...')
+            
+    def train_bestGMM(self,data):  #WRITE THIS FUNCTION
+        self.model.fit(data)
+        if self.model.converged_:
+            self.initialized=True
+        else:
+            print('The EM-algorithm did not converged...')
      
     def getBestGMM(self,data, lims=[1,10]):         
         lowest_bic = np.infty
@@ -150,8 +157,8 @@ class GMM(object):
             
             v, w = linalg.eigh(covar_plt)
             u = w[0] / linalg.norm(w[0])
-            v[0] = 2*np.sqrt(5.991*v[0]);
-            v[1] = 2*np.sqrt(5.991*v[1]);
+            v[0] = 2.0*np.sqrt(2.0*v[0]);
+            v[1] = 2.0*np.sqrt(2.0*v[1]);
             # as the DP will not use every component it has access to
             # unless it needs it, we shouldn't plot the redundant
             # components.

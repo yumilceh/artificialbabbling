@@ -4,9 +4,6 @@ Created on Feb 5, 2016
 @author: yumilceh
 '''
 
-
-
-
 if __name__ == '__main__':
     import os,sys,random
     sys.path.append(os.getcwd())

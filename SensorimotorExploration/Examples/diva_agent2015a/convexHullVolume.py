@@ -14,34 +14,36 @@ from scipy.spatial import ConvexHull
 # Experiment report and videos
 #
 #=======================================================================================
+this_dir =  os.getcwd()
+
 if __name__ == '__main__' and True:
      
-    sys.path.append(os.getcwd())
-    from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2015a
-    
+    #------------------------------------------------- sys.path.append("../../")
+    #------- from SensorimotorSystems.Diva_Proprio2015a import Diva_Proprio2015a   
     
     diva_output_scale=[100.0,500.0,1500.0,3000.0]
 
-    directories = ['ExperimentsIEEETCDS2016/EVD_no_Proprio_0/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_1/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_2/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_3/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_4/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_6/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_7/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_8/',
-                   'ExperimentsIEEETCDS2016/EVD_no_Proprio_9/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_0/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_1/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_2/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_3/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_4/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_6/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_7/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_8/',
-                   'ExperimentsIEEETCDS2016/EVD_Proprio_9/',
-                   'ExperimentsIEEETCDS2016/Special_EVD_Proprio_5/EVD_no_Proprio_5/',
-                   'ExperimentsIEEETCDS2016/Special_EVD_Proprio_5/EVD_Proprio_5/']
+    os.chdir('../ExperimentsIEEETCDS2016/')
+    directories = ['EVD_no_Proprio_0/',
+                   'EVD_no_Proprio_1/',
+                   'EVD_no_Proprio_2/',
+                   'EVD_no_Proprio_3/',
+                   'EVD_no_Proprio_4/',
+                   'EVD_no_Proprio_6/',
+                   'EVD_no_Proprio_7/',
+                   'EVD_no_Proprio_8/',
+                   'EVD_no_Proprio_9/',
+                   'EVD_Proprio_0/',
+                   'EVD_Proprio_1/',
+                   'EVD_Proprio_2/',
+                   'EVD_Proprio_3/',
+                   'EVD_Proprio_4/',
+                   'EVD_Proprio_6/',
+                   'EVD_Proprio_7/',
+                   'EVD_Proprio_8/',
+                   'EVD_Proprio_9/',
+                   'Special_EVD_Proprio_5/EVD_no_Proprio_5/',
+                   'Special_EVD_Proprio_5/EVD_Proprio_5/']
                    
     hull_volumes = {key: None for key in directories}
     
