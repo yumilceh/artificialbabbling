@@ -10,10 +10,17 @@ import h5py, os, sys, random
 from scipy.stats import gaussian_kde
 from scipy.stats.distributions import norm    
 
-def kl_montecarlo(f, g, nsamples=500000):
+def kl_montecarlo1(f, g, nsamples=500000): #https://github.com/pierrelux/notebooks/blob/master/KL%20Estimation%20for%20GMM.ipynb
     return np.mean(f.score(f.sample(nsamples)) - g.score(g.sample(nsamples)))
 
-def kl_unscented(f, g):
+
+def kl_montecarlo2(gmm_p, gmm_q, n_samples=500000): #http://stackoverflow.com/questions/26079881/kl-divergence-of-two-gmms
+    X = gmm_p.sample(n_samples).append(gmm_q.sample(n_samples),axis=0)
+    log_p_X, _ = gmm_p.score(X)
+    log_q_X, _ = gmm_q.score(X)
+    return log_p_X.mean() - log_q_X.mean() 
+
+def kl_unscented(f, g): #https://github.com/pierrelux/notebooks/blob/master/KL%20Estimation%20for%20GMM.ipynb
     d = f.means_[0].shape[0]
     ncomponents = f.means_.shape[0]
     
@@ -201,12 +208,14 @@ if __name__ == '__main__':
         
                     
     n_directories = len(directories)
-    kl_div_mc = np.zeros((n_directories, n_directories))
+    kl_div_mc1 = np.zeros((n_directories, n_directories))
+    kl_div_mc2 = np.zeros((n_directories, n_directories))
     kl_div_u = np.zeros((n_directories, n_directories))
     
     for i in range(n_directories):
         for j in range(n_directories):
-            kl_div_mc[i,j] = kl_montecarlo(models[directories[i]].model, models[directories[j]].model)
+            kl_div_mc1[i,j] = kl_montecarlo1(models[directories[i]].model, models[directories[j]].model)
+            kl_div_mc2[i,j] = kl_montecarlo2(models[directories[i]].model, models[directories[j]].model)
             kl_div_u[i,j] = kl_unscented(models[directories[i]].model, models[directories[j]].model)
     
     plt.show()
