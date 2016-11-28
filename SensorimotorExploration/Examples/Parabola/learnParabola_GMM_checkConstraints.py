@@ -3,7 +3,6 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from numpy import linspace
 from numpy import random as np_rnd
 
 if __name__ == '__main__':
@@ -16,10 +15,6 @@ if __name__ == '__main__':
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from Algorithm.InteractiveSimulation import ManualSimulation as Algorithm
-    from Models.GMMpbd_SM import GMM_SM 
-    from Models.GMM_SS import GMM_SS
-    from Algorithm.ModelEvaluation import SM_ModelEvaluation
-    from DataManager.PlotTools import *
    
     random_seed=1234
     n_experiments=200

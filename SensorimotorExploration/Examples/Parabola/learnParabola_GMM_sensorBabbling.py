@@ -23,18 +23,18 @@ if __name__ == '__main__':
     from DataManager.PlotTools import *
 
     ## Simulation Parameters ##
-    n_initialization=50
+    n_initialization=1000
     n_evaluation_samples=100
     n_experiments=200
     random_seed=1234
     
-    k_sm = 5
-    sm_step=200
-    alpha_sm=0.1
+    k_sm = 30
+    sm_step=100
+    alpha_sm=0.05
     
-    k_ss = 5
+    k_ss = 6
     ss_step=100
-    alpha_ss=0.1
+    alpha_ss=0.05
        
     ## To guarantee reproductible experiments##
     random.seed(random_seed)
@@ -121,9 +121,22 @@ if __name__ == '__main__':
     ax4.relim()
     ax4.autoscale_view()
     
+    fig5,ax5=initializeFigure();
+    fig5,ax5=initialization_data_sm_ss.plotSimulatedData2D(fig5,ax5,'sensor', 0, 'sensor', 1,"or")
+    #===========================================================================
+    # fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4,ax4,'motor', 1, 'sensor', 1,"ob")    
+    #===========================================================================
+    #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
+    fig5, ax5 = simulation1.models.f_sm.model.plotGMMProjection(fig5,ax5,2, 3)
+    ax5.relim()
+    ax5.autoscale_view()
+    
+    
     fig10, ax10 = initializeFigure();
     fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"r",moving_average=10)
     
 
     
-    plt.show();
+    plt.draw();
+    plt.pause(0.001)
+    input("Press [enter] to continue.")

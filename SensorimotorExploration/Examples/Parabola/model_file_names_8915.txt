@@ -1,4 +1,0 @@
-GMM_priors_8915.txt
-GMM_mu_8915.txt
-GMM_sigma_8915.txt
-var_names_8915.txt

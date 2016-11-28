@@ -101,9 +101,9 @@ class Algorithm_Random(object):
             self.agent.executeMotorCommand()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
-                self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_sm.trainIncrementalLearning(self.data.initialization_data_sm_ss)
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
-                self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_ss.trainIncrementalLearning(self.data.initialization_data_sm_ss)
                 print('Random sensor babbling (Initialization-NP): Experiment: Training Models')
             print('Random sensor babbling (Initialization-NP): Experiment: {} of {}'.format(i+1,n_motor_initialization))
             if (np.mod(i,n_save_data) == 0):

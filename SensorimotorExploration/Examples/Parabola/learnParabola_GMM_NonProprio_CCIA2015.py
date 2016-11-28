@@ -17,25 +17,25 @@ if __name__ == '__main__':
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from Algorithm.Algorithm_CCIA2015 import Algorithm_CCIA2015 as Algorithm
     from Algorithm.Algorithm_CCIA2015 import MODELS
-    from Models.GMM_SM import GMM_SM
+    from Models.ILGMM_SM import GMM_SM
     from Models.GMM_SS import GMM_SS
     from Models.GMM_IM import GMM_IM
     from Algorithm.ModelEvaluation import SM_ModelEvaluation
     from DataManager.PlotTools import *
    
     ## Simulation Parameters ##
-    n_initialization=100
+    n_initialization=1000
     n_evaluation_samples=100
-    n_experiments=200
+    n_experiments=500
     random_seed=1234
     
-    k_sm = 12
-    sm_step=30
-    alpha_sm=0.1
+    k_sm = 3
+    sm_step=100
+    alpha_sm=0.05
     
-    k_ss = 5
-    ss_step=30
-    alpha_ss=0.1
+    k_ss = 6
+    ss_step=100
+    alpha_ss=0.05
     
     k_im=10
     im_step=20
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                          im_step=im_step)
 
     ## Creating Simulation object, running simulation and plotting experiments##
-    file_prefix='Sinus_GMM_'
+    file_prefix='Parabolic_NP_GMM_'
     simulation1=Algorithm(system,
                           models,
                           file_prefix=file_prefix,
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                           )
     
 
-    simulation1.runNonProprioceptiveAlgorithm()
+    simulation1.runProprioceptiveAlgorithm()
     
     initialization_data_sm_ss=simulation1.data.initialization_data_sm_ss
     initialization_data_im=simulation1.data.initialization_data_im
@@ -132,9 +132,26 @@ if __name__ == '__main__':
     ax4.relim()
     ax4.autoscale_view()
     
+    fig5,ax5=initializeFigure();
+    fig5,ax5=initialization_data_sm_ss.plotSimulatedData2D(fig5,ax5,'sensor', 0, 'sensor', 1,"or")
+    
+    #===========================================================================
+    # fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4,ax4,'motor', 1, 'sensor', 1,"ob")    
+    #===========================================================================
+    #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
+    fig5, ax5 = simulation1.models.f_sm.model.plotGMMProjection(fig5,ax5,2, 3)
+    ax5.relim()
+    ax5.autoscale_view()
+    
+    
+    fig9, ax9 = initializeFigure();
+    fig9, ax9 = simulation_data.plotTemporalSimulatedData(fig9,ax9,'competence', 0,"r",moving_average=10)
+    
+    
     fig10, ax10 = initializeFigure();
     fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"r",moving_average=10)
     
 
-    
-    plt.show();
+    plt.draw();
+    plt.pause(0.001)
+    input("Press [enter] to continue.")
