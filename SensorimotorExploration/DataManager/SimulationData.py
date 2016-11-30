@@ -13,6 +13,8 @@ from DataManager.DataTemplates.TabularData import TabularData
 import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
 from DataManager.PlotTools import movingAverage
+import numpy as np
+
 
 class SimulationData(object):
     '''
@@ -100,9 +102,17 @@ class SimulationData(object):
         elif src=='sensor_goal':
             x_name=sensor_names[column]
             data=self.sensor_goal_data.data[[x_name]]
+        elif src=='error':    
+            data = np.linalg.norm(self.sensor_goal_data.data - self.sensor_data.data, axis = 1)
+            
+        elif src=='error_log':
+            data=np.log(self.competence_data.data[['competence']])
         
         if moving_average>0:
-            data=movingAverage(data.as_matrix(),moving_average)
+            try:
+                data=movingAverage(data.as_matrix(),moving_average)
+            except AttributeError:
+                data=movingAverage(data, moving_average)
 
         plt.figure(fig.number)
         plt.sca(axes)    

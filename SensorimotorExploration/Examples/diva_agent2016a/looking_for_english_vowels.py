@@ -16,7 +16,9 @@ if __name__ == '__main__' and True:
     sys.path.append("../../")
     from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a
 
-    data_file = 'looking_for_english_vowel_results/Experiment_3/looking_english_vowels.h5'
+    #===========================================================================
+    # data_file = 'looking_for_english_vowel_results/Experiment_4/looking_english_vowels.h5'
+    #===========================================================================
  
     english_vowels = {'i':[296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [532.0, 1656.0, 1.0], 'ae': [667.0, 1565.0, 1.0],
     'A': [661.0, 1296.0, 1.0], 'a': [680.0, 1193.0, 1.0], 'b': [643.0, 1019.0, 1.0], 'c': [480.0, 857.0, 1.0],
@@ -26,9 +28,9 @@ if __name__ == '__main__' and True:
               
     system = Diva_Proprio2016a()    
     
-    distance_to_unit = np.load('looking_for_english_vowel_results/Experiment_3/distances_result_lev.npy').all()
-    articulations = np.load('looking_for_english_vowel_results/Experiment_3/articulations_data_lev.npy').all()
-    best_perception_window = np.load('looking_for_english_vowel_results/Experiment_3/best_perception_window_lev.npy').all()
+    distance_to_unit = np.load('looking_for_english_vowel_results/Experiment_4/distances_result_lev.npy').all()
+    articulations = np.load('looking_for_english_vowel_results/Experiment_4/articulations_data_lev.npy').all()
+    best_perception_window = np.load('looking_for_english_vowel_results/Experiment_4/best_perception_window_lev.npy').all()
         
     for vowel in english_vowels_keys:
         motor_command_tmp = system.motor_command
@@ -41,12 +43,11 @@ if __name__ == '__main__' and True:
             motor_command_tmp[13:] = articulations[vowel].motor_data.data.iloc[-1][13:].as_matrix()
             system.setMotorCommand(motor_command_tmp)
         system.executeMotorCommand()
-        system.getVocalizationVideo(show=0, file_name='looking_for_english_vowel_results/Experiment_3/vt'+vowel) #no extension in files        
+        system.getVocalizationVideo(show=0, file_name='looking_for_english_vowel_results/Experiment_4/vt'+vowel) #no extension in files        
 
     for key, val in distance_to_unit.items():
         print("minimum distance to {} is {}".format(key, val))
-        
-             
+           
 #=======================================================================================
 #
 # ORIGINAL EXPERIMENT
