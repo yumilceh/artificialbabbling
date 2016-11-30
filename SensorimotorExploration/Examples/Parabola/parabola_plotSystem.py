@@ -14,7 +14,7 @@ if __name__ == '__main__':
     sys.path.append(os.getcwd())
 
     ## Adding libraries##
-    from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
+    from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from DataManager.PlotTools import * 
    
     ## Creating system
