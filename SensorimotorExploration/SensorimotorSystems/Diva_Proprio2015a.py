@@ -182,6 +182,13 @@ class Diva_Proprio2015a:
         except:
             pass'''
         
+    def drawVocalTractShape_index(self,index, ax):
+        ax.plot(np.real(self.vocalTractshape[:,index]), np.imag(self.vocalTractshape[:,index]))
+        '''try:
+            input('Press any key to continue...')
+        except:
+            pass'''
+        
     def getVocalizationVideo(self,show=0, file_name='vt',keep_audio=0):
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=1/0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
@@ -230,9 +237,9 @@ class Diva_Proprio2015a:
         if(returnArtStates):
             return soundArtStates  
 
-    def plotSoundWave(self):
-        plt.plot(self.soundWave)
-        plt.show();
+    def plotSoundWave(self, ax):
+        ax.plot(np.float128(xrange(0,len(self.soundWave)))* self.ts, self.soundWave)
+        
     
     def playSoundWave(self): #keep in mind that DIVA works with ts=0.005
         import pyaudio 

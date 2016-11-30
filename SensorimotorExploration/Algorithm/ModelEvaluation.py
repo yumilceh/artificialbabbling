@@ -8,9 +8,13 @@ import numpy as np
 import random
 
 from DataManager.SimulationData import SimulationData
-from Algorithm.CompetenceFunctions import get_competence_Moulin2013
 from Algorithm.StorageDataFunctions import saveSimulationData, loadSimulationData
 from Algorithm.RndSensorimotorFunctions import get_random_sensor_set
+
+from Algorithm.CompetenceFunctions import get_competence_Moulin2013
+#===============================================================================
+# from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
+#===============================================================================
 
 class PARAMS(object):        
     def __init__(self):

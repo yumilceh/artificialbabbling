@@ -90,11 +90,21 @@ class ConstrainedParabolicArea:
         
         self.somatoOutput = 0.0
         self.sensorOutput[0] = self.motor_command[0]
-        self.sensorOutput[1] = math.pow(self.motor_command[1]-b,2.0)
+        self.sensorOutput[1] = math.pow(self.motor_command[1]-b,2.0) 
         
     def executeMotorCommand(self):
         self.motor_command = self.boundMotorCommand(self.motor_command)    
                  
+        
+        self.executeMotorCommand_unconstrained()
+        self.applyConstraints()
+               
+        self.sensorOutput[0] = self.sensorOutput[0] + np.random.normal(0.0,0.1,1)
+        self.sensorOutput[1] = self.sensorOutput[1] + np.random.normal(0.0,0.1,1)
+     
+        self.applyConstraints()
+        
+    def applyConstraints(self): 
         a = self.params.a
         b = self.params.b
         c = self.params.c
@@ -104,12 +114,7 @@ class ConstrainedParabolicArea:
         m1 = self.params.m1
         m2 = self.params.m2
         
-        r = c - a
-        
-        self.somatoOutput = 0.0
-        self.sensorOutput[0] = self.motor_command[0]
-        self.sensorOutput[1] = math.pow(self.motor_command[1]-b,2.0)
-        
+        r = c - a  
         x=self.sensorOutput[0]
         y=self.sensorOutput[1]
         
@@ -124,10 +129,11 @@ class ConstrainedParabolicArea:
         parabola.c = b**2
         
         if math.pow(self.motor_command[0]-b,2.0) > self.sensorOutput[1]:
+            self.somatoOutput = 1.0
             x, y = closestPointInParabola(parabola, point)
             point.x = x
             point.y = y
-
+        
         ##Checking if the sensorimotor result is insede of the constrained circle
         circle = CustomObject()
         circle.x_c = b
@@ -135,11 +141,12 @@ class ConstrainedParabolicArea:
         circle.r = r
                 
         circle_condition = math.pow(x - b , 2.0) + math.pow(y - a , 2.0)
-        if circle_condition < math.pow(r, 2.0):                       
+        if circle_condition < math.pow(r, 2.0):
+            self.somatoOutput = 1.0                       
             x, y = closestPointInCircle(circle, point)
             point.x = x
             point.y = y
- 
+        
             
         ## Checking if the sensorimotor result is inside of thecontrained region between two parallel lines
         up_line = CustomObject()
@@ -151,6 +158,7 @@ class ConstrainedParabolicArea:
         down_line.m = m2
             
         if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1):
+            self.somatoOutput = 1.0
             x1, y1, distance1 = closestPointToLine(up_line, point)
             x2, y2, distance2 = closestPointToLine(down_line, point)
             
@@ -170,9 +178,10 @@ class ConstrainedParabolicArea:
                     y=y2
             point.x = x
             point.y = y
+            
         self.sensorOutput[0] = x
         self.sensorOutput[1] = y
-        
+
     def boundMotorCommand(self, motor_command):
         n_motor=self.n_motor
         min_motor_values = self.min_motor_values

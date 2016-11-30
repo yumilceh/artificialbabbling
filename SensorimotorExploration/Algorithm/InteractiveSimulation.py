@@ -8,14 +8,8 @@ Created on Aug 31, 2016
 '''
 Currently this class is only prepared to work with two dimensional sensori spaces
 '''
-import numpy as np
-import random
-
-from DataManager.SimulationData import SimulationData
-from Algorithm.CompetenceFunctions import get_competence_Moulin2013
-from Algorithm.StorageDataFunctions import saveSimulationData, loadSimulationData
 from DataManager.PlotTools import *
-from matplotlib.pyplot  import draw, show
+from matplotlib.pyplot  import draw
 
 class PARAMS(object):        
     def __init__(self):
@@ -45,9 +39,7 @@ class ManualSimulation(object):
         ax=self.axes
         plt.figure(fig.number)
         plt.sca(ax)   
-        
-        
-        #Validation against Training set
+                
         motor_command = self.agent.motor_command        
         for i in range(len(motor_command)):
             motor_command[i] = float(input("Insert the element " + str(i) + " of the motor command vector: "))
