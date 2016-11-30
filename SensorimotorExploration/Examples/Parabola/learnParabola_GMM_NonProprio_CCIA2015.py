@@ -11,7 +11,7 @@ if __name__ == '__main__':
      
     ## Adding the projects folder to the path##
     import os,sys,random
-    sys.path.append(os.getcwd())
+    sys.path.append("../../")
 
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     ## Simulation Parameters ##
     n_initialization=200
     n_evaluation_samples=100
-    n_experiments=200
+    n_experiments=1000
     random_seed=1234
     
     k_sm = 3
@@ -37,8 +37,8 @@ if __name__ == '__main__':
     ss_step=100
     alpha_ss=0.05
     
-    k_im=10
-    im_step=20
+    k_im=20
+    im_step=100
     im_samples=800
     
     # To guarantee reproductible experiments##
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                           file_prefix=file_prefix,
                           n_experiments = n_experiments,
                           n_initialization_experiments = n_initialization,
-                          g_im_initialization_method = 'non-painful',
+                          g_im_initialization_method = 'all',
                           n_save_data=100
                           )
     
@@ -83,12 +83,7 @@ if __name__ == '__main__':
     initialization_data_im=simulation1.data.initialization_data_im
     simulation_data=simulation1.data.simulation_data
     
-    
-    fig1,ax1=initializeFigure();
-    fig1,ax1=simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
-    
-    
-    ## Validation of the model ##
+        ## Validation of the model ##
     n_samples=n_evaluation_samples
     evaluation=SM_ModelEvaluation(system,
                                   n_samples,
@@ -96,7 +91,13 @@ if __name__ == '__main__':
                                   file_prefix=file_prefix)
     evaluation.setValidationEvaluationSets()
     
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)    
+    validation_valSet_data = evaluation.evaluateModel(saveData=True)   
+    
+    
+    fig1,ax1 = initializeFigure();
+    fig1, ax1 = initialization_data_sm_ss.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ok")
+    fig1, ax1 = initialization_data_im.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"og")
+    fig1,ax1 = simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
     
     fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    
     #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
@@ -153,8 +154,10 @@ if __name__ == '__main__':
     
     
     fig10, ax10 = initializeFigure();
-    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error_log', 0,"--b",moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"--b",moving_average=10)
     fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error', 0,"r",moving_average=10)
+    
+    
     
 
     plt.draw()

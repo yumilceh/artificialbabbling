@@ -11,21 +11,22 @@ if __name__ == '__main__':
      
     ## Adding the projects folder to the path##
     import os,sys,random
-    sys.path.append(os.getcwd())
+    sys.path.append("../../")
 
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from Algorithm.Algorithm_Random import Algorithm_Random as Algorithm
     from Algorithm.Algorithm_Random import MODELS 
-    from Models.GMM_SM import GMM_SM 
+    from Models.ILGMM_SM import GMM_SM 
     from Models.GMM_SS import GMM_SS
     from Algorithm.ModelEvaluation import SM_ModelEvaluation
     from DataManager.PlotTools import *
    
     ## Simulation Parameters ##
-    n_initialization=1000
-    n_evaluation_samples=100
-    n_experiments=1000
+    n_initialization=200
+    n_evaluation_samples=1000
+    n_experiments=200
+    
     random_seed=1234
     
     k_sm = 30
@@ -128,8 +129,8 @@ if __name__ == '__main__':
     ax5.autoscale_view()
     
     
-    fig9, ax9 = initializeFigure();
-    fig9, ax9 = simulation_data.plotTemporalSimulatedData(fig9,ax9,'competence', 0,"r",moving_average=10)
+    #------------------------------------------- fig9, ax9 = initializeFigure();
+    # fig9, ax9 = simulation_data.plotTemporalSimulatedData(fig9,ax9,'competence', 0,"r",moving_average=10)
     
     
     fig10, ax10 = initializeFigure();
@@ -137,6 +138,11 @@ if __name__ == '__main__':
     
 
     
-    plt.draw();
+    plt.draw()
     plt.pause(0.001)
-    input("Press [enter] to continue.")
+    try:
+        str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
+        if str_opt == 'H':
+            plt.show()
+    except SyntaxError:
+        pass

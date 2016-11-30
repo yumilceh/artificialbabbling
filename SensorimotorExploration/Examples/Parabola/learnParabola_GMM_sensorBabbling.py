@@ -11,19 +11,19 @@ if __name__ == '__main__':
      
     ## Adding the projects folder to the path##
     import os,sys,random
-    sys.path.append(os.getcwd())
+    sys.path.append("../../")
 
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from Algorithm.Algorithm_Random import Algorithm_Random as Algorithm
     from Algorithm.Algorithm_Random import MODELS 
-    from Models.GMM_SM import GMM_SM
+    from Models.ILGMM_SM import GMM_SM
     from Models.GMM_SS import GMM_SS
     from Algorithm.ModelEvaluation import SM_ModelEvaluation
     from DataManager.PlotTools import *
 
     ## Simulation Parameters ##
-    n_initialization=1000
+    n_initialization=200
     n_evaluation_samples=100
     n_experiments=200
     random_seed=1234
@@ -65,28 +65,22 @@ if __name__ == '__main__':
 
     simulation1.runNonProprioceptiveAlgorithm(n_motor_initialization=n_initialization)
     
-    initialization_data_sm_ss=simulation1.data.initialization_data_sm_ss
-    simulation_data=simulation1.data.simulation_data
-
-    '''
-    fig,ax=initializeFigure();
-    fig,ax=initialization_data_sm_ss.plotSimulatedData2D(fig,ax,'motor', 0, 'sensor', 0,"or")
-    '''
-
+    initialization_data_sm_ss = simulation1.data.initialization_data_sm_ss
+    simulation_data = simulation1.data.simulation_data
+    
+    
     fig1,ax1=initializeFigure();
     fig1,ax1=simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
-    
-    
-    ## Validation of the model ##
-    n_samples=n_evaluation_samples
+     ## Validation of the model ##
     evaluation=SM_ModelEvaluation(system,
-                                  n_samples,
+                                  n_evaluation_samples,
                                   simulation1.models.f_sm,
                                   file_prefix=file_prefix)
     evaluation.setValidationEvaluationSets()
     
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)    
-    
+    validation_valSet_data = evaluation.evaluateModel(saveData=True) 
+
+
     fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    
     #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
     fig1, ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
@@ -123,20 +117,38 @@ if __name__ == '__main__':
     
     fig5,ax5=initializeFigure();
     fig5,ax5=initialization_data_sm_ss.plotSimulatedData2D(fig5,ax5,'sensor', 0, 'sensor', 1,"or")
-    #===========================================================================
-    # fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4,ax4,'motor', 1, 'sensor', 1,"ob")    
-    #===========================================================================
-    #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
     fig5, ax5 = simulation1.models.f_sm.model.plotGMMProjection(fig5,ax5,2, 3)
     ax5.relim()
     ax5.autoscale_view()
     
+    #--------------------------------------------- fig6, ax6=initializeFigure();
+    # fig6, ax6=initialization_data_im.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"ob")
+    #------------------------------------------------------------ plt.hold(True)
+    # fig6, ax6=simulation_data.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"or")
+
+    #- fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
+    #--------------------------------------------------------------- ax6.relim()
+    #------------------------------------------------------ ax6.autoscale_view()
+    
+    
+    fig9, ax9 = initializeFigure();
+    fig9, ax9 = simulation_data.plotTemporalSimulatedData(fig9,ax9,'competence', 0,"r",moving_average=10)
+    
     
     fig10, ax10 = initializeFigure();
-    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"r",moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error_log', 0,"--b",moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error', 0,"r",moving_average=10)
     
 
-    
-    plt.draw();
+    plt.draw()
     plt.pause(0.001)
-    input("Press [enter] to continue.")
+    try:
+        str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
+        if str_opt == 'H':
+            plt.show()
+    except SyntaxError:
+        pass
+    
+    
+    
+        

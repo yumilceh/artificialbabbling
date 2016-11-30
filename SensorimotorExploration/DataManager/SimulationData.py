@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
 from DataManager.PlotTools import movingAverage
 import numpy as np
+from mock.mock import self
 
 
 class SimulationData(object):
@@ -49,6 +50,16 @@ class SimulationData(object):
         simulationdata_tmp.competence_data.data=self.competence_data.data.iloc[start:stop]
         return simulationdata_tmp
     
+    def mixDataSets(self, sim_data_2):
+        sim_data_1 = self
+        sim_data_1.motor_data.data = sim_data_1.motor_data.data.append(sim_data_2.motor_data.data)
+        sim_data_1.sensor_data.data = sim_data_1.sensor_data.data.append(sim_data_2.sensor_data.data)
+        sim_data_1.sensor_goal_data.data = sim_data_1.sensor_goal_data.data.append(sim_data_2.sensor_data.data)
+        sim_data_1.somato_data.data = sim_data_1.somato_data.data.append(sim_data_2.somato_data.data)
+        sim_data_1.competence_data.data = sim_data_1.competence_data.data.append(sim_data_2.competence_data.data)
+        return sim_data_1
+        
+        
     def plotSimulatedData2D(self,fig,axes,src1,column1,src2,column2,color):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)

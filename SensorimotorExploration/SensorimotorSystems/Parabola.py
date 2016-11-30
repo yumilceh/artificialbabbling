@@ -104,6 +104,9 @@ class ConstrainedParabolicArea:
      
         self.applyConstraints()
         
+        #---------------------------------------- while self.applyConstraints():
+            #-------------------------------------------------------------- pass
+        
     def applyConstraints(self): 
         a = self.params.a
         b = self.params.b
@@ -118,6 +121,8 @@ class ConstrainedParabolicArea:
         x=self.sensorOutput[0]
         y=self.sensorOutput[1]
         
+        changed = False
+        onParabola = False
         point = CustomObject()
         point.x = x
         point.y = y
@@ -128,26 +133,14 @@ class ConstrainedParabolicArea:
         parabola.b = -2.0*b
         parabola.c = b**2
         
-        if math.pow(self.motor_command[0]-b,2.0) > self.sensorOutput[1]:
-            self.somatoOutput = 1.0
-            x, y = closestPointInParabola(parabola, point)
-            point.x = x
-            point.y = y
-        
         ##Checking if the sensorimotor result is insede of the constrained circle
         circle = CustomObject()
         circle.x_c = b
         circle.y_c = a
         circle.r = r
-                
         circle_condition = math.pow(x - b , 2.0) + math.pow(y - a , 2.0)
-        if circle_condition < math.pow(r, 2.0):
-            self.somatoOutput = 1.0                       
-            x, y = closestPointInCircle(circle, point)
-            point.x = x
-            point.y = y
-        
-            
+
+    
         ## Checking if the sensorimotor result is inside of thecontrained region between two parallel lines
         up_line = CustomObject()
         up_line.y_0 = d 
@@ -156,32 +149,92 @@ class ConstrainedParabolicArea:
         down_line = CustomObject()
         down_line.y_0 = e 
         down_line.m = m2
-            
-        if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1):
-            self.somatoOutput = 1.0
-            x1, y1, distance1 = closestPointToLine(up_line, point)
-            x2, y2, distance2 = closestPointToLine(down_line, point)
-            
-            if distance1 >= distance2:
-                if math.pow(x2-b,2.0) < y2:
-                    x=x2
-                    y=y2
-                else:
-                    x=x1
-                    y=y1
-            else:
-                if math.pow(x1-b,2.0) < y1:
-                    x=x1
-                    y=y1
-                else:
-                    x=x2
-                    y=y2
+         
+        uppest_line = CustomObject()
+        uppest_line.y_0 = self.max_sensor_values[1]
+        uppest_line.m = 0.0
+         
+        if circle_condition < math.pow(r, 2.0): #Circle
+            changed = True
+            self.somatoOutput = 1.0                       
+            x, y = closestPointInCircle(circle, point)
             point.x = x
             point.y = y
-            
+         
+        # if math.pow(self.motor_command[0]-b,2.0) > self.sensorOutput[1]: #Parabola
+        if math.pow(self.sensorOutput[0]-b,2.0) > self.sensorOutput[1]: #Parabola
+           changed = True
+           onParabola = True
+           self.somatoOutput = 1.0
+           x, y = closestPointInParabola(parabola, point)
+           point.x = x
+           point.y = y
+                
+        if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1): #Lines
+           changed = True
+           self.somatoOutput = 1.0
+           x1, y1, distance1 = closestPointToLine(up_line, point)
+           x2, y2, distance2 = closestPointToLine(down_line, point)
+           
+           x = point.x
+           y = point.y 
+           if onParabola:
+                if distance1 >= distance2:
+                    x_vals, y_vals = intersectionParabolaLine(parabola, down_line)
+                    d_tmp = np.finfo(np.float64).max
+                    
+                    x_tmp = x
+                    y_tmp = y
+                    for i in range(len(x_vals)):
+                        x_val = x_vals[i]
+                        y_val = y_vals[i]
+                        distance = math.sqrt( (x_tmp - x_val)** 2 + (y_tmp - y_val)** 2)
+                        if distance < d_tmp:
+                            d_tmp = distance
+                            x = x_val
+                            y = y_val
+                else:
+                    x_vals, y_vals = intersectionParabolaLine(parabola, up_line)          
+                    d_tmp = np.finfo(np.float64).max
+                    for i in range(len(x_vals)):
+                        x_val = x_vals[i]
+                        y_val = y_vals[i]
+                        distance = math.sqrt( (x - x_val)** 2 + (y - y_val)** 2)
+                        if distance < d_tmp:
+                            d_tmp = distance
+                            x = x_val
+                            y = y_val  
+           else:               
+               if distance1 >= distance2:
+                   x=x2
+                   y=y2
+               else:
+                   x=x1
+                   y=y1
+
+           point.x = x
+           point.y = y
+                    
+        if checkLineCondition(uppest_line, point) == 1: # Upper limit
+            changed = True
+            self.somatoOutput = 1.0
+            x, y, distance = closestPointToLine(uppest_line, point)
+            point.x = x
+            point.y = y
+            if checkLineCondition(up_line, point) == -1: 
+                x, y = intersectionTwoLines(uppest_line, up_line)
+                point.x = x
+                point.y = y
+            elif onParabola:
+                x, y = closestPointInParabola(parabola, point)
+                point.x = x
+                point.y = y
+                
         self.sensorOutput[0] = x
         self.sensorOutput[1] = y
-
+        return changed
+    
+        
     def boundMotorCommand(self, motor_command):
         n_motor=self.n_motor
         min_motor_values = self.min_motor_values
@@ -257,15 +310,48 @@ def closestPointInParabola(parabola, point):   #Parabola: y=ax^2+bx+c
     
     x_vals = np.real(np.roots(coeff))
     d_tmp = np.finfo(np.float64).max
+    
+    x_0 = x
+    y_0 = y
     for i in range(len(x_vals)):
         x_val = x_vals[i]
         y_val = a * x_val**2 + b * x_val + c
-        distance = math.sqrt( (x - x_val)** 2 + (y - y_val)** 2)
+        distance = math.sqrt( (x_0 - x_val)** 2 + (y_0 - y_val)** 2)
         if distance < d_tmp:
             d_tmp = distance
             x = x_val
             y = y_val
-    return x, y    
+    return x, y
+
+def intersectionTwoLines(line1, line2):
+    y_01 = line1.y_0
+    m1 = line1.m    
+    y_02 = line2.y_0
+    m2 = line2.m
+    
+    x = (y_02-y_01)/(m1-m2)
+    y =  m1 * x + y_01
+    return x, y
+    
+def intersectionParabolaLine(parabola, line):   #Parabola: y=ax^2+bx+c      
+    a = parabola.a
+    b = parabola.b
+    c = parabola.c
+    
+    y_0 = line.y_0
+    m = line.m
+    
+    #self.sensorOutput[0] = self.motor_command[1] #Simply takes the value of the other motor command
+    
+    coeff = [a, b-m, c-y_0]
+    
+    x_vals = np.real(np.roots(coeff))
+    y_vals = [0.0, 0.0]
+    for i in range(len(x_vals)):
+        x_val = x_vals[i]
+        y_vals[i] = a * x_val**2 + b * x_val + c
+    return x_vals, y_vals
+    
         
 def closestPointInCircle(circle, point):
     r = circle.r
@@ -298,22 +384,30 @@ def checkLineCondition(line, point):
     
 def closestPointToLine(line, point):
     y_0 = line.y_0
+    
     m = line.m
     
     x = point.x
-    y = point.y   
-            
-    #-------------------------------------------------- y_0p = y + (1.0 / m) * x
+    y = point.y 
     
-    #------------------------------------------ x_l = (y_0p-y_0) / (m + (1.0/m))
-    #x_l = (y_0p - y_0 - (1.0 / m) * x) / m
-    
-    
-    #-------------------------------------------- x_l = (y_0p-y_0)/(m + (1.0/m))
-    
-    x_l = ((1/m) * x + y - y_0) / (m + (1.0/m))
-    y_l = y_0 + m * x_l
-    
+    if m!=0:
+          
+                
+        #-------------------------------------------------- y_0p = y + (1.0 / m) * x
+        
+        #------------------------------------------ x_l = (y_0p-y_0) / (m + (1.0/m))
+        #x_l = (y_0p - y_0 - (1.0 / m) * x) / m
+        
+        
+        #-------------------------------------------- x_l = (y_0p-y_0)/(m + (1.0/m))
+        
+        x_l = ((1/m) * x + y - y_0) / (m + (1.0/m))
+        y_l = y_0 + m * x_l
+    else:
+        x_l = x
+        y_l = y_0 
+        
+        
     distance = math.sqrt( (x - x_l)** 2 + (y - y_l)** 2)
 
     return x_l, y_l, distance

@@ -52,8 +52,12 @@ class ManualSimulation(object):
         self.fig = fig
         self.axes = ax
         
-        plt.draw()
-        plt.show()
-        self.executeManualMotorCommands()
+        self.fig.canvas.draw()
+        
+        try:
+            self.executeManualMotorCommands()
+        except SyntaxError:
+            plt.show()
+
             
         
