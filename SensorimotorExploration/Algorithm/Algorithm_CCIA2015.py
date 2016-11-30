@@ -6,10 +6,10 @@ Created on May 23, 2016
 from DataManager.SimulationData import SimulationData
 
 from Algorithm.RndSensorimotorFunctions import get_random_motor_set
-from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
 #===============================================================================
-# from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
+# from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
 #===============================================================================
+from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
 
 import numpy as np
 import numpy.linalg as linalg
@@ -42,7 +42,7 @@ class Algorithm_CCIA2015(object):
                         n_initialization_experiments = 100,
                         n_experiments = 500000,
                         random_seed = np.random.random((1,1)),
-                        g_im_initialization_method = 'non-zero', #'non-zero' 'all'
+                        g_im_initialization_method = 'non-zero', #'non-zero' 'all' 'non-painful'
                         n_save_data = 50000,
                         file_prefix=''):
         '''
@@ -88,7 +88,19 @@ class Algorithm_CCIA2015(object):
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
                     print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, Non-null sensory result considered ')
-        if (g_im_initialization_method == 'all'):
+        elif (g_im_initialization_method == 'non-painful'):
+            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
+            proprio_data = self.data.initialization_data_sm_ss.somato_data.data.as_matrix()
+            for i in range(n_init):
+                print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
+                if((proprio_data[i])==0):
+                    self.agent.sensor_goal = sensor_goals[i]
+                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.agent.executeMotorCommand()
+                    get_competence(self.agent)
+                    self.data.initialization_data_im.appendData(self.agent)
+                    print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, Non-painful sensory result considered ')
+        elif (g_im_initialization_method == 'all'):
             sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
             for i in range(n_init):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
@@ -153,7 +165,20 @@ class Algorithm_CCIA2015(object):
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
                     print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, Non-null sensory result considered ')
-        if (g_im_initialization_method == 'all'):
+        elif (g_im_initialization_method == 'non-painful'):
+            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
+            proprio_data = self.data.initialization_data_sm_ss.somato_data.data.as_matrix()
+            for i in range(n_init):
+                print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
+                if((proprio_data[i])==0):
+                    self.agent.sensor_goal = sensor_goals[i]
+                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.agent.executeMotorCommand()
+                    get_competence(self.agent)
+                    self.data.initialization_data_im.appendData(self.agent)
+                    print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, Non-painful sensory result considered ')
+        
+        elif (g_im_initialization_method == 'all'):
             sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
             for i in range(n_init):
                 print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i+1,n_init))

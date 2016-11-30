@@ -24,9 +24,9 @@ if __name__ == '__main__':
     from DataManager.PlotTools import *
    
     ## Simulation Parameters ##
-    n_initialization=1000
+    n_initialization=200
     n_evaluation_samples=100
-    n_experiments=500
+    n_experiments=200
     random_seed=1234
     
     k_sm = 3
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     
     k_im=10
     im_step=20
-    im_samples=80
+    im_samples=800
     
     # To guarantee reproductible experiments##
     random.seed(random_seed)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                           file_prefix=file_prefix,
                           n_experiments = n_experiments,
                           n_initialization_experiments = n_initialization,
-                          g_im_initialization_method = 'all',
+                          g_im_initialization_method = 'non-painful',
                           n_save_data=100
                           )
     
@@ -134,14 +134,18 @@ if __name__ == '__main__':
     
     fig5,ax5=initializeFigure();
     fig5,ax5=initialization_data_sm_ss.plotSimulatedData2D(fig5,ax5,'sensor', 0, 'sensor', 1,"or")
-    
-    #===========================================================================
-    # fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4,ax4,'motor', 1, 'sensor', 1,"ob")    
-    #===========================================================================
-    #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
     fig5, ax5 = simulation1.models.f_sm.model.plotGMMProjection(fig5,ax5,2, 3)
     ax5.relim()
     ax5.autoscale_view()
+    
+    fig6, ax6=initializeFigure();
+    fig6, ax6=initialization_data_im.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"ob")
+    plt.hold(True)
+    fig6, ax6=simulation_data.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"or")
+
+    fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
+    ax6.relim()
+    ax6.autoscale_view()    
     
     
     fig9, ax9 = initializeFigure();
@@ -149,9 +153,19 @@ if __name__ == '__main__':
     
     
     fig10, ax10 = initializeFigure();
-    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"r",moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error_log', 0,"--b",moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error', 0,"r",moving_average=10)
     
 
-    plt.draw();
+    plt.draw()
     plt.pause(0.001)
-    input("Press [enter] to continue.")
+    try:
+        str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
+        if str_opt == 'H':
+            plt.show()
+    except SyntaxError:
+        pass
+    
+    
+    
+        
