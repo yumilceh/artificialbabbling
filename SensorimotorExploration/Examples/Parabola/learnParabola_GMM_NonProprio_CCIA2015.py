@@ -7,8 +7,6 @@ from numpy import linspace
 from numpy import random as np_rnd
 
 if __name__ == '__main__':
-   
-     
     ## Adding the projects folder to the path##
     import os,sys,random
     sys.path.append("../../")
@@ -72,7 +70,7 @@ if __name__ == '__main__':
                           file_prefix=file_prefix,
                           n_experiments = n_experiments,
                           n_initialization_experiments = n_initialization,
-                          g_im_initialization_method = 'all',
+                          g_im_initialization_method = 'non-pain',
                           n_save_data=100
                           )
     

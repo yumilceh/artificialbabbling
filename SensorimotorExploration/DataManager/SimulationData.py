@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
 from DataManager.PlotTools import movingAverage
 import numpy as np
-from mock.mock import self
 
 
 class SimulationData(object):

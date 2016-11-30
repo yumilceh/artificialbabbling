@@ -203,7 +203,7 @@ class Diva_Proprio2015a:
         for index in range(nSamples):
             sequence.append((plt.plot(np.real(outline[:,index]), np.imag(outline[:,index]))))
         im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False,blit=True)
-        im_ani.save(file_name + '.mp4', writer=writer)
+        im_ani.save(file_name + '.mp4', writer=writer, codec="libx264")
         command = ["ffmpeg",
                    '-i', file_name + '.wav',
                    '-i',file_name + '.mp4',
