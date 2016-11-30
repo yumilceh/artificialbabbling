@@ -1,4 +1,0 @@
-GMM_priors_1318.txt
-GMM_mu_1318.txt
-GMM_sigma_1318.txt
-var_names_1318.txt

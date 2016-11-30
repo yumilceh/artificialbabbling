@@ -10,7 +10,7 @@ if __name__ == '__main__':
      
     ## Adding the projects folder to the path##
     import os,sys,random
-    sys.path.append(os.getcwd())
+    sys.path.append("../../")
 
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System

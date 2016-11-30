@@ -9,14 +9,13 @@ Created on Aug 31, 2016
 Currently this class is only prepared to work with two dimensional sensori spaces
 '''
 from DataManager.PlotTools import *
-from matplotlib.pyplot  import draw
 
 class PARAMS(object):        
     def __init__(self):
         pass
 class ManualSimulation(object):
     '''
-        This class uses data in order to estimate a sensorimotor model and evaluate it.
+        This class is used to check interactivelly the system Constrained Parabola.
     '''
     def __init__(self,  agent, 
                         file_prefix = '',
@@ -52,8 +51,9 @@ class ManualSimulation(object):
         
         self.fig = fig
         self.axes = ax
-        draw()
         
+        plt.draw()
+        plt.show()
         self.executeManualMotorCommands()
             
         
