@@ -207,7 +207,7 @@ class Diva_Proprio2015a:
         command = ["ffmpeg",
                    '-i', file_name + '.wav',
                    '-i',file_name + '.mp4',
-                   '-vcodec', 'copy', file_name + '_audio.mp4']
+                   '-c:v', "libx264", file_name + '_audio.mp4']
         sp.call(command)
         if keep_audio==0:
             command =  ["rm",
