@@ -26,11 +26,8 @@ class ILGMM(GMMmix):
         if self.initialized:
             self.short_term_model = GMMmix(self.params['init_components'])
             self.short_term_model.getBestGMM(data, lims=[self.params['init_components'],self.params['max_step_components']])
-            self.merge_similar_gaussians(self.short_term_model.model)
-            self.mergeGMM(self.short_term_model.model)
-                
-            
-
+            self.mergeGMM(self.merge_similar_gaussians(self.short_term_model.model))
+                       
         else:
             self.getBestGMM(data, lims=[self.params['init_components'],self.params['max_step_components']])
             self.short_term_model = GMMmix(self.model.n_components)
@@ -45,16 +42,18 @@ class ILGMM(GMMmix):
         
         similarity_tmp = (1/total_similar) * similarity_tmp
         
-        is_merged = False
+        changed_flag = False
         for i in range(len(similarity_tmp)):
             if similarity_tmp[i]<=0.01:
+                changed_flag = True
                 indices = np.array(np.unravel_index(i,similarity.shape))
                 gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1])
-                break
-            is_merged = True  #WRONGGGGGG here
         
-        if not is_merged:
-            self.merge_similar_gaussians(gmm2)         
+        
+        if changed_flag:
+            return self.merge_similar_gaussians(gmm2) 
+        else:
+            return gmm2                  
                         
     def mergeGMM(self,gmm2):
         covars_ = self.model._get_covars() 
@@ -108,7 +107,7 @@ class ILGMM(GMMmix):
         gmm2.covars_ = covars_2
         gmm2.means_ = means_2
         gmm2.weights_ = weights_2
-        gmm2.n_components = gmm2.n_components -1
+        gmm2.n_components = gmm2.n_components - 1
         
         return gmm2
         

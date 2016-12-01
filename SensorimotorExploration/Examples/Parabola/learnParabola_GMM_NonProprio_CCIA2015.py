@@ -30,6 +30,7 @@ if __name__ == '__main__':
     k_sm = 3
     sm_step=100
     alpha_sm=0.05
+    sm_all_samples = True
     
     k_ss = 6
     ss_step=100
@@ -53,6 +54,7 @@ if __name__ == '__main__':
                          k_sm,
                          sm_step=sm_step,
                          alpha=alpha_sm)
+    
     models.f_ss = GMM_SS(system,
                          k_ss,
                          ss_step=ss_step,
@@ -70,12 +72,12 @@ if __name__ == '__main__':
                           file_prefix=file_prefix,
                           n_experiments = n_experiments,
                           n_initialization_experiments = n_initialization,
-                          g_im_initialization_method = 'non-pain',
-                          n_save_data=100
-                          )
+                          g_im_initialization_method = 'non-painful',
+                          n_save_data=100,
+                          sm_all_samples = sm_all_samples)
     
 
-    simulation1.runProprioceptiveAlgorithm()
+    simulation1.runNonProprioceptiveAlgorithm()
     
     initialization_data_sm_ss=simulation1.data.initialization_data_sm_ss
     initialization_data_im=simulation1.data.initialization_data_im

@@ -42,6 +42,7 @@ class Algorithm_CCIA2015(object):
                         random_seed = np.random.random((1,1)),
                         g_im_initialization_method = 'non-zero', #'non-zero' 'all' 'non-painful'
                         n_save_data = 50000,
+                        sm_all_samples = False,
                         file_prefix=''):
         '''
         Constructor
@@ -53,7 +54,8 @@ class Algorithm_CCIA2015(object):
         self.params.random_seed = random_seed
         self.params.g_im_initialization_method = g_im_initialization_method
         self.params.n_save_data = n_save_data
-        
+        self.params.sm_all_samples = sm_all_samples
+                
         self.agent = agent
         self.models=models
     
@@ -120,23 +122,31 @@ class Algorithm_CCIA2015(object):
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
             
+            ''' Train Interest Model'''
             if ((i+1)%self.models.f_im.params.im_step) == 0:
-                if i < n_init:
+                print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model IM')
+                if i < self.models.f_im.params.n_training_samples:
                     self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.data.simulation_data))
-
                 else:
                     self.models.f_im.train(self.data.simulation_data)
                 
-            if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 
-                self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+            ''' Train Sensorimotor Model'''
+            if ((i+1)%self.models.f_sm.params.sm_step) == 0:
+                print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SM')
+                if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
+                    self.models.f_sm.trainIncrementalLearning(
+                                        self.data.simulation_data.mixDataSets(
+                                            self.data.initialization_data_im.mixDataSets(
+                                                self.data.initialization_data_sm_ss)))
+                else:
+                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+
                 
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
-                
+                print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SS')
                 self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
                 
-                
-                print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Models')
             print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
@@ -210,7 +220,7 @@ class Algorithm_CCIA2015(object):
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_im.params.im_step) == 0:
-                if i < n_init:
+                if i < self.models.f_im.params.n_training_samples:
                     self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.data.simulation_data))
                 else:
                     self.models.f_im.train(self.data.simulation_data)
