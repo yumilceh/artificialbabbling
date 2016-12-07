@@ -157,9 +157,6 @@ if __name__ == '__main__':
     fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'competence', 0,"--b",moving_average=10)
     fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10,ax10,'error', 0,"r",moving_average=10)
     
-    
-    
-
     plt.draw()
     plt.pause(0.001)
     try:

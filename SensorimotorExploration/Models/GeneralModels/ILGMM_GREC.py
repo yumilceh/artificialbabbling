@@ -4,8 +4,11 @@ Created on Sep, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from Models.GeneralModels.Mixture import GMM as GMMmix
+from DataManager.PlotTools import initializeFigure
 
+import matplotlib.pyplot as plt
 import numpy as np
+import copy 
 from scipy import linalg as LA 
 
 class ILGMM(GMMmix):
@@ -13,47 +16,137 @@ class ILGMM(GMMmix):
     classdocs
     '''
 
-    def __init__(self, min_components):
+    def __init__(self, min_components, plot = True, plot_dims=[2,3]):
         
         self.params={'init_components': min_components,
                      'max_step_components': 30,
                      'max_components':60,
-                     'a_split': 0.8}
+                     'a_split': 0.8,
+                     'plot': plot,
+                     'plot_dims': plot_dims}
         GMMmix.__init__(self, min_components) 
+        
+        if  self.params['plot']:
+            
+            self.fig_old, self.ax_old = initializeFigure()
+            self.fig_old.suptitle("Previous  Model")
+            
+            self.fig, self.ax = initializeFigure()
+            self.fig.suptitle("Current Model")
+
+            self.fig_new, self.ax_new = initializeFigure()
+            self.fig_new.suptitle("Model obtained with new data")
+            
+            self.fig_old.show()
+            self.fig.show()
+            self.fig_new.show()        
         
           
     def train(self, data):
         if self.initialized:
+            self.ax_old.clear()
+            self.fig_old, self.ax_old = self.plotGMMProjection(self.fig_old, self.ax_old, self.params['plot_dims'][0], self.params['plot_dims'][1])
+            self.ax_old.autoscale_view()
+            self.fig_old.canvas.draw()
+
+            
             self.short_term_model = GMMmix(self.params['init_components'])
-            self.short_term_model.getBestGMM(data, lims=[self.params['init_components'],self.params['max_step_components']])
-            self.mergeGMM(self.merge_similar_gaussians(self.short_term_model.model))
+            self.short_term_model.getBestGMM(data, lims = [self.params['init_components'],self.params['max_step_components']])
+            gmm_new = copy.deepcopy(self.short_term_model.model)
+            
+            self.mergeGMM(self.merge_similar_gaussians_in_gmm_smart(gmm_new))
+            if self.params['plot']:
+                
+                self.ax.clear()
+                self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax.autoscale_view()                
+                
+                self.ax_new.clear()
+                self.fig_new, self.ax_new = self.short_term_model.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_new.autoscale_view()
+                                
+                self.fig.canvas.draw()
+                self.fig_new.canvas.draw()                
                        
         else:
             self.getBestGMM(data, lims=[self.params['init_components'],self.params['max_step_components']])
             self.short_term_model = GMMmix(self.model.n_components)
             self.initialized = True
+            if self.params['plot']:
+                self.fig_old, self.ax_old = self.plotGMMProjection(self.fig_old, self.ax_old, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old.autoscale_view()
+                
+                self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax.autoscale_view()
+                
+                self.fig_new, self.ax_new = self.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_new.autoscale_view()
+
+                self.fig_old.canvas.draw()
+                self.fig.canvas.draw()
+                self.fig_new.canvas.draw()  
+               
+        str_opt = raw_input("Press [enter] to continue...    ")       
     
-    def merge_similar_gaussians(self, gmm2):
+    def merge_similar_gaussians_in_gmm_full(self, gmm2):
         #Selecting high related Gaussians to be mixtured
         gmm1 = self.model
         similarity = get_similarity_matrix(gmm1, gmm2)
-        similarity_tmp = similarity.flatten()
-        total_similar = np.sum(similarity_tmp)
+        #--------------------------------- similarity_tmp = similarity.flatten()
+        #-------------------------------- total_similar = np.sum(similarity_tmp)
+        #------------------- similarity_tmp = (1/total_similar) * similarity_tmp
         
-        similarity_tmp = (1/total_similar) * similarity_tmp
+        total_similar = np.sum(similarity.flatten())
+        similarity_pct = (1/total_similar) * similarity 
         
         changed_flag = False
-        for i in np.arange(len(similarity_tmp)-1,-1,-1):
-            if similarity_tmp[i]<=0.01:
-                changed_flag = True
-                indices = np.array(np.unravel_index(i,similarity.shape))
-                gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1])
-        
+        indices_gmm2 = np.arange(similarity_pct.shape[1]-1, -1 , -1)
+        for i in np.arange(similarity_pct.shape[0]-1,-1,-1):
+            j_= 0
+            for j in indices_gmm2:
+                if similarity_pct[i,j] <= 0.01:
+                    gmm2 = self.mergeGMMComponents(gmm2, i, len(indices_gmm2)-j_-1) #len(indices_gmm2)-j_ to take the correspondent gaussian in gmm2
+                    indices_gmm2 = np.delete(indices_gmm2, j_ , axis = 0)
+                    j_ = j_ - 1
+                j_ = j_ + 1
+    
         
         if changed_flag:
-            return self.merge_similar_gaussians(gmm2) 
+            return self.merge_similar_gaussians_in_gmm_full(gmm2) 
         else:
-            return gmm2                  
+            return gmm2
+    def merge_similar_gaussians_in_gmm_smart(self, gmm2):
+        #Selecting high related Gaussians to be mixtured
+        gmm1 = self.model
+        similarity = get_similarity_matrix(gmm1, gmm2)
+        
+        total_similar = np.sum(similarity.flatten())
+        similarity_pct = (1/total_similar) * similarity 
+        
+        indices = np.unravel_index(similarity_pct.argmin(), similarity.shape)
+        
+        changed_flag = False
+        if similarity_pct[indices[0], indices[1]] <= 0.01:
+            gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1]) #len(indices_gmm2)-j_ to take the correspondent gaussian in gmm2
+            changed_flag = True
+        
+        if changed_flag:
+            return self.merge_similar_gaussians_in_gmm_smart(gmm2) 
+        else:
+            return gmm2
+               
+    def merge_similar_gaussians_in_gmm_minim(self, gmm2):
+        #Selecting high related Gaussians to be mixtured
+        gmm1 = self.model
+        similarity = get_similarity_matrix(gmm1, gmm2)
+        #--------------------------------- similarity_tmp = similarity.flatten()
+        #-------------------------------- total_similar = np.sum(similarity_tmp)
+        #------------------- similarity_tmp = (1/total_similar) * similarity_tmp
+        
+        indices = np.unravel_index(similarity.argmin(),similarity.shape)
+        gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1]) #len(indices_gmm2)-j_ to take the correspondent gaussian in gmm2
+        
+        return gmm2                 
                         
     def mergeGMM(self,gmm2):
         covars_ = self.model._get_covars() 
@@ -235,6 +328,26 @@ def split_gaussian(gauss, a):  #Supervise that all the values here are real
     
     return {'covariance': covar, 'mean': mean1, 'weight': weight}, {'covariance': covar, 'mean': mean2, 'weight': weight}
     
-
+    #---------------------------------- def merge_similar_gaussians(self, gmm2):
+        #----------------------- Selecting high related Gaussians to be mixtured
+        #----------------------------------------------------- gmm1 = self.model
+        #------------------------ similarity = get_similarity_matrix(gmm1, gmm2)
+        #--------------------------------- similarity_tmp = similarity.flatten()
+        #-------------------------------- total_similar = np.sum(similarity_tmp)
+#------------------------------------------------------------------------------ 
+        #------------------- similarity_tmp = (1/total_similar) * similarity_tmp
+#------------------------------------------------------------------------------ 
+        #-------------------------------------------------- changed_flag = False
+        #---------------------- for i in np.arange(len(similarity_tmp)-1,-1,-1):
+            #--------------------------------------- if similarity_tmp[i]<=0.01:
+                #------------------------------------------- changed_flag = True
+                #------ indices = np.array(np.unravel_index(i,similarity.shape))
+                #-- gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1])
+#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------ 
+        #------------------------------------------------------ if changed_flag:
+            #------------------------- return self.merge_similar_gaussians(gmm2)
+        #----------------------------------------------------------------- else:
+            #------------------------------------------------------- return gmm2
     
     
