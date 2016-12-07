@@ -43,7 +43,7 @@ class ILGMM(GMMmix):
         similarity_tmp = (1/total_similar) * similarity_tmp
         
         changed_flag = False
-        for i in range(len(similarity_tmp)):
+        for i in np.arange(len(similarity_tmp)-1,-1,-1):
             if similarity_tmp[i]<=0.01:
                 changed_flag = True
                 indices = np.array(np.unravel_index(i,similarity.shape))

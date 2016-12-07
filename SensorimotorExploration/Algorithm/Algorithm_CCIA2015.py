@@ -126,7 +126,7 @@ class Algorithm_CCIA2015(object):
             if ((i+1)%self.models.f_im.params.im_step) == 0:
                 print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model IM')
                 if i < self.models.f_im.params.n_training_samples:
-                    self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.data.simulation_data))
+                    self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.agent, self.data.simulation_data))
                 else:
                     self.models.f_im.train(self.data.simulation_data)
                 
@@ -136,8 +136,8 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
                     self.models.f_sm.trainIncrementalLearning(
-                                        self.data.simulation_data.mixDataSets(
-                                            self.data.initialization_data_im.mixDataSets(
+                                        self.data.simulation_data.mixDataSets(self.agent,
+                                            self.data.initialization_data_im.mixDataSets(self.agent,
                                                 self.data.initialization_data_sm_ss)))
                 else:
                     self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
@@ -221,7 +221,7 @@ class Algorithm_CCIA2015(object):
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_im.params.im_step) == 0:
                 if i < self.models.f_im.params.n_training_samples:
-                    self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.data.simulation_data))
+                    self.models.f_im.train(self.data.initialization_data_im.mixDataSets(self.agent, self.data.simulation_data))
                 else:
                     self.models.f_im.train(self.data.simulation_data)
                 

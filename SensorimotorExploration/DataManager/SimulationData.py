@@ -49,13 +49,13 @@ class SimulationData(object):
         simulationdata_tmp.competence_data.data=self.competence_data.data.iloc[start:stop]
         return simulationdata_tmp
     
-    def mixDataSets(self, sim_data_2):
-        sim_data_1 = self
-        sim_data_1.motor_data.data = sim_data_1.motor_data.data.append(sim_data_2.motor_data.data)
-        sim_data_1.sensor_data.data = sim_data_1.sensor_data.data.append(sim_data_2.sensor_data.data)
-        sim_data_1.sensor_goal_data.data = sim_data_1.sensor_goal_data.data.append(sim_data_2.sensor_data.data)
-        sim_data_1.somato_data.data = sim_data_1.somato_data.data.append(sim_data_2.somato_data.data)
-        sim_data_1.competence_data.data = sim_data_1.competence_data.data.append(sim_data_2.competence_data.data)
+    def mixDataSets(self, agent, sim_data_2):
+        sim_data_1 = SimulationData(agent)
+        sim_data_1.motor_data.data = self.motor_data.data.append(sim_data_2.motor_data.data)
+        sim_data_1.sensor_data.data = self.sensor_data.data.append(sim_data_2.sensor_data.data)
+        sim_data_1.sensor_goal_data.data = self.sensor_goal_data.data.append(sim_data_2.sensor_data.data)
+        sim_data_1.somato_data.data = self.somato_data.data.append(sim_data_2.somato_data.data)
+        sim_data_1.competence_data.data = self.competence_data.data.append(sim_data_2.competence_data.data)
         return sim_data_1
         
         
