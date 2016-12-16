@@ -42,9 +42,9 @@ class SM_ModelEvaluation(object):
     
     def loadEvaluationDataSet(self, file_name):
         self.data = loadSimulationData_h5(file_name, self.agent)
-        n_samples = len(self.data.motor_data.data)
+        n_samples = len(self.data.sensor_data.data)
         self.n_samples_val = n_samples
-        self.random_indexes_val = xrange(n_samples)
+        self.random_indexes_val = range(n_samples)
         
     def setValidationEvaluationSets(self):
         

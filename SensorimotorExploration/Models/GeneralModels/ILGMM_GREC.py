@@ -35,26 +35,41 @@ class ILGMM(GMMmix):
         
         if  self.params['plot']:
             
-            self.fig_old, self.ax_old = initializeFigure()
-            self.fig_old.suptitle("Previous  Model")
+            self.fig_old, self.ax_old = initializeFigure(subplots=[1,3], hold=False)
+            self.fig_old.suptitle("Incremental Learning of GMM")
+            self.ax_old[0].set_title('Old Model')
+            self.ax_old[1].set_title('Short Term Model')
+            self.ax_old[2].set_title('Current Term Model')
             
-            self.fig, self.ax = initializeFigure()
-            self.fig.suptitle("Current Model")
-
-            self.fig_new, self.ax_new = initializeFigure()
-            self.fig_new.suptitle("Model obtained with new data")
+            
+#===============================================================================
+#             self.fig, self.ax = initializeFigure()
+#             self.fig.suptitle("Current Model")
+# 
+#             self.fig_new, self.ax_new = initializeFigure()
+#             self.fig_new.suptitle("Model obtained with new data")
+#===============================================================================
             
             self.fig_old.show()
-            self.fig.show()
-            self.fig_new.show()        
+            #===================================================================
+            # self.fig.show()
+            # self.fig_new.show()        
+            #===================================================================
         
           
     def train(self, data):
         if self.initialized:
-            self.ax_old.clear()
-            self.fig_old, self.ax_old = self.plotGMMProjection(self.fig_old, self.ax_old, self.params['plot_dims'][0], self.params['plot_dims'][1])
-            self.ax_old.autoscale_view()
-            self.fig_old.canvas.draw()
+            if self.params['plot']:
+                #===============================================================
+                self.ax_old[0].clear()
+                self.ax_old[0].set_title('Old Model')
+                 
+                #===============================================================
+                self.fig_old, self.ax_old[0] = self.plotGMMProjection(self.fig_old, self.ax_old[0], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[0].autoscale_view()
+                #===============================================================
+                # self.fig_old.canvas.draw()
+                #===============================================================
 
             
             self.short_term_model = GMMmix(self.params['init_components'])
@@ -72,34 +87,57 @@ class ILGMM(GMMmix):
             self.mergeGMM(self.merge_similar_gaussians_in_gmm_minim(gmm_new))
             if self.params['plot']:
                 
-                self.ax.clear()
-                self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
-                self.ax.autoscale_view()                
+                #===============================================================
+                # self.ax.clear()
+                # self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                # self.ax.autoscale_view()                
+                # 
+                # self.ax_new.clear()
+                # self.fig_new, self.ax_new = self.short_term_model.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                # self.ax_new.autoscale_view()
+                #                 
+                # self.fig.canvas.draw()
+                # self.fig_new.canvas.draw()                
+                #===============================================================
+                self.ax_old[1].clear()
+                self.ax_old[2].clear()
                 
-                self.ax_new.clear()
-                self.fig_new, self.ax_new = self.short_term_model.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
-                self.ax_new.autoscale_view()
-                                
-                self.fig.canvas.draw()
-                self.fig_new.canvas.draw()                
-                       
+                self.ax_old[1].set_title('Short Term Model')
+                self.ax_old[2].set_title('Current Term Model')
+                
+                
+                self.fig_old, self.ax_old[1] = self.short_term_model.plotGMMProjection(self.fig_old, self.ax_old[1], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[1].autoscale_view()
+                self.fig_new, self.ax_old[2] = self.plotGMMProjection(self.fig_old, self.ax_old[2], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[2].autoscale_view()
+                 
+                self.fig_old.canvas.draw()      
         else:
             self.getBestGMM(data, lims=[self.params['init_components'],self.params['max_step_components']])
             self.short_term_model = GMMmix(self.model.n_components)
             self.initialized = True
             if self.params['plot']:
-                self.fig_old, self.ax_old = self.plotGMMProjection(self.fig_old, self.ax_old, self.params['plot_dims'][0], self.params['plot_dims'][1])
-                self.ax_old.autoscale_view()
+                self.fig_old, self.ax_old[0] = self.plotGMMProjection(self.fig_old, self.ax_old[0], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[0].autoscale_view()
+                self.fig_old, self.ax_old[1] = self.plotGMMProjection(self.fig_old, self.ax_old[1], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[1].autoscale_view()
+                self.fig_old, self.ax_old[2] = self.plotGMMProjection(self.fig_old, self.ax_old[2], self.params['plot_dims'][0], self.params['plot_dims'][1])
+                self.ax_old[2].autoscale_view()
                 
-                self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
-                self.ax.autoscale_view()
                 
-                self.fig_new, self.ax_new = self.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
-                self.ax_new.autoscale_view()
+                #===============================================================
+                # self.fig, self.ax = self.plotGMMProjection(self.fig, self.ax, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                # self.ax.autoscale_view()
+                # 
+                # self.fig_new, self.ax_new = self.plotGMMProjection(self.fig_new, self.ax_new, self.params['plot_dims'][0], self.params['plot_dims'][1])
+                # self.ax_new.autoscale_view()
+                #===============================================================
 
                 self.fig_old.canvas.draw()
-                self.fig.canvas.draw()
-                self.fig_new.canvas.draw()  
+                #===============================================================
+                # self.fig.canvas.draw()
+                # self.fig_new.canvas.draw()  
+                #===============================================================
                
         #=======================================================================
         # raw_input("Press [enter] to continue...    ")       
@@ -132,6 +170,22 @@ class ILGMM(GMMmix):
             return self.merge_similar_gaussians_in_gmm_full(gmm2) 
         else:
             return gmm2
+        
+    def returnCopy(self):
+        copy_tmp = ILGMM(min_components = self.params['init_components'],
+                     max_step_components = self.params['max_step_components'],
+                     max_components = self.params['max_components'],
+                     a_split = self.params['a_split'],
+                     forgetting_factor = self.params['forgetting_factor'], 
+                     plot = False)
+        
+        copy_tmp.model.covars_ = self.model._get_covars()
+        copy_tmp.model.means_ = self.model.means_
+        copy_tmp.model.weights_ = self.model.weights_
+        
+        copy_tmp.short_term_model = copy.deepcopy(self.short_term_model)
+        return copy_tmp
+
     def merge_similar_gaussians_in_gmm_smart(self, gmm2):
         #Selecting high related Gaussians to be mixtured
         gmm1 = self.model

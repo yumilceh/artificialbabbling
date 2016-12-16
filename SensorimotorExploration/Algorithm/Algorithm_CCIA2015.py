@@ -4,6 +4,7 @@ Created on May 23, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 from DataManager.SimulationData import SimulationData
+import copy 
 
 from Algorithm.RndSensorimotorFunctions import get_random_motor_set
 from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
@@ -12,6 +13,7 @@ from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_compe
 import numpy as np
 import numpy.linalg as linalg
 from Algorithm.StorageDataFunctions import saveSimulationData
+from copy import deepcopy
 
 class PARAMS(object):
     def __init__(self):
@@ -57,7 +59,9 @@ class Algorithm_CCIA2015(object):
         self.params.sm_all_samples = sm_all_samples
                 
         self.agent = agent
-        self.models=models
+        self.initialization_models = MODELS()
+         
+        self.models = models
     
         self.data = DATA(self)
         self.data.file_prefix=file_prefix
@@ -72,6 +76,9 @@ class Algorithm_CCIA2015(object):
             print('Algorithm 1 (Non-proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i,n_init))
         self.models.f_sm.train(self.data.initialization_data_sm_ss)
         self.models.f_ss.train(self.data.initialization_data_sm_ss)
+        self.initialization_models.f_sm = self.models.f_sm.model.returnCopy()
+        self.initialization_models.f_ss = self.models.f_ss.model.returnCopy()
+        
         print('Algorithm 1 (Non-proprioceptive), Line 1: Initialize G_SM and G_SS, experiment {} of {}'.format(i,n_init))
         
         self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data_sm_ss.h5')    
@@ -112,6 +119,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, All sensory result considered ')
         self.data.initialization_data_im.saveData(self.data.file_prefix +'initialization_data_im.h5')
         self.models.f_im.train(self.data.initialization_data_im)
+        self.initialization_models.f_im = self.models.f_im.model.returnCopy()
         
         n_save_data = self.params.n_save_data;
         n_experiments = self.params.n_experiments

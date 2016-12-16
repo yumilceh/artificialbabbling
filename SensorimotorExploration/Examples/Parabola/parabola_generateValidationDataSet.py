@@ -117,7 +117,7 @@ if __name__ == '__main__':
     import pandas as pd
     from DataManager.SimulationData import SimulationData
     validation_data_set = SimulationData(simulation1.agent)
-    validation_data_set.sensor_goal_data.data = pd.DataFrame(data_as_matrix)
+    validation_data_set.sensor_data.data = pd.DataFrame(data_as_matrix)
     validation_data_set.saveData('parabola_validation_data_set_2.h5')
     
     try:

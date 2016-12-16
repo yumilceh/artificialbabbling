@@ -102,7 +102,19 @@ class GMM(object):
         self.model.weights_ = gmm.weights_
         self.model.covars_ = gmm._get_covars()
         self.model.means_ = gmm.means_
-        self.model.n_components = gmm.n_components 
+        self.model.n_components = gmm.n_components
+         
+    def returnCopy(self):
+        '''If any trouble be sure that assignation of 
+            means and weights is done copying through assignation        
+        '''
+        copy_tmp = GMM(n_components=self.model.n_components)
+        
+        copy_tmp.model.covars_ = self.model._get_covars()
+        copy_tmp.model.means_ = self.model.means_
+        copy_tmp.model.weights_ = self.model.weights_
+        
+        return copy_tmp
         
     def trainIncrementalLearning(self,new_data,alpha):
         if self.initialized:
@@ -208,7 +220,8 @@ class GMM(object):
         # axes.set_xlim(-1, 1)
         # axes.set_ylim(-1, 1)
         #=======================================================================
-        axes.set_title(title)
+        if axes.get_title() == '':
+            axes.set_title(title)
         return fig,axes
     
     def plotGMM3DProjection(self,fig,axes,column1,column2,column3):
@@ -262,7 +275,8 @@ class GMM(object):
         # axes.set_xlim(-1, 1)
         # axes.set_ylim(-1, 1)
         #=======================================================================
-        axes.set_title(title)
+        if axes.get_title()=='':
+            axes.set_title(title)
         return fig,axes
      
          

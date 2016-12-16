@@ -16,7 +16,7 @@ if __name__ == '__main__':
     from Algorithm.Algorithm_CCIA2015 import Algorithm_CCIA2015 as Algorithm
     from Algorithm.Algorithm_CCIA2015 import MODELS
     from Models.ILGMM_SM import GMM_SM
-    from Models.GMM_SS import GMM_SS
+    from Models.ILGMM_SS import GMM_SS
     from Models.GMM_IM import GMM_IM
     from Algorithm.ModelEvaluation import SM_ModelEvaluation
     from DataManager.PlotTools import *
@@ -29,16 +29,19 @@ if __name__ == '__main__':
     
     k_sm_min = 3
     k_sm_step = 5
-    k_sm_max = 25 
-    sm_step = 100   
+    k_sm_max = 10 
+    sm_step = 20   
     alpha_sm=0.05
-    sm_all_samples = True
+    sm_all_samples = False
     
-    k_ss = 6
-    ss_step=100
+    k_ss_min = 3
+    k_ss_step = 5
+    k_ss_max = 10 
+    ss_step=20
     alpha_ss=0.05
+    sm_all_samples = False
     
-    k_im=20
+    k_im=10
     im_step=30
     im_samples=800
     
@@ -53,16 +56,18 @@ if __name__ == '__main__':
     models=MODELS()
     
     models.f_sm = GMM_SM(system,
-                         sm_step = 100,
+                         sm_step = sm_step,
                          min_components = k_sm_min, max_components = k_sm_max,
                          max_step_components = k_sm_step,
                          forgetting_factor = alpha_sm,
+                         plot = True,
                          plot_dims=[2,3])
     
     models.f_ss = GMM_SS(system,
-                         k_ss,
                          ss_step=ss_step,
-                         alpha=alpha_ss)
+                         min_components = k_ss_min, max_components = k_ss_max,
+                         max_step_components = k_ss_step,
+                         forgetting_factor = alpha_ss)
     
     models.f_im = GMM_IM(system,
                          k_im,
@@ -70,7 +75,7 @@ if __name__ == '__main__':
                          im_step=im_step)
 
     ## Creating Simulation object, running simulation and plotting experiments##
-    file_prefix='Parabolic_NP_GMM_'
+    file_prefix='Parabolic_NP_ILGMM_'
     simulation1=Algorithm(system,
                           models,
                           file_prefix=file_prefix,
@@ -96,7 +101,6 @@ if __name__ == '__main__':
     evaluation.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
     
     validation_valSet_data = evaluation.evaluateModel(saveData=True)   
-    
     
     fig1,ax1 = initializeFigure()
     fig1.suptitle('All Sensory Results')
@@ -155,12 +159,7 @@ if __name__ == '__main__':
     plt.hold(True)
     fig8, ax8 = validation_valSet_data.plotSimulatedData2D(fig8,ax8,'sensor_goal', 0, 'sensor_goal', 1,"or")
     ax8.legend(['Results','Goal'])
-       
-     
-
-    
-    
-    
+           
     fig9, ax9 = initializeFigure();
     fig9.suptitle('Competence during Training')
     fig9, ax9 = simulation_data.plotTemporalSimulatedData(fig9,ax9,'competence', 0,"r",moving_average=10)
