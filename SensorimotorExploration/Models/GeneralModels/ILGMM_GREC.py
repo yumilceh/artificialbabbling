@@ -16,14 +16,21 @@ class ILGMM(GMMmix):
     classdocs
     '''
 
-    def __init__(self, min_components, plot = True, plot_dims=[2,3]):
+    def __init__(self, min_components = 3,
+                       max_step_components = 30,
+                       max_components = 60,
+                       a_split = 0.8,
+                       forgetting_factor = 0.05, 
+                       plot = True, plot_dims=[0,1]):
         
         self.params={'init_components': min_components,
-                     'max_step_components': 30,
-                     'max_components':60,
-                     'a_split': 0.8,
+                     'max_step_components': max_step_components,
+                     'max_components':max_components,
+                     'a_split': a_split,
                      'plot': plot,
-                     'plot_dims': plot_dims}
+                     'plot_dims': plot_dims,
+                     'forgetting_factor':forgetting_factor}
+        
         GMMmix.__init__(self, min_components) 
         
         if  self.params['plot']:
@@ -52,9 +59,17 @@ class ILGMM(GMMmix):
             
             self.short_term_model = GMMmix(self.params['init_components'])
             self.short_term_model.getBestGMM(data, lims = [self.params['init_components'],self.params['max_step_components']])
+            weights_st = self.short_term_model.model.weights_
+            weights_st = self.params['forgetting_factor'] * weights_st
+            self.short_term_model.model.weights_ = weights_st
+            
+            weights_lt = self.model.weights_
+            weights_lt = (self.model.weights_.sum() -self.params['forgetting_factor']) * weights_lt  #Regularization to keep sum(w)=1.0
+            self.model.weights_ = weights_lt
+            
             gmm_new = copy.deepcopy(self.short_term_model.model)
             
-            self.mergeGMM(self.merge_similar_gaussians_in_gmm_smart(gmm_new))
+            self.mergeGMM(self.merge_similar_gaussians_in_gmm_minim(gmm_new))
             if self.params['plot']:
                 
                 self.ax.clear()
@@ -86,7 +101,9 @@ class ILGMM(GMMmix):
                 self.fig.canvas.draw()
                 self.fig_new.canvas.draw()  
                
-        str_opt = raw_input("Press [enter] to continue...    ")       
+        #=======================================================================
+        # raw_input("Press [enter] to continue...    ")       
+        #=======================================================================
     
     def merge_similar_gaussians_in_gmm_full(self, gmm2):
         #Selecting high related Gaussians to be mixtured
@@ -146,7 +163,10 @@ class ILGMM(GMMmix):
         indices = np.unravel_index(similarity.argmin(),similarity.shape)
         gmm2 = self.mergeGMMComponents(gmm2, indices[0], indices[1]) #len(indices_gmm2)-j_ to take the correspondent gaussian in gmm2
         
-        return gmm2                 
+        if self.model.n_components + gmm2.n_components > self.params['max_components']:
+            return self.merge_similar_gaussians_in_gmm_minim(gmm2)
+        else:
+            return gmm2                 
                         
     def mergeGMM(self,gmm2):
         covars_ = self.model._get_covars() 

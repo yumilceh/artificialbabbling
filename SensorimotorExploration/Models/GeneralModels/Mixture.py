@@ -76,14 +76,17 @@ class GMM(object):
                 if (bic[-1] > bic[-2] and 
                     bic[-2] > bic[-3] and
                     bic[-3] < bic[-4] and
-                    bic[-4] < bic[-5] and
-                    bic[-5] < bic[-6]):
+                    bic[-4] < bic[-5]):
                     best_gmm = n_components - 2
                     break    
                 
             except IndexError:
                 pass
-
+        if best_gmm <= 6:
+            best_gmm = np.array(bic).argmin() + lims[0]
+             
+        
+        
         gmm = mix.GMM(n_components=best_gmm,
                        covariance_type='full',
                        random_state=None,

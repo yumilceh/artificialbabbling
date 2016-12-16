@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
 from DataManager.PlotTools import movingAverage
 import numpy as np
-
+import pandas as pd
 
 class SimulationData(object):
     '''
@@ -128,5 +128,13 @@ class SimulationData(object):
         plt.sca(axes)    
         plt.plot(data,color)
         return fig,axes
-            
+    
+def loadSimulationData_h5(file_name, agent):
+    tmp = SimulationData(agent)
+    tmp.motor_data.data = pd.read_hdf(file_name,'motor_data')
+    tmp.sensor_data.data = pd.read_hdf(file_name,'sensor_data')
+    tmp.sensor_goal_data.data = pd.read_hdf(file_name,'sensor_goal_data')
+    tmp.somato_data.data = pd.read_hdf(file_name,'somato_data')
+    tmp.competence_data.data = pd.read_hdf(file_name,'competence_data')
+    return tmp
         

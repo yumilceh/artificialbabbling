@@ -17,7 +17,14 @@ class GMM_SM(object):
     classdocs
     '''
 
-    def __init__(self, Agent, n_gauss_components, alpha=0.1, sm_step=400):
+    def __init__(self, Agent,
+                       sm_step =100,
+                       min_components = 3,
+                       max_step_components = 30,
+                       max_components = 60,
+                       a_split = 0.8,
+                       forgetting_factor = 0.05, 
+                       plot = True, plot_dims=[0,1]):
         '''
         Constructor
         '''
@@ -28,10 +35,17 @@ class GMM_SM(object):
         self.params.sensor_names=Agent.sensor_names;
         self.params.n_motor=Agent.n_motor;
         self.params.n_sensor=Agent.n_sensor;
-        self.params.alpha=alpha
-        self.params.sm_step=sm_step
-
-        self.model=GMM(n_gauss_components)
+        self.params.min_components = min_components
+        self.params.max_step_components = max_step_components
+        self.params.forgetting_factor = forgetting_factor
+        self.params.sm_step = sm_step
+        
+        self.model=GMM(min_components = min_components,
+                       max_step_components = max_step_components,
+                       max_components = max_components,
+                       a_split = a_split,
+                       forgetting_factor = forgetting_factor, 
+                       plot = plot, plot_dims=plot_dims)
 
         
     def train(self,simulation_data):

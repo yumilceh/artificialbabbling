@@ -7,7 +7,7 @@ Created on Jun 30, 2016
 import numpy as np
 import random
 
-from DataManager.SimulationData import SimulationData
+from DataManager.SimulationData import SimulationData, loadSimulationData_h5
 from Algorithm.StorageDataFunctions import saveSimulationData, loadSimulationData
 from Algorithm.RndSensorimotorFunctions import get_random_sensor_set
 
@@ -33,13 +33,19 @@ class SM_ModelEvaluation(object):
         '''
         self.agent = agent;
         self.data = PARAMS()
-        self.data = data;
+        self.data = data
         
         self.files=PARAMS()
         self.files.file_prefix = file_prefix;
         self.model = model;
         self.ratio_samples_val = ratio_samples_val;
-
+    
+    def loadEvaluationDataSet(self, file_name):
+        self.data = loadSimulationData_h5(file_name, self.agent)
+        n_samples = len(self.data.motor_data.data)
+        self.n_samples_val = n_samples
+        self.random_indexes_val = xrange(n_samples)
+        
     def setValidationEvaluationSets(self):
         
         if isinstance(self.data,int):

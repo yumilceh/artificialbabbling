@@ -6,8 +6,7 @@ Created on May 23, 2016
 import tarfile
 import os
 import pandas as pd
-from DataManager.SimulationData import SimulationData
-
+from DataManager.SimulationData import SimulationData, loadSimulationData_h5
 
 
 def saveSimulationData(in_file_names,out_file_name):
@@ -35,11 +34,4 @@ def loadSimulationData(file_name,agent):
         simulation_data[var_name]=tmp
     return simulation_data
 
-def loadSimulationData_h5(file_name, agent):
-    tmp = SimulationData(agent)
-    tmp.motor_data.data = pd.read_hdf(file_name,'motor_data')
-    tmp.sensor_data.data = pd.read_hdf(file_name,'sensor_data')
-    tmp.sensor_goal_data.data = pd.read_hdf(file_name,'sensor_goal_data')
-    tmp.somato_data.data = pd.read_hdf(file_name,'somato_data')
-    tmp.competence_data.data = pd.read_hdf(file_name,'competence_data')
-    return tmp
+

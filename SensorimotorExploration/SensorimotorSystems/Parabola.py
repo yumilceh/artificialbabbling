@@ -19,7 +19,7 @@ class CustomObject:
 
 class ConstrainedParabolicArea:
     
-    def __init__(self):
+    def __init__(self, sigma_noise=0.01):
         
         a = 2.0
         b = 3.0
@@ -56,6 +56,7 @@ class ConstrainedParabolicArea:
         self.params.e = e
         self.params.m1 = m1
         self.params.m2 = m2
+        self.params.sigma_noise = sigma_noise
         
         self.n_motor = n_motor
         self.n_sensor = n_sensor
@@ -99,8 +100,8 @@ class ConstrainedParabolicArea:
         self.executeMotorCommand_unconstrained()
         self.applyConstraints()
                
-        self.sensorOutput[0] = self.sensorOutput[0] + np.random.normal(0.0,0.1,1)
-        self.sensorOutput[1] = self.sensorOutput[1] + np.random.normal(0.0,0.1,1)
+        self.sensorOutput[0] = self.sensorOutput[0] + np.random.normal(0.0,self.params.sigma_noise,1)
+        self.sensorOutput[1] = self.sensorOutput[1] + np.random.normal(0.0,self.params.sigma_noise,1)
      
         self.applyConstraints()
         
@@ -163,22 +164,22 @@ class ConstrainedParabolicArea:
          
         # if math.pow(self.motor_command[0]-b,2.0) > self.sensorOutput[1]: #Parabola
         if math.pow(self.sensorOutput[0]-b,2.0) > self.sensorOutput[1]: #Parabola
-           changed = True
-           onParabola = True
-           self.somatoOutput = 1.0
-           x, y = closestPointInParabola(parabola, point)
-           point.x = x
-           point.y = y
+            changed = True
+            onParabola = True
+            self.somatoOutput = 1.0
+            x, y = closestPointInParabola(parabola, point)
+            point.x = x
+            point.y = y
                 
         if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1): #Lines
-           changed = True
-           self.somatoOutput = 1.0
-           x1, y1, distance1 = closestPointToLine(up_line, point)
-           x2, y2, distance2 = closestPointToLine(down_line, point)
-           
-           x = point.x
-           y = point.y 
-           if onParabola:
+            changed = True
+            self.somatoOutput = 1.0
+            x1, y1, distance1 = closestPointToLine(up_line, point)
+            x2, y2, distance2 = closestPointToLine(down_line, point)
+            
+            x = point.x
+            y = point.y 
+            if onParabola:
                 if distance1 >= distance2:
                     x_vals, y_vals = intersectionParabolaLine(parabola, down_line)
                     d_tmp = np.finfo(np.float64).max
@@ -204,16 +205,16 @@ class ConstrainedParabolicArea:
                             d_tmp = distance
                             x = x_val
                             y = y_val  
-           else:               
-               if distance1 >= distance2:
-                   x=x2
-                   y=y2
-               else:
-                   x=x1
-                   y=y1
+            else:               
+                if distance1 >= distance2:
+                    x=x2
+                    y=y2
+                else:
+                    x=x1
+                    y=y1
 
-           point.x = x
-           point.y = y
+            point.x = x
+            point.y = y
                     
         if checkLineCondition(uppest_line, point) == 1: # Upper limit
             changed = True
