@@ -176,6 +176,8 @@ class Algorithm_CCIA2015(object):
             print('Algorithm 1 (Proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i+1,n_init))
         self.models.f_sm.train(self.data.initialization_data_sm_ss)
         self.models.f_ss.train(self.data.initialization_data_sm_ss)
+        self.initialization_models.f_sm = self.models.f_sm.model.returnCopy()
+        self.initialization_models.f_ss = self.models.f_ss.model.returnCopy()
         print('Algorithm 1 (Proprioceptive), Line 1: Initialize G_SM and G_SS, experiment {} of {}'.format(i+1,n_init))
         
         self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data_sm_ss.h5')    
@@ -217,6 +219,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, All sensory result considered ')
         self.data.initialization_data_im.saveData(self.data.file_prefix +'initialization_data_im.h5')
         self.models.f_im.train(self.data.initialization_data_im)
+        self.initialization_models.f_im = self.models.f_im.model.returnCopy()
         
         n_save_data = self.params.n_save_data;
         n_experiments = self.params.n_experiments
