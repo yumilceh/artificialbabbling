@@ -22,7 +22,7 @@ if __name__ == '__main__':
     from DataManager.PlotTools import *
    
     ## Simulation Parameters ##
-    n_initialization=200
+    n_initialization=35
     n_evaluation_samples=100
     n_experiments=400
     random_seed=1234
@@ -30,14 +30,14 @@ if __name__ == '__main__':
     k_sm_min = 3
     k_sm_step = 5
     k_sm_max = 10 
-    sm_step = 20   
+    sm_step = 50   
     alpha_sm=0.05
     sm_all_samples = False
     
     k_ss_min = 3
     k_ss_step = 5
     k_ss_max = 10 
-    ss_step=20
+    ss_step=50
     alpha_ss=0.05
     sm_all_samples = False
     
@@ -73,9 +73,15 @@ if __name__ == '__main__':
                          k_im,
                          n_training_samples=im_samples,
                          im_step=im_step)
-
+    
+    evaluation_sim=SM_ModelEvaluation(system,
+                                      100,
+                                      models.f_sm)
+    evaluation_sim.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
+    
+    
     ## Creating Simulation object, running simulation and plotting experiments##
-    file_prefix='Parabolic_NP_ILGMM_'
+    file_prefix='Test_Parabola_Pro_ILGMM_'
     simulation1=Algorithm(system,
                           models,
                           file_prefix=file_prefix,
@@ -83,6 +89,7 @@ if __name__ == '__main__':
                           n_initialization_experiments = n_initialization,
                           g_im_initialization_method = 'non-painful',
                           n_save_data=100,
+                          evaluation=evaluation_sim,
                           sm_all_samples = sm_all_samples)
     
 
@@ -152,6 +159,14 @@ if __name__ == '__main__':
     fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
     ax6.relim()
     ax6.autoscale_view()    
+    
+    fig7, ax7 =  initializeFigure();
+    fig7.suptitle('Evaluation Error Evolution')
+    plt.plot(simulation1.evaluation_error[1:],'b')
+    plt.hold(True)
+    plt.xlabel('Sensorimotor training step')
+    plt.ylabel('Mean error') 
+    
     
     fig8, ax8 =  initializeFigure();
     fig8.suptitle('Validation: S1 vs S2')

@@ -46,7 +46,7 @@ class ConstrainedParabolicArea:
         
         min_somato_values = np.array([0])
         max_somato_values = np.array([1])
-        somato_threshold = np.array([0.6])
+        somato_threshold = np.array([0.7])
 
         self.params = CustomObject()
         self.params.a = a

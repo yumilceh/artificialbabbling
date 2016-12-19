@@ -125,7 +125,12 @@ class SM_ModelEvaluation(object):
             else:
                 saveSimulationData([self.files.file_prefix +'validation_valSet_data.h5'], self.files.file_prefix  + 'validation_results.tar.gz')
                 return validation_valSet_data
-         
+        else:
+            if (eva_train_set>0):
+                return validation_trainSet_data, validation_valSet_data
+            else:
+                return validation_valSet_data
+            
 def loadEvaluationResults(file_name, agent):
     return loadSimulationData(file_name, agent)
             
