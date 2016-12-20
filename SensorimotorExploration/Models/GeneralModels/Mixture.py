@@ -255,9 +255,6 @@ class GMM(object):
             u = w[0] / linalg.norm(w[0])
             v[0] = 2.0*np.sqrt(2.0*v[0]);
             v[1] = 2.0*np.sqrt(2.0*v[1]);
-            # as the DP will not use every component it has access to
-            # unless it needs it, we shouldn't plot the redundant
-            # components.
     
             # Plot an ellipse to show the Gaussian component
             angle = np.arctan(u[1] / u[0])
@@ -266,14 +263,47 @@ class GMM(object):
             ell.set_alpha(0.5)
             
             axes.add_patch(ell)
-            
-        #=======================================================================
-        # axes.set_xlim(-1, 1)
-        # axes.set_ylim(-1, 1)
-        #=======================================================================
+            axes.autoscale_view()
+
         if axes.get_title() == '':
             axes.set_title(title)
         return fig,axes
+    
+    def plotGMMProjection_k(self,fig,axes,k,column1,column2):
+        '''
+            Display Gaussian distributions with a 95% interval of confidence
+        '''
+        # Number of samples per component
+        gmm=self.model;
+        
+        
+        plt.figure(fig.number)
+        plt.sca(axes)        
+        covar_plt=np.zeros((2,2))
+        
+        covar = gmm._get_covars()[k]
+        covar_plt[0,0] = covar[column1,column1]
+        covar_plt[1,1] = covar[column2,column2]
+        covar_plt[0,1] = covar[column1,column2]
+        covar_plt[1,0] = covar[column2,column1]
+        
+        mean_plt = [gmm.means_[k][column1], gmm.means_[k][column2]]
+        
+
+        v, w = linalg.eigh(covar_plt)
+        u = w[0] / linalg.norm(w[0])
+        v[0] = 2.0*np.sqrt(2.0*v[0]);
+        v[1] = 2.0*np.sqrt(2.0*v[1]);
+
+        # Plot an ellipse to show the Gaussian component
+        angle = np.arctan(u[1] / u[0])
+        angle = 180 * angle / np.pi  # convert to degrees
+        ell = mpl.patches.Ellipse(mean_plt, v[0], v[1], 180 + angle, color='r')
+        ell.set_alpha(0.5)
+        axes.add_patch(ell)
+        axes.autoscale_view()
+                   
+        return axes
     
     def plotGMM3DProjection(self,fig,axes,column1,column2,column3):
         '''
@@ -330,22 +360,38 @@ class GMM(object):
             axes.set_title(title)
         return fig,axes
      
-    def interactiveSystem(self):
-        ### Main window container
-        self.root_window = tk.Tk()
-        self.root_window.geometry("800x800")
-        self.root_window.title("Interactive Analysis of GMM")
-        
-        self.root_frame = tk.Frame(self.root_window, width=800, height=800, bg="green")
-        self.root_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
-        self.guiPlotsPanel()
-        self.guiControlPanel()
-        
-        
-        #----------------------------------- self.guiMotorPanel_reset_callback()
+    def plot_callback(self):
+        n_plots = np.int(self.n_proj_str.get())
+        subplot_dim_x = self.proj_arrays[self.n_proj_str.get()][0]
+        subplot_dim_y = self.proj_arrays[self.n_proj_str.get()][1]
+        self.plots_fig.clf()
          
-        self.root_window.mainloop()  
+        self.plots_ax = []
+        for i in range(n_plots): 
+            self.plots_ax.append(self.plots_fig.add_subplot(subplot_dim_x,subplot_dim_y, i + 1))
+            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,self.plots_ax[i],i,0,1)
+        
+        self.plots_canvas.draw()
+     
+    def interactiveModel(self):
+        if self.initialized:
+            self.n_dims = self.model._get_covars()[0].shape[0]
+            ### Main window container
+            self.root_window = tk.Tk()
+            self.root_window.geometry("800x800")
+            self.root_window.title("Interactive Analysis of GMM")
+            
+            self.root_frame = tk.Frame(self.root_window, width=800, height=800, bg="green")
+            self.root_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+            
+            self.guiPlotsPanel()
+            self.guiControlPanel()
+        
+            self.plot_callback()
+        #----------------------------------- self.guiMotorPanel_reset_callback() 
+            self.root_window.mainloop()
+        else:
+            print("Interactive mode only can be used when the model has been initialized")    
     
     def guiPlotsPanel(self):
         self.plots_frame = tk.Frame(self.root_frame, width=800, height=600, bg="white")
@@ -353,9 +399,13 @@ class GMM(object):
         self.plots_container_frame = tk.Frame(self.plots_frame, width=800, height=600, bg="black")
         self.plots_container_frame.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
         
-        self.plots_fig = plt.Figure(figsize=(1.20,1.5), dpi=100)
+        self.plots_fig = plt.figure()
+        self.plots_fig.set_dpi(100)
+        self.plots_fig.set_figheight(6)
+        self.plots_fig.set_figwidth(8)
+
         self.plots_fig.patch.set_facecolor('red')
-        self.plots_canvas = FigureCanvasTkAgg(self.plots_fig, master=self.vt_frame) 
+        self.plots_canvas = FigureCanvasTkAgg(self.plots_fig, master=self.plots_container_frame) 
         self.plots_canvas.show()
         self.plots_canvas.get_tk_widget().pack(side="left",fill="none", expand=False)
         self.plots_canvas.get_tk_widget().configure(background='white',  highlightcolor='white', highlightbackground='white')
@@ -372,32 +422,73 @@ class GMM(object):
         
         self.plots_canvas.draw()
     
+    def guiControlPanel(self):
+        self.control_frame = tk.Frame(self.root_frame, width=800, height=200, bg="white")
+        self.control_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        self.control_entries_frame = tk.Frame(self.control_frame, width=800, height=200, bg="white") 
+        self.control_entries_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        
+        #SELECT NUMBER OF PROJECTIONS
+        self.n_proj_lbl = tk.Label(self.control_entries_frame, text="Number of projections:")
+        self.n_proj_lbl.grid(row=0, padx=5, pady=5)
+        self.n_proj_str = tk.StringVar()
+        self.n_proj_str.set("1")        
+        self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "2","3","4","6","8","9")
+        self.proj_arrays={'1':[1,1], '2':[1,2], '3':[1,3], '4':[2,2], '6':[2,3], '8':[2,4], '9':[3,3]}
+        
+        self.n_proj_m.grid(row=0, column =1, columnspan=2, padx=5, pady=5)
+        
+        #SELECT NUMBER OF PROJECTION TO BE EDITED
+        self.n_edit_proj_lbl = tk.Label(self.control_entries_frame, text="Projection to edit:")
+        self.n_edit_proj_lbl.grid(row=3, column=0, padx=5, pady=5)
+        self.n_edit_proj_str = tk.StringVar()
+        self.n_edit_proj_str.set("1")
+        self.n_edit_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_edit_proj_str,"","")
+        self.n_edit_proj_m.config(state=tk.DISABLED)
+        self.n_edit_proj_m.grid(row=3, column=1, columnspan=2, padx=5, pady=5)
+        
+        #SELECT DIMENSIONS
+
+        self.edit_proj_dim1_str = tk.StringVar()
+        self.edit_proj_dim2_str = tk.StringVar()
+
+        if self.n_dims <= 1:
+            self.edit_proj_dim1_str.set("0")
+            self.edit_proj_dim2_str.set("0")
+        else:
+            self.edit_proj_dim1_str.set("0")
+            self.edit_proj_dim2_str.set("1")
+              
+        self.edit_proj_dim1_lbl = tk.Label(self.control_entries_frame, text="Dimension 1:")
+        self.edit_proj_dim1_lbl.grid(row=5, column=0, padx=5, pady=5)
+        self.edit_proj_dim1_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim1_str, "0","1")
+        self.edit_proj_dim1_m.config(state=tk.DISABLED)
+        self.edit_proj_dim1_m.grid(row=5, column=1, columnspan=2, padx=5, pady=5)
+        self.edit_proj_dim2_lbl = tk.Label(self.control_entries_frame, text="Dimension 2:")
+        self.edit_proj_dim2_lbl.grid(row=6, column=0, padx=5, pady=5)
+
+        self.edit_proj_dim2_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim2_str,"0","1")
+        self.edit_proj_dim2_m.config(state=tk.DISABLED)
+        self.edit_proj_dim2_m.grid(row=6, column=1, columnspan=2, padx=5, pady=5)
+        
+        #Current Gaussian and sweeping 
+        self.prev_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text="<<")
+        self.prev_gauss_btn.grid(row=3, column=3, padx=5, pady=5)
+        self.current_gauss_str = tk.StringVar()
+        self.current_gauss_str.set("0")
+        self.entry_gauss = tk.Entry(self.control_entries_frame, state=tk.DISABLED, 
+                                    textvariable=self.current_gauss_str, width=4)
+        self.entry_gauss.grid(row=3, column=4, padx=5, pady=5)
+        self.next_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text=">>")
+        self.next_gauss_btn.grid(row=3, column=5, padx=5, pady=5)
+    
+    
+    
+    
+        
+    
     '''
-
-       
-
-        
-        self.fig_sound = plt.Figure(figsize=(6.00,1.5), dpi=100)
-        self.canvas_sound = FigureCanvasTkAgg(self.fig_sound, master=self.sound_frame)
-        self.canvas_sound.show()
-        self.canvas_sound.get_tk_widget().pack(side="left",fill="none", expand=False)   
-        self.ax_sound = self.fig_sound.add_subplot(111)
-        pos1 = self.ax_sound.get_position() # get the original position 
-        pos2 = [pos1.x0*0.9, pos1.y0*2.0,  pos1.width*1.1, pos1.height*0.9] 
-        self.ax_sound.set_position(pos2) # set a new position
-        self.ax_sound.autoscale(enable=True, axis='both', tight=None)
-        self.canvas_sound.draw()
-
-        self.btn_prev_vt = tk.Button(self.vt_sound_opt_frame, state=tk.DISABLED, text="<<", command = self.vt_shape_prev_callback)
-        self.btn_next_vt = tk.Button(self.vtimport Tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from matplotlib.backend_bases import key_press_handler_sound_opt_frame, state=tk.DISABLED, text=">>", command = self.vt_shape_next_callback)
-        self.btn_play_vt = tk.Button(self.vt_sound_opt_frame, state=tk.DISABLED, text="Play", command = self.play_callback)
-        self.btn_prev_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.btn_next_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.btn_play_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        
-        
         self.sv_step = tk.StringVar()
         self.sv_step.set("10")     
         self.vt_shape_step = np.int(self.sv_step.get())       
@@ -420,7 +511,7 @@ from matplotlib.backend_bases import key_press_handler_sound_opt_frame, state=tk
         
         self.vt_shape_step = np.int(self.sv_step.get())
         self.vt_shape_current = np.int(self.sv_current.get())
-        
+        , width=8
                
     def guiMotorPanel(self):
         self.motor_frame = tk.Frame(self.root_frame, width=800, height=150, bg="white")
@@ -459,11 +550,11 @@ from matplotlib.backend_bases import key_press_handler_sound_opt_frame, state=tk
         self.entry_m5 = tk.Entry(self.motor_entries_frame, width=10)
         self.entry_m5.grid(row=4, column=1, padx=5, pady=5)
         self.entry_m6 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m6.grid(row=0, column=3, padx=5, pady=5)
+        self.entry_m6.grid(row=0, column=2, padx=5, pady=5)
         self.entry_m7 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m7.grid(row=1, column=3, padx=5, pady=5)
+        self.entry_m7.grid(row=1, column=2, padx=5, pady=5)
         self.entry_m8 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m8.grid(row=2, column=3, padx=5, pady=5)
+        self.entry_m8.grid(row=2, column=2, padx=5, pady=5)
 
         self.lbl_m9 = tk.Label(self.motor_entries_frame, text="M9")
         self.lbl_m9.grid(row=3, column=2, padx=5, pady=5)
@@ -477,9 +568,9 @@ from matplotlib.backend_bases import key_press_handler_sound_opt_frame, state=tk
         self.lbl_m13.grid(row=3, column=4, padx=5, pady=5)
         
         self.entry_m9 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m9.grid(row=3, column=3, padx=5, pady=5)
+        self.entry_m9.grid(row=3, column=2, padx=5, pady=5)
         self.entry_m10 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m10.grid(row=4, column=3, padx=5, pady=5)
+        self.entry_m10.grid(row=4, column=2, padx=5, pady=5)
         self.entry_m11 = tk.Entry(self.motor_entries_frame, width=10)
         self.entry_m11.grid(row=1, column=5, padx=5, pady=5)
         self.entry_m12 = tk.Entry(self.motor_entries_frame, width=10)
