@@ -33,27 +33,27 @@ if __name__ == '__main__':
     model.train(X)
     Y_  = model.model.predict(X)
              
-    #------------------------------------------------------------ n_samples2=150
-    #----------------------------------- C2 = np.array([[0., -0.1], [0.2, 0.4]])
-    #----------------- X2 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.5*C),
-              #--------- .7 * np.random.randn(n_samples, 2) + np.array([-5, 4]),
-              #-------- .2 * np.random.randn(n_samples2, 2) + np.array([-2, 1]),
-              #--------- .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
-              #--------- .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
-              #------ .4 * np.random.randn(n_samples, 2) + np.array([-2, -0.5])]
-#------------------------------------------------------------------------------ 
-    #----------------------------------------------------------- model.train(X2)
-#------------------------------------------------------------------------------ 
-    #----------------- X3 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.1*C),
-                #------- .1 * np.random.randn(n_samples, 2) + np.array([-5, 4]),
-                #------ .1 * np.random.randn(n_samples2, 2) + np.array([-2, 1]),
-                #------- .2 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
-                #------- .3 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
-                #------- .4 * np.random.randn(n_samples, 2) + np.array([-2, 3]),
-                #------- .4 * np.random.randn(n_samples, 2) + np.array([-6, 0]),
-                #-------- .4 * np.random.randn(n_samples, 2) + np.array([4, 5])]
-#------------------------------------------------------------------------------ 
-    #----------------------------------------------------------- model.train(X3)
+    n_samples2=150
+    C2 = np.array([[0., -0.1], [0.2, 0.4]])
+    X2 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.5*C),
+              .7 * np.random.randn(n_samples, 2) + np.array([-5, 4]),
+              .2 * np.random.randn(n_samples2, 2) + np.array([-2, 1]),
+              .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
+              .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
+              .4 * np.random.randn(n_samples, 2) + np.array([-2, -0.5])]
+
+    model.train(X2)
+
+    X3 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.1*C),
+                .1 * np.random.randn(n_samples, 2) + np.array([-5, 4]),
+                .1 * np.random.randn(n_samples2, 2) + np.array([-2, 1]),
+                .2 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
+                .3 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
+                .4 * np.random.randn(n_samples, 2) + np.array([-2, 3]),
+                .4 * np.random.randn(n_samples, 2) + np.array([-6, 0]),
+                .4 * np.random.randn(n_samples, 2) + np.array([4, 5])]
+
+    model.train(X3)
   
     model.interactiveModel()
     

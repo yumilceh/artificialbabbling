@@ -14,6 +14,7 @@ import pandas as pd
 import Tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backend_bases import key_press_handler
+from distutils import command
 
 class GMM(object):
     '''
@@ -365,14 +366,89 @@ class GMM(object):
         subplot_dim_x = self.proj_arrays[self.n_proj_str.get()][0]
         subplot_dim_y = self.proj_arrays[self.n_proj_str.get()][1]
         self.plots_fig.clf()
+        
+        current_gauss = self.current_gauss_str.get()
          
         self.plots_ax = []
         for i in range(n_plots): 
             self.plots_ax.append(self.plots_fig.add_subplot(subplot_dim_x,subplot_dim_y, i + 1))
-            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,self.plots_ax[i],i,0,1)
+            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,self.plots_ax[i],current_gauss,0,1)
         
         self.plots_canvas.draw()
-     
+        
+        #=======================================================================
+        # self.plots_ax = []
+        # for i in range(self.n_proj):
+        #     self.plots_ax.append(self.plots_fig.add_subplot(self.proj_arrays[n_proj_tmp][0],
+        #                                                   self.proj_arrays[n_proj_tmp][1], i+1))
+        #     self.plots_ax[i].spines['right'].set_visible(False)
+        #     self.plots_ax[i].spines['top'].set_visible(False)
+        #     self.plots_ax[i].spines['left'].set_visible(False)
+        #     self.plots_ax[i].spines['bottom'].set_visible(False)
+        #     self.plots_ax[i].xaxis.set_ticks_position('none')
+        #     self.plots_ax[i].yaxis.set_ticks_position('none')
+        #     self.plots_ax[i].xaxis.set_ticks([])
+        #     self.plots_ax[i].yaxis.set_ticks([])
+        # 
+        # self.plots_canvas.draw()
+        #=======================================================================
+    def plot_array_callback(self):
+        n_proj_old = self.n_proj
+        n_proj_tmp = self.n_proj_str.get()
+        self.n_proj = np.int(n_proj_tmp)
+        
+        if self.n_proj > 1:
+            self.n_edit_proj_m.config(state=tk.NORMAL)
+        else:
+            self.n_edit_proj_m.config(state=tk.DISABLED)
+        
+        if self.n_proj < n_proj_old:
+            pass
+        else:
+            pass
+        
+        self.plot_callback()
+        
+    def current_gauss_callback(self):
+        self.current_gauss = np.int(self.current_gauss_str.get())
+        if self.current_gauss == 0:
+            self.prev_gauss_btn.config(state = tk.DISABLED)
+        else:   
+             self.prev_gauss_btn.config(state = tk.NORMAL)
+             
+        if self.current_gauss >= self.model.n_components - 1:
+            self.next_gauss_btn.config(state = tk.DISABLED)
+        else:
+            self.next_gauss_btn.config(state = tk.NORMAL)
+            
+        self.plot_callback()
+             
+    def prev_gauss_callback(self):
+        self.current_gauss = self.current_gauss - 1
+        self.current_gauss_str.set(str(self.current_gauss))
+
+    
+    def next_gauss_callback(self):        
+        self.current_gauss = self.current_gauss + 1
+        self.current_gauss_str.set(str(self.current_gauss))
+
+    def current_projection_callback(self):
+        if np.int(self.n_edit_proj_str.get()) > self.n_proj -1:
+            self.n_edit_proj_str.set(str(self.n_proj -1))
+        self.n_edit_proj = np.int(self.n_edit_proj_str.get())
+        self.edit_proj_dim1_str.set(str(self.proj_dim[self.n_edit_proj,0]))
+        self.edit_proj_dim2_str.set(str(self.proj_dim[self.n_edit_proj,1]))
+        
+        
+        
+    def current_dim1_callback(self):
+        self.proj_dim[self.n_edit_proj,0]=np.int(self.edit_proj_dim1_str.get())
+        pass
+                
+    def current_dim2_callback(self):
+        self.proj_dim[self.n_edit_proj,1]=np.int(self.edit_proj_dim2_str.get())
+        pass
+                
     def interactiveModel(self):
         if self.initialized:
             self.n_dims = self.model._get_covars()[0].shape[0]
@@ -433,8 +509,13 @@ class GMM(object):
         self.n_proj_lbl = tk.Label(self.control_entries_frame, text="Number of projections:")
         self.n_proj_lbl.grid(row=0, padx=5, pady=5)
         self.n_proj_str = tk.StringVar()
-        self.n_proj_str.set("1")        
-        self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "2","3","4","6","8","9")
+        self.n_proj_str.set("1")     
+        self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
+
+           
+        self.n_proj = 1   
+           
+        self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "1","2","3","4","6","8","9")
         self.proj_arrays={'1':[1,1], '2':[1,2], '3':[1,3], '4':[2,2], '6':[2,3], '8':[2,4], '9':[3,3]}
         
         self.n_proj_m.grid(row=0, column =1, columnspan=2, padx=5, pady=5)
@@ -444,9 +525,14 @@ class GMM(object):
         self.n_edit_proj_lbl.grid(row=3, column=0, padx=5, pady=5)
         self.n_edit_proj_str = tk.StringVar()
         self.n_edit_proj_str.set("1")
-        self.n_edit_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_edit_proj_str,"","")
+        posible_projectios = ["1","2", "3","4","5","6","7","8","9"]
+        self.n_edit_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_edit_proj_str, *posible_projectios)
+        self.n_edit_proj_str.trace("w", lambda name, index, mode, sv=self.n_edit_proj_str: self.current_projection_callback())
+
+        
         self.n_edit_proj_m.config(state=tk.DISABLED)
         self.n_edit_proj_m.grid(row=3, column=1, columnspan=2, padx=5, pady=5)
+        self.n_edit_proj = np.int(self.n_edit_proj_str.get())
         
         #SELECT DIMENSIONS
 
@@ -456,34 +542,45 @@ class GMM(object):
         if self.n_dims <= 1:
             self.edit_proj_dim1_str.set("0")
             self.edit_proj_dim2_str.set("0")
+            self.proj_dim=np.reshape(np.array([0, 0] * 9), (9,2))
         else:
             self.edit_proj_dim1_str.set("0")
             self.edit_proj_dim2_str.set("1")
+            self.proj_dim=np.reshape(np.array([0, 1] * 9), (9,2))
+              
+           
+        self.edit_proj_dim1_str.trace("w", lambda name, index, mode, sv=self.edit_proj_dim1_str: self.current_dim1_callback())
+        self.edit_proj_dim2_str.trace("w", lambda name, index, mode, sv=self.edit_proj_dim2_str: self.current_dim2_callback())   
               
         self.edit_proj_dim1_lbl = tk.Label(self.control_entries_frame, text="Dimension 1:")
-        self.edit_proj_dim1_lbl.grid(row=5, column=0, padx=5, pady=5)
-        self.edit_proj_dim1_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim1_str, "0","1")
-        self.edit_proj_dim1_m.config(state=tk.DISABLED)
-        self.edit_proj_dim1_m.grid(row=5, column=1, columnspan=2, padx=5, pady=5)
+        self.edit_proj_dim1_lbl.grid(row=5, column=0, padx=5, pady=0)
+        posible_dimensions = range(self.n_dims)
+        self.edit_proj_dim1_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim1_str, *posible_dimensions)#, command = self.current_dim1_callback())
+        self.edit_proj_dim1_m.config(state=tk.NORMAL)
+        self.edit_proj_dim1_m.grid(row=5, column=1, columnspan=2, padx=5, pady=0)
         self.edit_proj_dim2_lbl = tk.Label(self.control_entries_frame, text="Dimension 2:")
-        self.edit_proj_dim2_lbl.grid(row=6, column=0, padx=5, pady=5)
+        self.edit_proj_dim2_lbl.grid(row=6, column=0, padx=5, pady=0)
 
-        self.edit_proj_dim2_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim2_str,"0","1")
-        self.edit_proj_dim2_m.config(state=tk.DISABLED)
-        self.edit_proj_dim2_m.grid(row=6, column=1, columnspan=2, padx=5, pady=5)
+        self.edit_proj_dim2_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim2_str, *posible_dimensions)#, command = self.current_dim2_callback())
+        self.edit_proj_dim2_m.config(state=tk.NORMAL)
+        self.edit_proj_dim2_m.grid(row=6, column=1, columnspan=2, padx=5, pady=0)
         
         #Current Gaussian and sweeping 
-        self.prev_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text="<<")
-        self.prev_gauss_btn.grid(row=3, column=3, padx=5, pady=5)
+        self.prev_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text="<<", command = self.prev_gauss_callback)
+        self.prev_gauss_btn.grid(row=3, column=3, padx=5, pady=0)
         self.current_gauss_str = tk.StringVar()
         self.current_gauss_str.set("0")
         self.entry_gauss = tk.Entry(self.control_entries_frame, state=tk.DISABLED, 
                                     textvariable=self.current_gauss_str, width=4)
-        self.entry_gauss.grid(row=3, column=4, padx=5, pady=5)
-        self.next_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text=">>")
-        self.next_gauss_btn.grid(row=3, column=5, padx=5, pady=5)
+        self.entry_gauss.grid(row=3, column=4, padx=5, pady=0)
+        self.current_gauss_str.trace("w", lambda name, index, mode, sv=self.current_gauss_str: self.current_gauss_callback())
+        self.current_gauss = 0
+        self.next_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text=">>", command = self.next_gauss_callback)
+        self.next_gauss_btn.grid(row=3, column=5, padx=5, pady=0)
     
-    
+        if self.model.n_components > 1:
+            self.next_gauss_btn.config(state=tk.NORMAL)
+            self.entry_gauss.config(state=tk.NORMAL) 
     
     
         
