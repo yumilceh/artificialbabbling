@@ -7,8 +7,11 @@ Created on May 23, 2016
 from DataManager.SimulationData import SimulationData
 
 from Algorithm.RndSensorimotorFunctions import get_random_motor_set
-# from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
-from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
+from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
+
+#===============================================================================
+# from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
+#===============================================================================
 
 from Algorithm.ModelEvaluation import SM_ModelEvaluation
 import numpy as np

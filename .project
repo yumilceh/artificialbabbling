@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Early_Development</name>
+	<name>early_development</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -14,14 +14,4 @@
 	<natures>
 		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
-	<variableList>
-		<variable>
-			<name>IMLE_lib</name>
-			<value>file:/home/yumilceh/Documents/IMLE/imleLib</value>
-		</variable>
-		<variable>
-			<name>SENSORIMOTOR_EXP</name>
-			<value>file:/home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration</value>
-		</variable>
-	</variableList>
 </projectDescription>

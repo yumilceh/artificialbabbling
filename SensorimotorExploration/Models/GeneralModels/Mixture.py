@@ -192,40 +192,65 @@ class GMM(object):
         gmm=self.model
         likely_x=np.mat(np.zeros((len(x_dims),n_components)))
         sm=np.mat(np.zeros((len(x_dims)+len(y_dims),n_components)))
-        p_xy=np.mat(np.zeros((n_components,1)))
+        p_xy=np.array([0.0]*n_components)
         
-        x=[0.0] * len(x_dims);
+        x=np.array([0.0] * len(x_dims))
         
         for k,(Mu, Sigma, Weight) in enumerate(zip(gmm.means_, gmm._get_covars(), gmm.weights_)):
             Mu=np.transpose(Mu)
-            #----------------------------------------------- Sigma=np.mat(Sigma)
-            Sigma_yy=Sigma[:,y_dims]
-            Sigma_yy=Sigma_yy[y_dims,:]
+
+            Sigma_yy = Sigma[:,y_dims]
+            Sigma_yy = Sigma_yy[y_dims,:]
             
-            Sigma_xy=Sigma[x_dims,:]
-            Sigma_xy=Sigma_xy[:,y_dims]
-            tmp1=linalg.inv(Sigma_yy)*np.transpose(y-Mu[y_dims])
-            tmp2=np.transpose(Sigma_xy*tmp1)
-            likely_x[:,k]=np.transpose(Mu[x_dims]+tmp2)
+            Sigma_xy = Sigma[x_dims,:]
+            Sigma_xy = Sigma_xy[:,y_dims]
             
-            #----------- sm[:,k]=np.concatenate((likely_x[:,k],np.transpose(y)))
-            likely_x_tmp=pd.DataFrame(likely_x[:,k],index=x_dims)
-            y_tmp=pd.DataFrame(np.transpose(y),index=y_dims)
-            tmp3=pd.concat([y_tmp, likely_x_tmp])
-            tmp3=tmp3.sort_index()
+            tmp1 = linalg.inv(Sigma_yy) * np.transpose( y - Mu[y_dims] )
+            tmp2 = np.transpose(Sigma_xy * tmp1)
             
-            sm[:,k]=tmp3.as_matrix()
+            likely_x[:,k] = np.transpose( Mu[x_dims] + tmp2 )
             
-            tmp4=1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
-            tmp5=np.transpose(sm[:,k])-(Mu)
-            tmp6=linalg.inv(Sigma)
-            tmp7=np.exp((-1.0/2.0)*(tmp5*tmp6*np.transpose(tmp5))) #Multiply time GMM.Priors????
-            p_xy[k,:]=np.reshape(tmp4*tmp7,(1))
-            #- print('Warning: Priors are not be considering to compute P(x,y)')
+            likely_x_tmp = pd.DataFrame(likely_x[:,k],index=x_dims)
             
-        p_xy = (1.0 / np.sum(p_xy)) * p_xy    
+            y_tmp = pd.DataFrame(np.transpose(y),index=y_dims)
+            
+            tmp3 = pd.concat([y_tmp, likely_x_tmp])
+            
+            tmp3 = tmp3.sort_index()
+            
+            sm[:,k] = tmp3.as_matrix().reshape((len(x_dims)+len(y_dims),1))
+            
+            tmp4 = 1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
+            
+            #===================================================================
+            # tmp5=np.transpose(sm[:,k])-(Mu)
+            #===================================================================
+            
+            tmp5 = sm[:,k].reshape(Mu.shape)-(Mu)
+            
+            tmp6 = linalg.inv(Sigma)
+            
+            tmp7 = np.exp((-1.0/2.0) * (tmp5 * tmp6 * np.transpose(tmp5))) #Multiply time GMM.Priors????
+            
+            p_xy[k] = tmp4 * tmp7
+            
+            
+        #=======================================================================
+        # p_xy = (1.0 / np.sum(p_xy)) * p_xy
+        #=======================================================================
+       
+        h = np.array([0.0] * len(gmm.weights_))
+        total_tmp = np.multiply(gmm.weights_, p_xy)
+        total_piN = total_tmp.sum()
+         
+        
         for k in range(len(gmm.weights_)): 
-            x = x + Weight * p_xy[k] * likely_x_tmp
+            h[k] = gmm.weights_[k] * p_xy[k]  *  (1.0 / total_piN)
+            x = x + h[k] * likely_x[:,k].transpose()
+            #===================================================================
+            # x = x + Weight * p_xy[k, :] * likely_x_tmp.as_matrix().reshape((1,len(x_dims)))
+            #===================================================================
+        x.flatten()
         
         return np.array(x.transpose())   
         
@@ -277,7 +302,7 @@ class GMM(object):
         # Number of samples per component
         gmm=self.model;
         
-        
+        k = np.int(k)
         plt.figure(fig.number)
         plt.sca(axes)        
         covar_plt=np.zeros((2,2))
@@ -363,17 +388,34 @@ class GMM(object):
      
     def plot_callback(self):
         n_plots = np.int(self.n_proj_str.get())
+        self.plots_fig.clf()
+        
         subplot_dim_x = self.proj_arrays[self.n_proj_str.get()][0]
         subplot_dim_y = self.proj_arrays[self.n_proj_str.get()][1]
-        self.plots_fig.clf()
         
         current_gauss = self.current_gauss_str.get()
          
         self.plots_ax = []
         for i in range(n_plots): 
+            dim_x = self.proj_dim[i,0]
+            dim_y = self.proj_dim[i,1]
+            
             self.plots_ax.append(self.plots_fig.add_subplot(subplot_dim_x,subplot_dim_y, i + 1))
-            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,self.plots_ax[i],current_gauss,0,1)
+            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,
+                                                        self.plots_ax[i],
+                                                        current_gauss,
+                                                        dim_x, dim_y)
+            self.plots_ax[i].set_xlim(self.dim_lims[self.proj_dim[i,0], 0],
+                                      self.dim_lims[self.proj_dim[i,0], 1])
+            self.plots_ax[i].set_ylim(self.dim_lims[self.proj_dim[i,1], 0],
+                                      self.dim_lims[self.proj_dim[i,1], 1])
+            self.plots_ax[i].hold(True)
         
+            if self.data != None:
+                indices = np.array(self.data_indices).astype(int)
+                plt.plot(self.data[indices, dim_x],self.data[indices, dim_y], 'o')
+                
+            
         self.plots_canvas.draw()
         
         #=======================================================================
@@ -434,23 +476,60 @@ class GMM(object):
 
     def current_projection_callback(self):
         if np.int(self.n_edit_proj_str.get()) > self.n_proj -1:
-            self.n_edit_proj_str.set(str(self.n_proj -1))
+            self.n_edit_proj_str.set(str(self.n_proj))
         self.n_edit_proj = np.int(self.n_edit_proj_str.get())
-        self.edit_proj_dim1_str.set(str(self.proj_dim[self.n_edit_proj,0]))
-        self.edit_proj_dim2_str.set(str(self.proj_dim[self.n_edit_proj,1]))
-        
-        
+        self.edit_proj_dim1_str.set(str(self.proj_dim[self.n_edit_proj-1,0]))
+        self.edit_proj_dim2_str.set(str(self.proj_dim[self.n_edit_proj-1,1]))
         
     def current_dim1_callback(self):
-        self.proj_dim[self.n_edit_proj,0]=np.int(self.edit_proj_dim1_str.get())
-        pass
+        self.proj_dim[self.n_edit_proj-1,0]=np.int(self.edit_proj_dim1_str.get())
+        self.dim1_min_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 0]))       
+        self.dim1_max_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 1]))
+        self.plot_callback()
                 
     def current_dim2_callback(self):
-        self.proj_dim[self.n_edit_proj,1]=np.int(self.edit_proj_dim2_str.get())
-        pass
+        self.proj_dim[self.n_edit_proj-1,1]=np.int(self.edit_proj_dim2_str.get())
+        self.dim2_min_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 0]))
+        self.dim2_max_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 1]))
+        self.plot_callback()
+
+    def dim1_min_callback(self):
+        self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 0] = np.float(self.dim1_min_str.get())
+        self.plot_callback()
+        
+    def dim1_max_callback(self):
+        self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 1] = np.float(self.dim1_max_str.get())
+        self.plot_callback()
+        
+    def dim2_min_callback(self):
+        self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 0] = np.float(self.dim2_min_str.get())
+        self.plot_callback()
+        
+    def dim2_max_callback(self):
+        self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 1] = np.float(self.dim2_max_str.get())
+        self.plot_callback()
                 
-    def interactiveModel(self):
+    def data_indices_callback(self):
+        try:
+            indices_str = self.data_indices_str.get()
+            indices_comma = indices_str.split(',')
+            self.data_indices = []
+            for i in range(len(indices_comma)):
+                if '-' in indices_comma[i]:
+                    indices_hyphen = indices_comma[i].split('-')
+                    self.data_indices = np.append(self.data_indices, np.array(
+                                                                        range(np.int(indices_hyphen[0]),
+                                                                              np.int(indices_hyphen[1])+1)))
+                else:
+                    self.data_indices = np.append(self.data_indices, np.int(indices_comma[i]))
+        except:
+            pass
+        pass   
+     
+    def interactiveModel(self, data = None):
         if self.initialized:
+            self.data = data
+            
             self.n_dims = self.model._get_covars()[0].shape[0]
             ### Main window container
             self.root_window = tk.Tk()
@@ -462,6 +541,9 @@ class GMM(object):
             
             self.guiPlotsPanel()
             self.guiControlPanel()
+                
+            
+                
         
             self.plot_callback()
         #----------------------------------- self.guiMotorPanel_reset_callback() 
@@ -470,14 +552,14 @@ class GMM(object):
             print("Interactive mode only can be used when the model has been initialized")    
     
     def guiPlotsPanel(self):
-        self.plots_frame = tk.Frame(self.root_frame, width=800, height=600, bg="white")
+        self.plots_frame = tk.Frame(self.root_frame, width=800, height=580, bg="white")
         self.plots_frame.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.plots_container_frame = tk.Frame(self.plots_frame, width=800, height=600, bg="black")
+        self.plots_container_frame = tk.Frame(self.plots_frame, width=800, height=580, bg="black")
         self.plots_container_frame.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
         
         self.plots_fig = plt.figure()
         self.plots_fig.set_dpi(100)
-        self.plots_fig.set_figheight(6)
+        self.plots_fig.set_figheight(5.8)
         self.plots_fig.set_figwidth(8)
 
         self.plots_fig.patch.set_facecolor('red')
@@ -499,15 +581,15 @@ class GMM(object):
         self.plots_canvas.draw()
     
     def guiControlPanel(self):
-        self.control_frame = tk.Frame(self.root_frame, width=800, height=200, bg="white")
+        self.control_frame = tk.Frame(self.root_frame, width=800, height=220, bg="white")
         self.control_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         
-        self.control_entries_frame = tk.Frame(self.control_frame, width=800, height=200, bg="white") 
+        self.control_entries_frame = tk.Frame(self.control_frame, width=800, height=220, bg="white") 
         self.control_entries_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         
         #SELECT NUMBER OF PROJECTIONS
         self.n_proj_lbl = tk.Label(self.control_entries_frame, text="Number of projections:")
-        self.n_proj_lbl.grid(row=0, padx=5, pady=5)
+        self.n_proj_lbl.grid(row=0, padx=5, pady=2)
         self.n_proj_str = tk.StringVar()
         self.n_proj_str.set("1")     
         self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
@@ -518,11 +600,11 @@ class GMM(object):
         self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "1","2","3","4","6","8","9")
         self.proj_arrays={'1':[1,1], '2':[1,2], '3':[1,3], '4':[2,2], '6':[2,3], '8':[2,4], '9':[3,3]}
         
-        self.n_proj_m.grid(row=0, column =1, columnspan=2, padx=5, pady=5)
+        self.n_proj_m.grid(row=0, column =1, columnspan=2, padx=5, pady=2)
         
         #SELECT NUMBER OF PROJECTION TO BE EDITED
         self.n_edit_proj_lbl = tk.Label(self.control_entries_frame, text="Projection to edit:")
-        self.n_edit_proj_lbl.grid(row=3, column=0, padx=5, pady=5)
+        self.n_edit_proj_lbl.grid(row=3, column=0, padx=5, pady=2)
         self.n_edit_proj_str = tk.StringVar()
         self.n_edit_proj_str.set("1")
         posible_projectios = ["1","2", "3","4","5","6","7","8","9"]
@@ -531,7 +613,7 @@ class GMM(object):
 
         
         self.n_edit_proj_m.config(state=tk.DISABLED)
-        self.n_edit_proj_m.grid(row=3, column=1, columnspan=2, padx=5, pady=5)
+        self.n_edit_proj_m.grid(row=3, column=1, columnspan=2, padx=5, pady=2)
         self.n_edit_proj = np.int(self.n_edit_proj_str.get())
         
         #SELECT DIMENSIONS
@@ -553,131 +635,105 @@ class GMM(object):
         self.edit_proj_dim2_str.trace("w", lambda name, index, mode, sv=self.edit_proj_dim2_str: self.current_dim2_callback())   
               
         self.edit_proj_dim1_lbl = tk.Label(self.control_entries_frame, text="Dimension 1:")
-        self.edit_proj_dim1_lbl.grid(row=5, column=0, padx=5, pady=0)
+        self.edit_proj_dim1_lbl.grid(row=5, column=0, padx=5, pady=2)
         posible_dimensions = range(self.n_dims)
+        
         self.edit_proj_dim1_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim1_str, *posible_dimensions)#, command = self.current_dim1_callback())
         self.edit_proj_dim1_m.config(state=tk.NORMAL)
-        self.edit_proj_dim1_m.grid(row=5, column=1, columnspan=2, padx=5, pady=0)
+        self.edit_proj_dim1_m.grid(row=5, column=1, columnspan=2, padx=5, pady=2)
         self.edit_proj_dim2_lbl = tk.Label(self.control_entries_frame, text="Dimension 2:")
-        self.edit_proj_dim2_lbl.grid(row=6, column=0, padx=5, pady=0)
+        self.edit_proj_dim2_lbl.grid(row=6, column=0, padx=5, pady=2)
 
         self.edit_proj_dim2_m = tk.OptionMenu(self.control_entries_frame, self.edit_proj_dim2_str, *posible_dimensions)#, command = self.current_dim2_callback())
         self.edit_proj_dim2_m.config(state=tk.NORMAL)
-        self.edit_proj_dim2_m.grid(row=6, column=1, columnspan=2, padx=5, pady=0)
+        self.edit_proj_dim2_m.grid(row=6, column=1, columnspan=2, padx=5, pady=2)
         
         #Current Gaussian and sweeping 
         self.prev_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text="<<", command = self.prev_gauss_callback)
-        self.prev_gauss_btn.grid(row=3, column=3, padx=5, pady=0)
+        self.prev_gauss_btn.grid(row=0, column=3, padx=5, pady=2)
         self.current_gauss_str = tk.StringVar()
         self.current_gauss_str.set("0")
         self.entry_gauss = tk.Entry(self.control_entries_frame, state=tk.DISABLED, 
                                     textvariable=self.current_gauss_str, width=4)
-        self.entry_gauss.grid(row=3, column=4, padx=5, pady=0)
+        self.entry_gauss.grid(row=0, column=4, padx=5, pady=2)
         self.current_gauss_str.trace("w", lambda name, index, mode, sv=self.current_gauss_str: self.current_gauss_callback())
         self.current_gauss = 0
         self.next_gauss_btn = tk.Button(self.control_entries_frame, state=tk.DISABLED, text=">>", command = self.next_gauss_callback)
-        self.next_gauss_btn.grid(row=3, column=5, padx=5, pady=0)
-    
+        self.next_gauss_btn.grid(row=0, column=5, padx=5, pady=2)
+        
+        self.dim1_lim_lbl = tk.Label(self.control_entries_frame, text="Limits:")
+        self.dim2_lim_lbl = tk.Label(self.control_entries_frame, text="Limits:")
+        
+        self.dim1_min_str = tk.StringVar()
+        self.dim1_max_str = tk.StringVar()
+        self.dim2_min_str = tk.StringVar()
+        self.dim2_max_str = tk.StringVar()
+        
+        self.dim_lims=np.reshape(np.array([-1.0, 1.0] * self.n_dims), (self.n_dims,2))
+        
+        self.dim1_min_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 0]))       
+        self.dim1_max_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,0], 1]))
+        self.dim2_min_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 0]))
+        self.dim2_max_str.set(str(self.dim_lims[self.proj_dim[self.n_edit_proj-1,1], 1]))
+        
+        self.entry_dim1_min = tk.Entry(self.control_entries_frame, state=tk.NORMAL, 
+                                    textvariable=self.dim1_min_str, width=4)
+        self.entry_dim1_max = tk.Entry(self.control_entries_frame, state=tk.NORMAL, 
+                                    textvariable=self.dim1_max_str, width=4)
+        self.entry_dim2_min = tk.Entry(self.control_entries_frame, state=tk.NORMAL, 
+                                    textvariable=self.dim2_min_str, width=4)
+        self.entry_dim2_max = tk.Entry(self.control_entries_frame, state=tk.NORMAL, 
+                                    textvariable=self.dim2_max_str, width=4)
+        
+        
+        self.dim1_min_str.trace("w", lambda name, index, mode, sv=self.dim1_min_str: self.dim1_min_callback())
+        self.dim1_max_str.trace("w", lambda name, index, mode, sv=self.dim1_max_str: self.dim1_max_callback())
+        self.dim2_min_str.trace("w", lambda name, index, mode, sv=self.dim2_min_str: self.dim2_min_callback())
+        self.dim2_max_str.trace("w", lambda name, index, mode, sv=self.dim2_max_str: self.dim2_max_callback())
+        
+        
+        
+        self.dim1_lim_lbl.grid(row=5, column=3, padx=5, pady=2)
+        self.dim2_lim_lbl.grid(row=6, column=3, padx=5, pady=2)
+        self.dim1_lim_lbl.grid(row=5, column=3, padx=5, pady=2)
+        self.dim2_lim_lbl.grid(row=6, column=3, padx=5, pady=2)
+        self.entry_dim1_min.grid(row=5, column=4, padx=5, pady=2)
+        self.entry_dim1_max.grid(row=5, column=5, padx=5, pady=2)
+        self.entry_dim2_min.grid(row=6, column=4, padx=5, pady=2)
+        self.entry_dim2_max.grid(row=6, column=5, padx=5, pady=2)
+        
+        
+        
+         # self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
+        
+        #--------------------------- self.n_proj_lbl.grid(row=0, padx=5, pady=2)
+        #-------------------------------------- self.n_proj_str = tk.StringVar()
+        #---------------------------------------------- self.n_proj_str.set("1")
+        # self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
+        #------------------------------------------------------- self.n_proj = 1
+        # self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "1","2","3","4","6","8","9")
+        
+        
+        #---------------------------------------------------------- columnspan=2
+        
         if self.model.n_components > 1:
             self.next_gauss_btn.config(state=tk.NORMAL)
             self.entry_gauss.config(state=tk.NORMAL) 
     
-    
+        self.data_indices = [0];
+        self.data_indices_lbl = tk.Label(self.control_entries_frame, text="Data indices:")
+        self.data_indices_str = tk.StringVar()
+        self.data_indices_str.set(str(self.data_indices[0]))       
+        self.data_indices_str.trace("w", lambda name, index, mode, sv=self.data_indices_str: self.data_indices_callback())
+        self.entry_data_indices = tk.Entry(self.control_entries_frame, state=tk.DISABLED, 
+                                       textvariable=self.data_indices_str, width=8)
+        self.data_indices_lbl.grid(row=0, column=7, padx=5, pady=2)
+        self.entry_data_indices.grid(row=0, column=8, padx=5, pady=2)
         
-    
-    '''
-        self.sv_step = tk.StringVar()
-        self.sv_step.set("10")     
-        self.vt_shape_step = np.int(self.sv_step.get())       
-        self.sv_step.trace("w", lambda name, index, mode, sv=self.sv_step: self.set_vt_opts_callback())
+        if self.data != None:
+            self.entry_data_indices.config(state=tk.NORMAL)
+            self.entry_data_indices.bind("<Return>", self.plot_return_callback)
         
-        self.sv_current = tk.StringVar()
-        self.sv_current.set("0")  
-        self.vt_shape_current = np.int(self.sv_current.get())     
-        self.sv_current.trace("w", lambda name, index, mode, sv=self.sv_current: self.set_vt_current_callback())
-
-        
-        self.lbl_step_vt = tk.Label(self.vt_sound_opt_frame, text="Step")
-        self.lbl_current_vt = tk.Label(self.vt_sound_opt_frame, text="Current")
-        self.entry_step_vt = tk.Entry(self.vt_sound_opt_frame, state=tk.DISABLED, textvariable=self.sv_step, width=8)
-        self.entry_current_vt = tk.Entry(self.vt_sound_opt_frame, state=tk.DISABLED, textvariable=self.sv_current, width=8)
-        self.lbl_step_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.entry_step_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.lbl_current_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        self.entry_current_vt.pack(side=tk.TOP, fill=tk.X, expand=1)
-        
-        self.vt_shape_step = np.int(self.sv_step.get())
-        self.vt_shape_current = np.int(self.sv_current.get())
-        , width=8
-               
-    def guiMotorPanel(self):
-        self.motor_frame = tk.Frame(self.root_frame, width=800, height=150, bg="white")
-        self.motor_frame.pack(side=tk.TOP, fill=tk.X, expand=1)
-        
-        self.motor_entries_frame = tk.Frame(self.motor_frame, width=800, height=150, bg="white") 
-        self.motor_entries_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-          
-        self.lbl_m1 = tk.Label(self.motor_entries_frame, text="M1")
-        self.lbl_m1.grid(row=0, padx=5, pady=5)
-        self.lbl_m2 = tk.Label(self.motor_entries_frame, text="M2")
-        self.lbl_m2.grid(row=1, padx=5, pady=5)
-        self.lbl_m3 = tk.Label(self.motor_entries_frame, text="M3")
-        self.lbl_m3.grid(row=2, padx=5, pady=5)
-        self.lbl_m4 = tk.Label(self.motor_entries_frame, text="M4")
-        self.lbl_m4.grid(row=3, padx=5, pady=5)
-        
-        self.entry_m1 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m1.grid(row=0, column=1, padx=5, pady=5)
-        self.entry_m2 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m2.grid(row=1, column=1, padx=5, pady=5)
-        self.entry_m3 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m3.grid(row=2, column=1, padx=5, pady=5)
-        self.entry_m4 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m4.grid(row=3, column=1, padx=5, pady=5)        
-        
-        self.lbl_m5 = tk.Label(self.motor_entries_frame, text="M5")
-        self.lbl_m5.grid(row=4, column=0, padx=5, pady=5)
-        self.lbl_m6 = tk.Label(self.motor_entries_frame, text="M6")
-        self.lbl_m6.grid(row=0, column=2, padx=5, pady=5)
-        self.lbl_m7 = tk.Label(self.motor_entries_frame, text="M7")
-        self.lbl_m7.grid(row=1, column=2, padx=5, pady=5)
-        self.lbl_m8 = tk.Label(self.motor_entries_frame, text="M8")
-        self.lbl_m8.grid(row=2, column=2, padx=5, pady=5)
-        
-        self.entry_m5 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m5.grid(row=4, column=1, padx=5, pady=5)
-        self.entry_m6 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m6.grid(row=0, column=2, padx=5, pady=5)
-        self.entry_m7 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m7.grid(row=1, column=2, padx=5, pady=5)
-        self.entry_m8 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m8.grid(row=2, column=2, padx=5, pady=5)
-
-        self.lbl_m9 = tk.Label(self.motor_entries_frame, text="M9")
-        self.lbl_m9.grid(row=3, column=2, padx=5, pady=5)
-        self.lbl_m10 = tk.Label(self.motor_entries_frame, text="M10")
-        self.lbl_m10.grid(row=4, column=2, padx=5, pady=5)
-        self.lbl_m11 = tk.Label(self.motor_entries_frame, text="M11")
-        self.lbl_m11.grid(row=1, column=4, padx=5, pady=5)
-        self.lbl_m12 = tk.Label(self.motor_entries_frame, text="M12")
-        self.lbl_m12.grid(row=2, column=4, padx=5, pady=5)
-        self.lbl_m13 = tk.Label(self.motor_entries_frame, text="M13")
-        self.lbl_m13.grid(row=3, column=4, padx=5, pady=5)
-        
-        self.entry_m9 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m9.grid(row=3, column=2, padx=5, pady=5)
-        self.entry_m10 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m10.grid(row=4, column=2, padx=5, pady=5)
-        self.entry_m11 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m11.grid(row=1, column=5, padx=5, pady=5)
-        self.entry_m12 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m12.grid(row=2, column=5, padx=5, pady=5)
-        self.entry_m13 = tk.Entry(self.motor_entries_frame, width=10)
-        self.entry_m13.grid(row=3, column=5, padx=5, pady=5)                
-        
-                
-        self.btn_execute_m = tk.Button(self.motor_frame, text="Execute", command = self.execute_callback)
-        self.btn_execute_m.pack(side=tk.LEFT, fill=tk.NONE, expand=0)   
-    '''   
-    
-  
+    def plot_return_callback(self, event):
+        self.plot_callback()
+            

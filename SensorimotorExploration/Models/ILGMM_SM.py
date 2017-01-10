@@ -19,13 +19,13 @@ class GMM_SM(object):
     '''
 
     def __init__(self, Agent,
-                       sm_step =100,
+                       sm_step = 100,
                        min_components = 3,
                        max_step_components = 30,
                        max_components = 60,
                        a_split = 0.8,
                        forgetting_factor = 0.05, 
-                       plot = True, plot_dims=[0,1]):
+                       plot = False, plot_dims=[0,1]):
         '''
         Constructor
         '''
@@ -50,7 +50,8 @@ class GMM_SM(object):
 
         
     def train(self,simulation_data):
-        train_data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
+        train_data_tmp=pd.concat([simulation_data.motor_data.data,
+                                  simulation_data.sensor_data.data], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
         
     def trainIncrementalLearning(self,simulation_data):
@@ -64,7 +65,8 @@ class GMM_SM(object):
         # new_data=pd.concat([motor_data,sensor_data],axis=1)
         # self.model.trainIncrementalLearning(new_data, alpha)
         #=======================================================================
-        train_data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
+        train_data_tmp=pd.concat([simulation_data.motor_data.data,
+                                  simulation_data.sensor_data.data], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
          
     
@@ -77,10 +79,18 @@ class GMM_SM(object):
         
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
-        
-        Agent.motor_command = boundMotorCommand(Agent,self.model.predict_all_gaussians(m_dims, s_dims, sensor_goal)) #This might be deprecated at some time
+         
+        Agent.motor_command = boundMotorCommand(Agent,
+                                                 self.model.predict_all_gaussians(
+                                                     m_dims, s_dims, sensor_goal)) 
+        #=======================================================================
+        # This might be deprecated at some time
+        #=======================================================================
 
-        # Agent.motor_command=boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal)) #This might be deprecated at some time   
+        #=======================================================================
+        # Agent.motor_command=boundMotorCommand(Agent,self.model.predict(m_dims,
+        #  s_dims, sensor_goal))   
+        #=======================================================================
         
         # return boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
         return copy.deepcopy(Agent.motor_command)

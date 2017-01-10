@@ -55,6 +55,6 @@ if __name__ == '__main__':
 
     model.train(X3)
   
-    model.interactiveModel()
+    model.interactiveModel(data = X3)
     
     

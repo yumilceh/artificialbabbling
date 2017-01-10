@@ -84,10 +84,10 @@ if __name__ == '__main__':
         ## Validation of the model ##
     n_samples=n_evaluation_samples
     evaluation=SM_ModelEvaluation(system,
-                                  n_samples,
-                                  simulation1.models.f_sm,
-                                  file_prefix=file_prefix)
-    evaluation.setValidationEvaluationSets()
+                                n_samples,
+                                simulation1.models.f_sm,
+                                file_prefix=file_prefix)
+    evaluation.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
     
     validation_valSet_data = evaluation.evaluateModel(saveData=True)   
     

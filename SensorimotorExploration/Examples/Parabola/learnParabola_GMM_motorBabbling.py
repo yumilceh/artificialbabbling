@@ -5,6 +5,7 @@ Created on Feb 5, 2016
 '''
 from numpy import linspace
 from numpy import random as np_rnd
+import pandas as pd
 
 if __name__ == '__main__':
    
@@ -24,7 +25,7 @@ if __name__ == '__main__':
    
     ## Simulation Parameters ##
     n_initialization=200
-    n_evaluation_samples=1000
+    n_evaluation_samples=200
     n_experiments=200
     
     random_seed=1234
@@ -48,9 +49,10 @@ if __name__ == '__main__':
     models=MODELS()
     
     models.f_sm = GMM_SM(system,
-                         k_sm,
+                         min_components = k_sm,
                          sm_step=sm_step,
-                         alpha=alpha_sm)
+                         forgetting_factor=alpha_sm)
+    
     models.f_ss = GMM_SS(system,
                          k_ss,
                          ss_step=ss_step,
@@ -83,6 +85,12 @@ if __name__ == '__main__':
     evaluation.setValidationEvaluationSets()
     
     validation_valSet_data = evaluation.evaluateModel(saveData=True)    
+    
+    data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
+    data = data_tmp.as_matrix(columns=None)
+    
+    simulation1.models.f_sm.model.interactiveModel(data = data)
+    
     
     fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    
     #fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'motor', 0, 'sensor_goal', 0,"ok")
@@ -146,3 +154,5 @@ if __name__ == '__main__':
             plt.show()
     except SyntaxError:
         pass
+    
+    
