@@ -1,8 +1,0 @@
-.project
-.pydevproject
-*.pyc
-*.mat
-*.h5
-*.mp4
-*.npy
-*.tar.gz
