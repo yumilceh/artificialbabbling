@@ -52,8 +52,11 @@ class GMM_SS(object):
         
         m_dims=np.arange(0, n_motor, 1)
         s_dims=np.arange(n_motor, n_motor+n_somato, 1)
-        Agent.proprioceptive_prediction=self.model.predict(s_dims, m_dims, motor_command)
-        return boundProprioceptivePrediction(Agent,self.model.predict(s_dims, m_dims, motor_command))
+        
+        
+        
+        Agent.proprioceptive_prediction=self.model.predict(s_dims, m_dims, motor_command.flatten())
+        return boundProprioceptivePrediction(Agent,self.model.predict(s_dims, m_dims, motor_command.flatten()))
     
 def boundProprioceptivePrediction(Agent, proprioceptive_prediction):
     n_somato=Agent.n_somato;
