@@ -234,22 +234,26 @@ class GMM(object):
             
             p_xy[k] = tmp4 * tmp7
             
-            
-        #=======================================================================
-        # p_xy = (1.0 / np.sum(p_xy)) * p_xy
-        #=======================================================================
-       
+           
+        #------------------------------- h = np.array([0.0] * len(gmm.weights_))
+        #--------------------------- total_tmp = np.multiply(gmm.weights_, p_xy)
+        #------------------------------------------- total_piN = total_tmp.sum()
+#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------ 
+        #------------------------------------ for k in range(len(gmm.weights_)):
+            #------------ h[k] = gmm.weights_[k] * p_xy[k]  *  (1.0 / total_piN)
+            #-------------------------- x = x + h[k] * likely_x[:,k].transpose()
+#------------------------------------------------------------------------------ 
+
         h = np.array([0.0] * len(gmm.weights_))
-        total_tmp = np.multiply(gmm.weights_, p_xy)
+        total_tmp = p_xy
         total_piN = total_tmp.sum()
          
         
         for k in range(len(gmm.weights_)): 
-            h[k] = gmm.weights_[k] * p_xy[k]  *  (1.0 / total_piN)
-            x = x + h[k] * likely_x[:,k].transpose()
-            #===================================================================
-            # x = x + Weight * p_xy[k, :] * likely_x_tmp.as_matrix().reshape((1,len(x_dims)))
-            #===================================================================
+            h[k] = p_xy[k]  *  (1.0 / total_piN)
+            x = x + gmm.weights_[k] *h[k] * likely_x[:,k].transpose()
+          
         x.flatten()
         
         return np.array(x.transpose())   

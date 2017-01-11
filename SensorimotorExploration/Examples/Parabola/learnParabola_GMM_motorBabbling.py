@@ -86,10 +86,10 @@ if __name__ == '__main__':
     
     validation_valSet_data = evaluation.evaluateModel(saveData=True)    
     
-    data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
-    data = data_tmp.as_matrix(columns=None)
-    
-    simulation1.models.f_sm.model.interactiveModel(data = data)
+    # data_tmp=pd.concat([simulation_data.motor_data.data,simulation_data.sensor_data.data], axis=1)
+    #----------------------------------- data = data_tmp.as_matrix(columns=None)
+#------------------------------------------------------------------------------ 
+    #--------------- simulation1.models.f_sm.model.interactiveModel(data = data)
     
     
     fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    

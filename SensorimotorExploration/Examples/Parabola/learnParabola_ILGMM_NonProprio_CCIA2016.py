@@ -60,7 +60,7 @@ if __name__ == '__main__':
                          min_components = k_sm_min, max_components = k_sm_max,
                          max_step_components = k_sm_step,
                          forgetting_factor = alpha_sm,
-                         plot = True,
+                         plot = False,
                          plot_dims=[2,3])
     
     models.f_ss = GMM_SS(system,
