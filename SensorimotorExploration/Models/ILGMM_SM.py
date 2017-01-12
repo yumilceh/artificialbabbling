@@ -80,24 +80,16 @@ class GMM_SM(object):
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
          
-<<<<<<< HEAD
-=======
-        #------------------------ Agent.motor_command = boundMotorCommand(Agent,
-                                                 # self.model.predict_all_gaussians(
-                                                     # m_dims, s_dims, sensor_goal))
-#------------------------------------------------------------------------------ 
->>>>>>> 435490b89acd1bf44e633bd196c889963b889f8b
         #=======================================================================
         # Agent.motor_command = boundMotorCommand(Agent,
         #                                          self.model.predict_all_gaussians(
         #                                              m_dims, s_dims, sensor_goal)) 
         #=======================================================================
-<<<<<<< HEAD
+
         #=======================================================================
         # This might be deprecated at some time
         #=======================================================================
-=======
->>>>>>> 435490b89acd1bf44e633bd196c889963b889f8b
+
 
         Agent.motor_command=boundMotorCommand(Agent,self.model.predict(m_dims,
          s_dims, sensor_goal))   

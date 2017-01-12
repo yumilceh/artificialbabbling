@@ -162,14 +162,12 @@ if __name__ == '__main__':
     ax6.autoscale_view()    
     
     
-    #===========================================================================
-    # fig7, ax7 =  initializeFigure();
-    # fig7.suptitle('Evaluation Error Evolution')
-    # plt.plot(simulation1.evaluation_error[1:],'b')
-    # plt.hold(True)
-    # plt.xlabel('Sensorimotor training step')
-    # plt.ylabel('Mean error') 
-    #===========================================================================
+    fig7, ax7 =  initializeFigure();
+    fig7.suptitle('Evaluation Error Evolution')
+    plt.plot(simulation1.evaluation_error[1:],'b')
+    plt.hold(True)
+    plt.xlabel('Sensorimotor training step')
+    plt.ylabel('Mean error') 
     
     
     

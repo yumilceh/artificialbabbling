@@ -81,7 +81,7 @@ if __name__ == '__main__':
     initialization_data_im=simulation1.data.initialization_data_im
     simulation_data=simulation1.data.simulation_data
     
-        ## Validation of the model ##
+    ## Validation of the model ##
     n_samples=n_evaluation_samples
     evaluation=SM_ModelEvaluation(system,
                                   n_samples,
@@ -142,15 +142,15 @@ if __name__ == '__main__':
     ax6.relim()
     ax6.autoscale_view()    
     
-    
-    fig7, ax7 =  initializeFigure();
-    fig7.suptitle('Evaluation Error Evolution')
-    plt.plot(simulation1.evaluation_error[1:],'b')
-    plt.hold(True)
-    plt.xlabel('Sensorimotor training step')
-    plt.ylabel('Mean error') 
-    
-    
+    #===========================================================================
+    # 
+    # fig7, ax7 =  initializeFigure();
+    # fig7.suptitle('Evaluation Error Evolution')
+    # plt.plot(simulation1.evaluation_error[1:],'b')
+    # plt.hold(True)
+    # plt.xlabel('Sensorimotor training step')
+    # plt.ylabel('Mean error') 
+    #===========================================================================
     
     fig8, ax8 =  initializeFigure();
     fig8.suptitle('Validation: S1 vs S2')
