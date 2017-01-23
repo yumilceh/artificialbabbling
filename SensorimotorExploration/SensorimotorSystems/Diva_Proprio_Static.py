@@ -28,28 +28,28 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         else:
             ts=self.ts
             
-        durationM1=0.4
-        durationM2=0.4
-        nSamples=int(0.8/ts+1)
-        nSamples1=int(durationM1/ts)+1
-        nSamples2=int(durationM2/ts)+1
-        y_neutral=[0.0]*13
-        y_neutral[11]=0
-        y_neutral[12]=0
-        y0=[0.0]*26
-        y0[:13]=y_neutral
-        m1=self.motor_command[:13]
-        t1=linspace(0.0,durationM1,nSamples1)
-        artStates1=odeint(motorDynamics,y0,t1,args=(self,m1))
-        t2=linspace(0.0,durationM2,nSamples2)
-        m2=self.motor_command[13:]
-        artStates2=odeint(motorDynamics,artStates1[-1,:],t2,args=(self,m2))
+        durationM1 = 0.4
+        durationM2 = 0.4
+        nSamples = int(0.8 / ts + 1)
+        nSamples1 = int(durationM1/ts) + 1
+        nSamples2 = int(durationM2/ts) + 1
+        y_neutral = [0.0] * 13
+        y_neutral[11] = 0
+        y_neutral[12] = 0
+        y0 = [0.0] * 26
+        y0[:13] = y_neutral
+        m1 = self.motor_command[:13]
+        t1 = linspace(0.0,durationM1,nSamples1)
+        artStates1 = odeint(motorDynamics,y0,t1,args=(self,m1))
+        t2 = linspace(0.0,durationM2,nSamples2)
+        m2 = self.motor_command[13:]
+        artStates2 = odeint(motorDynamics,artStates1[-1,:],t2,args=(self,m2))
         if sound:
             return np.concatenate((artStates1,artStates2))
         else:
-            self.artStates= np.zeros((nSamples, 26))
-            self.artStates[:nSamples1,:]=artStates1
-            self.artStates[nSamples1-1:,:]=artStates2
+            self.artStates = np.zeros((nSamples, 26))
+            self.artStates[:nSamples1,:] = artStates1
+            self.artStates[nSamples1-1:,:] = artStates2
     
     def vocalize(self):
         ts=self.ts;

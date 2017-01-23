@@ -5,6 +5,7 @@ a colorbar for the contours, and labelled contours.
 
 See also contour_image.py.
 """
+
 import matplotlib
 import numpy as np
 import matplotlib.cm as cm

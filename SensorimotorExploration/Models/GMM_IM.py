@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np 
 import sys
 from termcolor import colored
+from copy import deepcopy
 
 class PARAMS(object):
     def __init__(self):
@@ -39,7 +40,11 @@ class GMM_IM(object):
         self.model = GMM(n_gauss_components)
         self.model.Active=np.array([1]*n_gauss_components)
         
-    def train(self,simulation_data):
+    def train(self,simulation_data):       
+        self.model.getBestGMM(self.get_train_data(simulation_data), lims=[1,self.params.n_components])
+        self.model.initialized=True
+        
+    def get_train_data(self, simulation_data):
         n_training_samples = self.params.n_training_samples
         data_size=len(simulation_data.sensor_data.data.index)
         if data_size > n_training_samples:
@@ -51,7 +56,10 @@ class GMM_IM(object):
             train_data_tmp = pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
         train_data_tmp.reindex()
         train_data_tmp = train_data_tmp.reset_index()
-        self.model.train(train_data_tmp.as_matrix(columns=None))
+        train_data = train_data_tmp.as_matrix(columns=None)
+        
+        return train_data
+        
         
     def get_interesting_goal(self,agent):
         
