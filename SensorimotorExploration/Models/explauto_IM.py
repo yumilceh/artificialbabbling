@@ -3,10 +3,35 @@ Created on Jan 24, 2017
 
 @author: Juan Manuel Acevedo Valle
 '''
-
-from explauto.interest_model import  interest_models
+from importlib import import_module
+from Models.explauto_SM import generateConfigurationExplauto
 import numpy as np
 
+model_class_name = {'discretized_progress': 'DiscretizedProgress',
+                    'tree': 'InterestTree',
+                    'gmm_progress_beta': 'GmmInterest'}
+
+model_src_name = {'discretized_progress': 'discrete_progress',
+                    'tree': 'Itree',
+                    'gmm_progress_beta': 'gmm_progress'}
+                
+model_conf = {'discretized_progress': {'x_card': 1000,
+                                       'win_size': 10,
+                                       'eps_random': 0.3},
+              'tree':                 {'max_points_per_region': 100,
+                                       'max_depth': 20,
+                                       'split_mode': 'best_interest_diff',
+                                       'progress_win_size': 50,
+                                       'progress_measure': 'abs_deriv_smooth',                                                     
+                                       'sampling_mode': {'mode':'softmax', 
+                                                         'param':0.2,
+                                                         'multiscale':False,
+                                                         'volume':True}},
+              'gmm_progress_beta':    {'n_samples': 40,
+                                       'n_components': 6}             
+             }
+
+    
 class PARAMS(object):
     def __init__(self):
         pass
@@ -15,21 +40,29 @@ class explauto_IM(object):
     '''
     Implemented for non-parametric models
     '''
-    def __init__(self, agent, model_type, competence_func):
+    def __init__(self, agent, model_type, competence_func, model_conf = model_conf):
+        model_competence_conf = {'discretized_progress': {'measure': competence_func},
+                                 'tree':{'competence_measure': lambda target,reached : competence_func(target, reached)},
+                                 'gmm_progress_beta':    {'measure': competence_func}             
+                                      }
+        model_conf[model_type].update(model_competence_conf[model_type])    
+        
         conf = generateConfigurationExplauto(agent)
         self.conf = conf
 
-                #-------------------------------------- ['discretized_progress',
-                #------------------------------------------------------- 'tree',
-                #----------------------------------------------------- 'random',
+                #-------------------------------------- ['discretized_progress', IMPLEMENTED
+                #------------------------------------------------------- 'tree', IMPLEMENTED
+                #----------------------------------------------------- 'random', 
                 #------------------------------------------ 'miscRandom_global',
-                #------------------------------------------ 'gmm_progress_beta',
+                #------------------------------------------ 'gmm_progress_beta', IMPLEMENTED
                 #------------------------------------------- 'miscRandom_local']
-                
-        self.model = SensorimotorModel.from_configuration(conf, model_type, model_conf)
+            
+        InterestModel =  getattr(import_module('explauto.interest_model.' + model_src_name[model_type]),  model_class_name[model_type])      
+        
+        self.model = InterestModel(conf, conf.s_dims, **model_conf[model_type])
         
         self.params = PARAMS()
-        self.params.sm_step = 1 #only ok with non-parametric
+        self.params.im_step = 1 #only ok with non-parametric
        
     def getMotorCommand(self,Agent,sensor_goal=None):          
         if sensor_goal == None:
@@ -49,32 +82,8 @@ class explauto_IM(object):
     def set_sigma_explo_ratio(self, new_value):
         conf = self.conf
         self.model.sigma_expl = (conf.m_maxs - conf.m_mins) * float(new_value)
-            
-     
+    
+
+    
         
-def generateConfigurationExplauto(agent):
-    conf = PARAMS()
-    conf.m_maxs = agent.max_motor_values
-    conf.m_mins = agent.min_motor_values
-    conf.s_maxs = agent.max_sensor_values
-    conf.s_mins = agent.min_sensor_values
-   
-    n_motor = agent.n_motor;
-    n_sensor = agent.n_sensor;
-    
-    conf.m_ndims = n_motor
-    conf.s_ndims = n_sensor
-
-    conf.m_dims = np.arange(0, n_motor, 1).tolist()
-    conf.s_dims = np.arange(n_motor, n_motor+n_sensor, 1).tolist()
-
-    conf.bounds = np.zeros((2, n_motor + n_sensor))
-    conf.bounds[0,:] = np.array([conf.m_mins, conf.s_mins]).flatten()
-    conf.bounds[1,:] = np.array([conf.m_maxs, conf.s_maxs]).flatten()
-    return conf
-    
-    
-
-    
-    
-    
+        
