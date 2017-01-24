@@ -12,7 +12,8 @@ if __name__ == '__main__':
     
     #Adding required paths
     print(os.getcwd())
-    sys.path.append(os.getcwd()) 
+    sys.path.append(os.getcwd())
+     
     sys.path.append('/home/yumilceh/Documents/IMLE/build/lib/')
     
     

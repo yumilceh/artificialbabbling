@@ -8,7 +8,7 @@ if __name__ == '__main__':
     import os,sys
     import itertools
     
-    sys.path.append(os.getcwd())
+    sys.path.append("../../")
     
     import numpy as np
     import matplotlib.pyplot as plt

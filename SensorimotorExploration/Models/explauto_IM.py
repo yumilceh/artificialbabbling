@@ -1,35 +1,39 @@
 '''
-Created on Jan 22, 2017
+Created on Jan 24, 2017
 
 @author: Juan Manuel Acevedo Valle
 '''
-#----------------------------------------------------------- import pandas as pd
-#------------------------------------------------------------ import numpy as np
-#-------------------------------------------------------------------- import sys
-#------------------------------------------------- from termcolor import colored
-#----------------------------------------------------- from copy import deepcopy
-from explauto.sensorimotor_model.sensorimotor_model import SensorimotorModel
+
+from explauto.interest_model import  interest_models
 import numpy as np
 
 class PARAMS(object):
     def __init__(self):
         pass
 
-class explauto_SM(object):
+class explauto_IM(object):
     '''
     Implemented for non-parametric models
     '''
-    def __init__(self, agent, model_type, model_conf = "default"):
+    def __init__(self, agent, model_type, competence_func):
         conf = generateConfigurationExplauto(agent)
         self.conf = conf
+
+                #-------------------------------------- ['discretized_progress',
+                #------------------------------------------------------- 'tree',
+                #----------------------------------------------------- 'random',
+                #------------------------------------------ 'miscRandom_global',
+                #------------------------------------------ 'gmm_progress_beta',
+                #------------------------------------------- 'miscRandom_local']
+                
         self.model = SensorimotorModel.from_configuration(conf, model_type, model_conf)
         
         self.params = PARAMS()
-        self.params.sm_step=1 #only ok with non-parametric
+        self.params.sm_step = 1 #only ok with non-parametric
        
     def getMotorCommand(self,Agent,sensor_goal=None):          
-        if sensor_goal==None:
-            sensor_goal=Agent.sensor_goal  #s_g
+        if sensor_goal == None:
+            sensor_goal = Agent.sensor_goal  #s_g
         
         Agent.motor_command = self.model.inverse_prediction(sensor_goal)
         return  Agent.motor_command
@@ -45,6 +49,7 @@ class explauto_SM(object):
     def set_sigma_explo_ratio(self, new_value):
         conf = self.conf
         self.model.sigma_expl = (conf.m_maxs - conf.m_mins) * float(new_value)
+            
      
         
 def generateConfigurationExplauto(agent):
