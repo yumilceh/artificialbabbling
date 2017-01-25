@@ -64,26 +64,26 @@ class explauto_IM(object):
         self.params = PARAMS()
         self.params.im_step = 1 #only ok with non-parametric
        
-    def getMotorCommand(self,Agent,sensor_goal=None):          
-        if sensor_goal == None:
-            sensor_goal = Agent.sensor_goal  #s_g
-        
-        Agent.motor_command = self.model.inverse_prediction(sensor_goal)
-        return  Agent.motor_command
-    
-    def train(self, simulation_data):
+    def train(self,simulation_data):  
         m = simulation_data.motor_data.data.iloc[-1]
-        s = simulation_data.sensor_data.data.iloc[-1]
-        self.model.update(m,s)
+        s = simulation_data.sensor_data.data.iloc[-1]  
+        s_g =  simulation_data.sensor_goal_data.data.iloc[-1]
+        self.model.update(np.hstack((m, s_g)) , np.hstack((m, s)))  
+            
+    def get_interesting_goal(self,agent):
+        return self.model.sample()
         
-    def trainIncrementalLearning(self, simulation_data):
-        self.train(simulation_data)
+           
+    def get_interesting_goal_proprioception(self,agent,sm_model,ss_model):
+        ''' Not implemented yet'''
+        return get_interesting_goal(agent)
         
-    def set_sigma_explo_ratio(self, new_value):
-        conf = self.conf
-        self.model.sigma_expl = (conf.m_maxs - conf.m_mins) * float(new_value)
+            
+    def get_interesting_goals(self,agent,n_goals=1):
+        s_g = np.zeros((n_goals,agent.n_sensor))
+        for i in range(n_goals):
+            s_g[i,:] = self.model.sample()
+        pass
+           
     
-
     
-        
-        

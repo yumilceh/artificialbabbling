@@ -17,7 +17,7 @@ def get_competence_Baraglia2015(agent):
     y_g=agent.sensor_goal    
     agent.competence_result = get_competence_Baraglia2015_explauto(y_g, y)
     
-def get_competence_Moulin2013_explauto(target, reached):
+def get_competence_Moulin2013_explauto(target, reached, dist_min=0., dist_max = 1.):
     err_norm=linalg.norm(np.asarray(target)-np.asarray(reached))
     return np.exp(-err_norm)
 
