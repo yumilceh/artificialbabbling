@@ -12,7 +12,7 @@ model_class_name = {'discretized_progress': 'DiscretizedProgress',
                     'gmm_progress_beta': 'GmmInterest'}
 
 model_src_name = {'discretized_progress': 'discrete_progress',
-                    'tree': 'Itree',
+                    'tree': 'tree',
                     'gmm_progress_beta': 'gmm_progress'}
                 
 model_conf = {'discretized_progress': {'x_card': 1000,
