@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 
     system = System()
-    model_type = 'tree'  #'tree' 'discretized_progress''gmm_progress_beta'
+    model_type = 'discretized_progress'  #'tree' 'discretized_progress''gmm_progress_beta'
     im_model = explauto_IM(system, model_type, competence)
     
     sm_model = explauto_SM(system, "nearest_neighbor")
@@ -33,20 +33,19 @@ if __name__ == '__main__':
     sm_model.set_sigma_explo_ratio(sigma_explo_ratio)
     
     evaluation = SM_ModelEvaluation(system,
-                                    400,
+                                    0,
                                     sm_model)
-    evaluation.setValidationEvaluationSets()    
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+    
     simulation_data = SimulationData(system)
     
-    init_samples = 100
-    
-    for m in get_random_motor_set(system, init_samples):
+    for m in get_random_motor_set(system, 10):
         system.setMotorCommand(m)
         system.executeMotorCommand()        
         simulation_data.appendData(system)
         sm_model.train(simulation_data)
         
-    for s_g in get_random_sensor_set(system, init_samples):
+    for s_g in get_random_sensor_set(system, 10):
         system.sensor_goal = s_g
         sm_model.getMotorCommand(system)
         system.executeMotorCommand()        
@@ -54,18 +53,16 @@ if __name__ == '__main__':
         sm_model.train(simulation_data)
         im_model.train(simulation_data)
     
-    n_experiments = 5000
+    n_experiments = 3000
     evaluation_samples = range(10,n_experiments+1, 1000)
     evaluation_error=[]
     
     for i in range(n_experiments):
         
-        #--------------------------------------------------- #RANDOM EXPLORATION
-        
+        #---------------------------------------------------- #RANDOM EXPLORATION
         #-------------- system.sensor_goal = get_random_sensor_set(system, 1)[0]
         
-        #------------------------------------------------------------ #CURIOSITY
-        
+        #------------------------------------------------------------- #CURIOSITY
         system.sensor_goal = im_model.get_interesting_goal(system)
         
         sm_model.getMotorCommand(system)

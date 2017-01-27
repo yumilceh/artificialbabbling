@@ -64,8 +64,8 @@ def generateConfigurationExplauto(agent):
     conf.s_dims = np.arange(n_motor, n_motor+n_sensor, 1).tolist()
 
     conf.bounds = np.zeros((2, n_motor + n_sensor))
-    conf.bounds[0,:] = np.array([conf.m_mins, conf.s_mins]).flatten()
-    conf.bounds[1,:] = np.array([conf.m_maxs, conf.s_maxs]).flatten()
+    conf.bounds[0,:] = np.array(np.hstack((conf.m_mins, conf.s_mins))).flatten()
+    conf.bounds[1,:] = np.array(np.hstack((conf.m_maxs, conf.s_maxs))).flatten()
     return conf
     
     
