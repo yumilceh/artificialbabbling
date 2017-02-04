@@ -250,6 +250,7 @@ class Diva_Proprio2015a:
                          output=True)
         self.stream.start_stream()
         self.stream.write(self.soundWave.astype(np.float32).tostring())
+        self.stream.close()
     
     def releaseAudioDevice(self): #any sound in the buffer will be removed
         try:

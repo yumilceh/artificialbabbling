@@ -11,14 +11,6 @@ if __name__ == '__main__':
     from Models.explauto_IM import explauto_IM
     from DataManager.SimulationData import SimulationData
     
-    #===========================================================================
-    # from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    #===========================================================================
-    
-    #===========================================================================
-    # from SensorimotorSystems.Arm_explauto import SimpleArm as System
-    #===========================================================================
-    \
     from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a as System
 
 
@@ -62,9 +54,10 @@ if __name__ == '__main__':
         sm_model.train(simulation_data)
         im_model.train(simulation_data)
     
-    n_experiments = 5000
-    evaluation_samples = range(10,n_experiments+1, 1000)
+    n_experiments = 15000
+    evaluation_samples = range(10,n_experiments+1, 3000)
     evaluation_error=[]
+    mean_competence=[]
     
     for i in range(n_experiments):
         
@@ -89,6 +82,7 @@ if __name__ == '__main__':
             eval_data = evaluation.evaluateModel()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis = 1)
             evaluation_error = np.append(evaluation_error, np.mean(error_))
+            mean_competence = np.append(mean_competence, np.mean(eval_data.competence_data.datal))
             sm_model.set_sigma_explo_ratio(sigma_explo_ratio)
             
     

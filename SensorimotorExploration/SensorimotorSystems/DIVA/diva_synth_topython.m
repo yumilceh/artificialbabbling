@@ -1,5 +1,10 @@
-function [Aud,Som,Outline,af,filt]=diva_synth(Art,option)
-if nargin<2, if size(Art,2)>1, option='sound'; else option='audsom'; end; end
+function [Aud,Som,Outline,af,filt]=diva_synth_topython(Art,option)
+if nargin<2,
+    if size(Art,2)>1,
+        option='sound';
+    else option='audsom';
+    end;
+end
 % Art(1:10) vocaltract shape params
 % Art(11:13) F0/P/V params
 
@@ -258,7 +263,15 @@ if isempty(ab_alpha),
     alpha=[1, 1, 1, 1, 1, 1, 1];
     beta=[.25, 1.25, 1.25, 1.25, 1.25, 1.25, 1.25];
     idx={1:60,61:70,71:80,81:120,121:150,151:190,191:amax};
-    ab_alpha=zeros(amax,1);ab_beta=zeros(amax,1);for n1=1:numel(idx),ab_alpha(idx{n1})=alpha(n1);ab_beta(idx{n1})=beta(n1);end; h=hanning(51)/sum(hanning(51));ab_alpha=convn(ab_alpha([ones(1,25),1:end,end+zeros(1,25)]),h,'valid');ab_beta=convn(ab_beta([ones(1,25),1:end,end+zeros(1,25)]),h,'valid');
+    ab_alpha=zeros(amax,1);
+    ab_beta=zeros(amax,1);
+    for n1=1:numel(idx),
+        ab_alpha(idx{n1})=alpha(n1);
+        ab_beta(idx{n1})=beta(n1);
+    end; 
+    h=hanning(51)/sum(hanning(51));
+    ab_alpha=convn(ab_alpha([ones(1,25),1:end,end+zeros(1,25)]),h,'valid');
+    ab_beta=convn(ab_beta([ones(1,25),1:end,end+zeros(1,25)]),h,'valid');
     %sprintf('%0.2f,',ab_alpha(:)')
     %sprintf('%0.2f,',ab_beta(:)')
 end

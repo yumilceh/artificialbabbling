@@ -132,25 +132,28 @@ class SM_ModelEvaluation(object):
             else:
                 return validation_valSet_data
             
+def generateTestDatafromrawData(data_in, min_distance=0.01):
+    ''' This function takes raw data and reduces it to data with a min_distance between samples 
+        data_in: numpy matrix (n_samples x n_dims)
+        min_distance is a float
+    '''
+    change = True
+    
+    data = data_in.copy()
+    
+    while change: #No optimal
+        change = False
+        for i in range(data.shape[0]):
+            if change == True:
+                break
+            for j in range(i+1,data.shape[0]):
+                distance_ij = np.linalg.norm(data[i,:]-data[j,:])
+                if distance_ij < min_distance:
+                    data = np.delete(data, j, 0)
+                    change = True
+                    break
+                    
+    return data
+
 def loadEvaluationResults(file_name, agent):
     return loadSimulationData(file_name, agent)
-            
-    #---------------------------------------------- fig2,ax2=initializeFigure();
-    # fig2,ax2=validation_valSet_data.plotTemporalSimulatedData(fig2,ax2,'competence', 0,"r",moving_average=5000)
-#------------------------------------------------------------------------------ 
-    #--------------------------------------------------------------- plt.show();
-    
-    #Generating Training and Validation Sets
-        
-#--------------------------------------------------------- class Params(object):
-    #----------------------------------------------------------------------- '''
-        # This class generates the structurure of paramaters as required by the IMLE library
-    #----------------------------------------------------------------------- '''
-    #------------------------------------------------- def __init__(self,agent):
-        #----------------------------------- self.in_dims = range(agent.n_motor)
-        #------------------------------ self.n_dims=agent.n_motor+agent.n_sensor
-        #---------------------- self.out_dims = range(agent.n_motor,self.n_dims)
-        #------------------------- self.n_samples=len(self.data.motor_data.data)
-        # self.min = (np.append(agent.min_motor_values, agent.min_sensor_values, axis = 0))
-        # self.max = (np.append(agent.max_motor_values, agent.max_sensor_values, axis = 0))
-#------------------------------------------------------------------------------ 
