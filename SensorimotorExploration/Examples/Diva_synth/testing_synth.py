@@ -8,13 +8,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    art = [0.8]*13
+    art = [0.0]*13
     art = np.matrix(art)
     
     diva_synth = Diva()
     
     a,b,Outline,d = diva_synth.get_sample(art)
-    
+    diva_synth.xy2ab(Outline)
    
 
     plt.plot(np.real(Outline),np.imag(Outline))

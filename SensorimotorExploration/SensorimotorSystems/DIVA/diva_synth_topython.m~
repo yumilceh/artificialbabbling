@@ -328,8 +328,12 @@ if nargout>2,
         w=2;
         ab1=accumarray(max(1,min(amax, round((a(oall)-amin)))),b(oall),[amax,1],@min,nan);
         ab2=accumarray(max(1,min(amax, round((a(iall)-amin)))),b(iall),[amax,1],@max,nan);
-        for n1=1:w,ab1(2:end-1)=min(min(ab1(2:end-1),ab1(1:end-2)),ab1(3:end));end
-        for n1=1:w,ab2(2:end-1)=max(max(ab2(2:end-1),ab2(1:end-2)),ab2(3:end));end
+        for n1=1:w,
+            ab1(2:end-1)=min(min(ab1(2:end-1),ab1(1:end-2)),ab1(3:end));
+        end
+        for n1=1:w,
+            ab2(2:end-1)=max(max(ab2(2:end-1),ab2(1:end-2)),ab2(3:end));
+        end
         i=ab1>0&ab2>0;
         af=d*(ab1(i)-ab2(i));
         idx=find(af>0,1); % source position
