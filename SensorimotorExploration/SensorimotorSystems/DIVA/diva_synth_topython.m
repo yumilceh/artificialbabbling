@@ -328,8 +328,12 @@ if nargout>2,
         w=2;
         ab1=accumarray(max(1,min(amax, round((a(oall)-amin)))),b(oall),[amax,1],@min,nan);
         ab2=accumarray(max(1,min(amax, round((a(iall)-amin)))),b(iall),[amax,1],@max,nan);
-        for n1=1:w,ab1(2:end-1)=min(min(ab1(2:end-1),ab1(1:end-2)),ab1(3:end));end
-        for n1=1:w,ab2(2:end-1)=max(max(ab2(2:end-1),ab2(1:end-2)),ab2(3:end));end
+        for n1=1:w,
+            ab1(2:end-1)=min(min(ab1(2:end-1),ab1(1:end-2)),ab1(3:end));
+        end
+        for n1=1:w,
+            ab2(2:end-1)=max(max(ab2(2:end-1),ab2(1:end-2)),ab2(3:end));
+        end
         i=ab1>0&ab2>0;
         af=d*(ab1(i)-ab2(i));
         idx=find(af>0,1); % source position
@@ -525,50 +529,4 @@ while time<(ndata+1)*dt;
         u=synth.voicing*1*.010*(synth.pressure+20*synth.pressurebuildup)*synth.glottalsource + (1-synth.voicing)*1*.010*(synth.pressure+20*synth.pressurebuildup)*randn(synth.samplesperperiod,1);
 %         if release_closure_time<40
 %             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
-%         else
-%             u=1*.010*(synth.pressure+synth.pressurebuildup)*randn(synth.samplesperperiod,1);
-%         end
-        v0=real(ifft(fft(u).*synth.filt_closure));
-        numberofperiods=numberofperiods-1;
-        synth.pressure=synth.pressure/10;
-        vnew=v0(1:synth.samplesperperiod);
-        v0=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)/synth.samplesperperiod))+w.*vnew;
-        synth.sample=vnew;        
-    else v0=[]; end
-    if numberofperiods>0,
-        %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)); % vocal tract filter
-        u=0.25*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)); % vocal tract filter
-        u=(synth.voicing*u+(1-synth.voicing)*.025*synth.pressure*randn(synth.samplesperperiod,1));
-        if minaf0>0&&minaf0<=k, u=minaf/k*u+(1-minaf/k)*.02*synth.pressure*randn(synth.samplesperperiod,1); end
-        v=real(ifft(fft(u).*synth.filt));
-        
-        vnew=v(1:synth.samplesperperiod);
-        v=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)'/synth.samplesperperiod))+w.*vnew;
-        synth.sample=vnew;
-        
-        if numberofperiods>1
-            v=cat(1,v,repmat(vnew,[numberofperiods-1,1]));
-        end
-    else v=[]; end
-    v=cat(1,v0,v);
-    v=v+.0001*randn(size(v));
-    v=(1-exp(-v))./(1+exp(-v));
-    s(synth.samplesoutput+(1:numel(v)))=v;
-    time=time+numel(v)/synth.fs;
-    synth.samplesoutput=synth.samplesoutput+numel(v);
-    
-    % computes f0/amp/voicing/pressurebuildup modulation
-    synth.pressure0=vt.pressure0;
-    alpha=min(1,(.1)*synth.numberofperiods);beta=100/synth.numberofperiods;
-    synth.pressure=synth.pressure+alpha*(vt.pressure*(max(1,1.5-vt.opening_time/beta))-synth.pressure);
-    alpha=min(1,.5*synth.numberofperiods);beta=100/synth.numberofperiods;
-    synth.f0=synth.f0+2*sqrt(alpha)*randn+alpha*(vt.f0*max(1,1.25-vt.opening_time/beta)-synth.f0);%147;%120;
-    synth.voicing=max(0,min(1, synth.voicing+.5*(vt.voicing-synth.voicing) ));
-    %synth.modulation=max(0,min(1, synth.modulation+.1*(2*(vt.pressure>0&&minaf>-k)-1) ));
-    alpha=min(1,.1*synth.numberofperiods);
-    synth.pressurebuildup=max(0,min(1, synth.pressurebuildup+alpha*(2*(vt.pressure>0&minaf<0)-1) ));
-    synth.numberofperiods=max(1,numberofperiods);
-end
-s=s(1:ceil(synth.fs*ndata*dt));
-end
-
+%         e

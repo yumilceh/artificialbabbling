@@ -32,12 +32,12 @@ class Diva(object):
         
         keys = ['vt_scale', 'vt_base', 'vt_average', 'vt_box']
         for key in keys:
-            vt[key] = matrix(vt[key])
+            vt[key] = array(vt[key])
         keys = ['fmfit_beta_fmt', 'fmfit_p', 'fmfit_beta_som', 'fmfit_mu', 'fmfit_isigma']
         for key in keys:
-            fmfit[key] = matrix(fmfit[key])
+            fmfit[key] = array(fmfit[key])
         self.vt = vt
-        self.fm_fit = fmfit
+        self.fmfit = fmfit
         
     
     def get_audsom(self, Art):
@@ -45,16 +45,16 @@ class Diva(object):
              Art n_samples x n_articulators(13)
         '''
         Art = tanh(Art)
-        n_samples = Art.shape[0]
-        if n_samples == 1:
-            pass
+        
+        if len(Art.shape)>1:
+            n_samples = Art.shape[0]    
         else:
             Aud, Som, Outline, af = self.get_sample(Art);
         
         
     def get_sample(self, Art):
         '''
-            Art matrix 1 x n_articulators(13) 
+            Art numpy array 1 x n_articulators(13) 
             % computes auditory/somatosensory representations
             % Art(1:10) vocaltract shape params
             % Art(11:13) F0/P/V params
@@ -67,12 +67,10 @@ class Diva(object):
         # computes vocal tract configuration
         #======================================================================
         idx = range(10)
-        
-        if Art.shape[0] > 1:        
-            Art = Art.reshape((13,1),order = 'F')
-            
-        x = matrix(np.multiply(self.vt['vt_scale'][idx,0].transpose(), Art[0,idx]))
-        Outline = self.vt['vt_average'] + self.vt['vt_base'][:,idx].reshape([396,10]) * x.transpose()
+                    
+        x = np.multiply(self.vt['vt_scale'][idx].flatten(), Art[idx])
+        Outline = self.vt['vt_average'] + np.dot(self.vt['vt_base'][:,idx].reshape((396,10), order = 'F'), x.reshape((10,1))) #Keep in mind reshaping order
+        Outline = Outline.flatten()
         
         #=======================================================================
         # % computes somatosensory output (explicitly from vocal tract configuration)        
@@ -81,19 +79,17 @@ class Diva(object):
         Som = np.zeros((8,))
         a, b, sc, af, d = self.xy2ab(Outline)
         Som[0:6] = np.maximum(-1*np.ones((len(sc),)),np.minimum(np.ones((len(sc),)), -tanh(1*sc) ))
-        Som[6:7] = Art[-2:]
+        Som[6:] = Art[-2:]
         
         Aud = np.zeros((4,))
-        Aud[1] = 100 + 50 * Art[-3]
-        dx = Art[idx] - self.fmfit['fmfit_mu'];
-        p = -1 * np.sum(dx * np.multiply(self.fmfit['fmfit_iSigma'],dx),axis=1)/2;
+        Aud[0] = 100 + 50 * Art[-3]
+        dx = Art[idx] - self.fmfit['fmfit_mu']
+        p = -1 * np.sum(np.multiply(np.dot(dx, self.fmfit['fmfit_isigma']), dx),axis=1)/2
+        p = np.multiply(self.fmfit['fmfit_p'].flatten(),np.exp(p-(np.max(p)*np.ones(p.shape))))
+        p = p / np.sum(p)
+        px = np.dot(p.reshape((len(p),1)) , np.append(Art[idx],1).reshape((1,len(idx)+1)))
+        Aud[1:4] = np.dot(self.fmfit['fmfit_beta_fmt'], px.flatten(1))
         
-        '''
-        p = fmfit.p.*exp(p-max(p));
-        p = p/sum(p);
-        px = p*[Art(idx)',1];
-        Aud(2:4) = fmfit.beta_fmt*px(:);
-        '''
         ####################### Not implemente yet (nargout = 2 or 3)
         #---------------------------- if ~isempty(fmfit)&&nargout>1&&nargout<=3,
             #------------------------------------ Som(1:6)=fmfit.beta_som*px(:);
@@ -105,7 +101,6 @@ class Diva(object):
         
 
     def xy2ab(self, x, y = False):  #x -> Outline (column matrix)
-        x = np.asarray(x).flatten()
         if not hasattr(self, 'ab_alpha'):
             amax = 220
             alpha = array([1, 1, 1, 1, 1, 1, 1])
@@ -233,5 +228,4 @@ class Diva(object):
             else:
                 break
         return a, b, sc, af, d
-       
-        
+ 

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     art = [0.0]*13
-    art = np.matrix(art)
+    art = np.array(art)
     
     diva_synth = Diva()
     
