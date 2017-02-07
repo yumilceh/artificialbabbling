@@ -14,7 +14,7 @@ switch(lower(option))
         [Aud,Som,Outline,af,d]=diva_synth_sample(Art);
         filt=a2h(max(0,af),d,1000,11025);
     case 'sound' % outputs soundwave associated with sequence of articulatory states
-        [Aud af]=diva_synth_sound(Art);
+        [Aud, af]=diva_synth_sound(Art);
     case 'af'
         Aud = diva_synth_af(Art);
            

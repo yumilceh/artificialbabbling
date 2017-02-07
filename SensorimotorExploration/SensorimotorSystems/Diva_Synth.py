@@ -10,6 +10,7 @@ import numpy as np
 from numpy import tanh, matrix, array
 from scipy.io import loadmat as loadmat
 from numpy_groupies.aggregate_weave import aggregate 
+from array import array
     
 class Diva(object):
     '''
@@ -49,9 +50,53 @@ class Diva(object):
         if len(Art.shape)>1:
             n_samples = Art.shape[0]    
         else:
-            Aud, Som, Outline, af = self.get_sample(Art);
+            Aud, Som, Outline, af, d = self.get_sample(Art);
+        return Aud, Som, Outline, af
+    
+    def get_sound(self, art):
+        synth = object()
+        synth.fs = 11025
+        synth.update_fs = 200 # Modify sample frequency
+        synth.f0 = 120;
+        synth.samplesperperiod = np.ceil(synth.fs/synth.f0);
+        
+        glt_in = array(range(0,1/synth.samplesperperiod,1-1/synth.samplesperperiod))
+        
+        synth.glottalsource = glotlf(0, );
+        
+        '''
+        synth.f=[0,1];
+        synth.filt=[0,0];
+        synth.pressure=0;
+        %synth.modulation=1;
+        synth.voicing=1;
+        synth.pressurebuildup=0;
+        synth.pressure0=0;
+        synth.sample=zeros(synth.samplesperperiod,1);
+        synth.k1=1;
+        synth.numberofperiods=1;
+        synth.samplesoutput=0;
+        
+        vt.idx=1:10;
+        vt.pressure=0;
+        vt.f0=120;
+        vt.closed=0;
+        vt.closure_time=0;
+        vt.closure_position=0;
+        vt.opening_time=0;
+        
+        voices=struct('F0',{120,340},'size',{1,.7});
+        opt.voices=1;
+        
+        ndata=size(Art,2);
+        dt=.005;
+        time=0;
+        s=zeros(ceil((ndata+1)*dt*synth.fs),1);
         
         
+        Aud = None
+        af = None
+        '''
     def get_sample(self, Art):
         '''
             Art numpy array 1 x n_articulators(13) 
@@ -97,8 +142,6 @@ class Diva(object):
         #------------------------------------------------------------------- end
         
         return Aud, Som, Outline, af, d 
-         
-        
 
     def xy2ab(self, x, y = False):  #x -> Outline (column matrix)
         if not hasattr(self, 'ab_alpha'):
@@ -128,6 +171,9 @@ class Diva(object):
             x=np.exp(-i*np.pi/12) * x
             y=np.imag(x)
             x=np.real(x)
+        
+        ab_alpha = self.ab_alpha
+        ab_beta = self.ab_beta
         #=======================================================================
         # % Grid
         #=======================================================================
@@ -228,4 +274,99 @@ class Diva(object):
             else:
                 break
         return a, b, sc, af, d
- 
+    
+    
+def glotlf(d, t, p=None):
+    if p == None:
+        tt = array(range(99))/100
+    else:
+        tt = t-np.floor(t)
+    
+    u = np.zeros((len(tt),));
+    de = array([0.6, 0.1, 0.2])
+    
+    p = de #Only implemented for one/two input arguments
+    
+    te = p[0]
+    mtc = t*(10.0**(-1))
+    e0 = 1
+    wa = np.pi / (te * ( 1 - p[2] ))
+    a = -np.log(-p[1]* np.sin(wa * te)) / te
+    inta = e0 * ((wa / np.tan(wa*te)-a)/p[1]+wa) / (a**2.0 + wa**2.0)
+    
+    #----------------------------------------- % if inta<0 we should reduce p(2)
+    #------------------------- % if inta>0.5*p(2)*(1-te) we should increase p(2)
+    
+    rb0 = p[1] * inta
+    rb = rb0
+    
+    #--------------------------- % Use Newton to determine closure time constant
+    #----------------------------------- % so that flow starts and ends at zero.
+    
+    for i in range(4):
+        kk = 1 - np.exp(mtc/rb)
+        err = rb + mtc * (1 /kk - 1 ) - rb0
+        derr = 1 - (1 - kk) * (mtc/ rb / kk)**2.
+        rb = rb - err/derr
+    e1 = 1 /(p[1]*(1 - np.exp( mtc / rb ) ))
+    
+    
+    ta = np.lower(tt, te)
+    tb = ~ta
+    
+    if d == 0:
+        u(ta) = e0 * (np.multiply(np.exp(a*tt[np.where(ta)]),(a*np.sin(wa*tt[np.where(ta)])-wa*cos(wa*tt[np.where(ta)])))+wa)/(a**2.+wa**2.)
+        u(tb) = e1 * (np.exp(mtc/rb)*(tt[np.where(tb)]-1-rb)+np.exp((te-tt[np.where(tb)])/rb)*rb)
+    elif d==1:
+        u(ta) = e0 * np.multiply(np.exp(a*tt[np.where(ta)]),np.sin(wa*ttnp.where[(ta)]))
+        u(tb) = e1 * (np.exp(mtc/rb)-np.exp((te-tt[np.where(tb)])/rb))
+    elif d==2:
+        u(ta) = e0 * np.multiply(np.exp(a*tt[np.where(ta)]),(a*np.sin(wa*tt[np.where(ta)])+wa*np.cos(wa*tt[np.where(ta)])))
+        u(tb) = e1 * np.exp((te-tt[np.where(tb)])/rb)/rb
+    else:
+        print('Derivative must be 0,1 or 2')
+        rise ValueError
+    
+    return 
+    doc = '''
+        %GLOTLF   Liljencrants-Fant glottal model U=(D,T,P)
+        % d is derivative of flow waveform: must be 0, 1 or 2
+        % t is in fractions of a cycle
+        % p has one row per output point
+        %    p(:,1)=open phase [0.6]
+        %    p(:,2)=+ve/-ve slope ratio [0.1]
+        %    p(:,3)=closure time constant/closed phase [0.2]
+        % Note: this signal has not been low-pass filtered
+        % and will therefore be aliased
+        %
+        % Usage example:    ncyc=5;
+        %            period=80;
+        %            t=0:1/period:ncyc;
+        %            ug=glotlf(0,t);
+        %            plot(t,ug)
+        
+        
+        %      Copyright (C) Mike Brookes 1998
+        %
+        %      Last modified Thu Apr 30 17:22:00 1998
+        %
+        %   VOICEBOX home page: http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html
+        %
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %   This program is free software; you can redistribute it and/or modify
+        %   it under the terms of the GNU General Public License as published by
+        %   the Free Software Foundation; either version 2 of the License, or
+        %   (at your option) any later version.
+        %
+        %   This program is distributed in the hope that it will be useful,
+        %   but WITHOUT ANY WARRANTY; without even the implied warranty of
+        %   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        %   GNU General Public License for more details.
+        %
+        %   You can obtain a copy of the GNU General Public License from
+        %   ftp://prep.ai.mit.edu/pub/gnu/COPYING-2.0 or by writing to
+        %   Free Software Foundation, Inc.,675 Mass Ave, Cambridge, MA 02139, USA.
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        '''
+            
+        
