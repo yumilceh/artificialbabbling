@@ -5,6 +5,7 @@ Created on Feb 3, 2017
 '''
 import os
 
+import random
 import numpy.linalg  as linalg
 import numpy as np      
 from numpy import tanh, matrix, array
@@ -57,6 +58,7 @@ class Diva(object):
         return Aud, Som, Outline, af
     
     def get_sound(self, art):
+        art = tanh(art)
         synth = Object()
         synth.fs = 11025.
         synth.update_fs = 200. # Modify sample frequency
@@ -81,14 +83,14 @@ class Diva(object):
         self.vt['idx'] = range(10)
         self.vt['pressure'] = 0.
         self.vt['f0'] = 120
-        self.vt['closed'] = 0
+        self.vt['closed'] = False
         self.vt['closure_time'] = 0.
         self.vt['closure_position'] = 0.
         self.vt['opening_time'] = 0.
         
         voices = {'F0': array([120, 340]),'size':array([1,.7])}
         opt = Object()
-        opt.voices = 1
+        opt.voices = 0
         
         
         ndata = art.shape[0]
@@ -100,68 +102,100 @@ class Diva(object):
             #---------------------------------- % sample articulatory parameters
             t0 = np.floor(time/dt)
             t1 = (time-t0*dt)/dt
-            [nill,nill,nill,af1,d]=diva_synth_sample(Art(:,min(ndata,1+t0)))
-            [nill,nill,nill,af2,d]=diva_synth_sample(Art(:,min(ndata,2+t0)))
-            naf1=numel(af1)
-            naf2=numel(af2)
-            if naf2<naf1,af2(end+(1:naf1-naf2))=af2(end); end
-            if naf1<naf2,af1(end+(1:naf2-naf1))=af1(end); end
-            af=af1*(1-t1)+af2*t1
-            FPV=max(-1,min(1, Art(end-2:end,min(ndata,1+t0))*(1-t1)+Art(end-2:end,min(ndata,2+t0))*t1 ))
-            vt.voicing=(1+tanh(3*FPV(3)))/2
-            vt.pressure=FPV(2)
-            vt.pressure0=vt.pressure>.01
-            vt.f0=100+20*FPV(1)
+            dummy1,dummy2,dummy3,af1,d = self.get_sample(art[np.minimum(ndata,0+t0),:])
+            dummy1,dummy2,dummy3,af2,d = self.get_sample(art[np.minimum(ndata,1+t0),:])
             
-            af0=max(0,af)
-            k=.025;af0(af0>0&af0<k)=k;
-            minaf=min(af)
-            minaf0=min(af0)
-            vt.af=af
-        %      display(af)
-        %      DIVA_x.af_sample=DIVA_x.af_sample+1
-        %      DIVA_x.af(:,DIVA_x.af_sample)=af
-        %    tracks place of articulation
-            if minaf0==0, 
-                release=0
-                vt.opening_time=0; vt.closure_time=vt.closure_time+1
-                vt.closure_position=find(af0==0,1,'last')
-                if ~vt.closed, closure=vt.closure_position; else closure=0; end
-                vt.closed=1
-            else
-                if vt.closed, release=vt.closure_position; release_closure_time=vt.closure_time; else release=0; end
-                if (vt.pressure0&&~synth.pressure0) vt.opening_time=0; end
-                vt.opening_time=vt.opening_time+1
-                vt.closure_time=0
-                [nill,vt.closure_position]=min(af)
-                closure=0
-                vt.closed=0
-            end
-        %     display(vt.closed)
-            if release>0  af=max(k,af);minaf=max(k,minaf);minaf0=max(k,minaf0); end
+            naf1 = len(af1)
+            naf2 = len(af2)
+            if naf2<naf1:
+                af2 = np.concatenate((af2, np.repeat(af2[-1], naf1-naf2)))
+            if naf1<naf2:
+                af1 = np.concatenate((af1, np.repeat(af1[-1], naf2-naf1)))
+            af = af1*(1-t1) + af2*t1
+            FPV = np.maximum(-1*np.ones((1,3)),
+                         np.minimum(np.ones((1,3)), 
+                                art[np.minimum(ndata,1+t0),-3:] * (1-t1) +
+                                           art[np.minimum(ndata,2+t0),-3:]*t1 )).flatten()
+            self.vt['voicing'] = (1+np.tanh(3 * FPV[2]))/2
+            self.vt['pressure'] = FPV[1]
+            self.vt['pressure0'] = self.vt['pressure'] > 0.01
+            self.vt['f0'] = 100+20*FPV[0]
             
-            if release>0, 
-                            vt.f0=(.95+.1*rand)*voices(opt.voices).F0
-                            synth.pressure=0;%modulation=0 
-            elseif  (vt.pressure0&&~synth.pressure0) 
-                            vt.f0=(.95+.1*rand)*voices(opt.voices).F0
-                            synth.pressure=vt.pressure; synth.f0=1.25*vt.f0 
-                            synth.pressure=1;%synth.modulation=1 
-            elseif  (~vt.pressure0&&synth.pressure0&&~vt.closed), synth.pressure=synth.pressure/10
-            end
+            af0 = np.maximum(0*af,af)
+            k = 0.025
+            idx_af0 = np.where(np.logical_and(np.greater(af0,0*af0), np.less(af0,k*np.ones(af0.shape)))) 
+            af0[idx_af0] = k*np.ones((len(af0),))
+            minaf = np.min(af)
+            minaf0 = np.min(af0)
+            self.vt['af'] = af
             
-            % computes glottal source
-            synth.samplesperperiod=ceil(synth.fs/synth.f0)
-            pp=[.6,.2-.1*synth.voicing,.25];%10+.15*max(0,min(1,1-vt.opening_time/100))]
-            synth.glottalsource=10*.25*glotlf(0,(0:1/synth.samplesperperiod:1-1/synth.samplesperperiod)',pp)+10*.025*synth.k1*glotlf(1,(0:1/synth.samplesperperiod:1-1/synth.samplesperperiod)',pp);
-            numberofperiods=synth.numberofperiods
+        #---------------------------------------------------- %      display(af)
+        #---------------------------- %      DIVA_x.af_sample=DIVA_x.af_sample+1
+        #------------------------------- %      DIVA_x.af(:,DIVA_x.af_sample)=af
+        
+        #======================================================================
+        # %    tracks place of articulation
+        #======================================================================
+        
+            if minaf0 == 0: 
+                release = 0
+                self.vt['opening_time'] = 0
+                self.vt['closure_time'] = self.vt['closure_time'] + 1
+                self.vt['closure_position'] = np.where(af0 == 0,1)[-1]
+                if not self.vt['closed']:
+                    closure = self.vt['closure_position']
+                else:
+                    closure = False
+                self.vt['closed'] = True
+            else:
+                if self.vt['closed']:
+                    release = self.vt['closure_position']
+                    release_closure_time = self.vt['closure_time']
+                else: 
+                    release = 0
+                if self.vt['pressure0'] and not synth.pressure0:
+                    self.vt['opening_time'] = 0
+                self.vt['opening_time'] = self.vt['opening_time'] + 1
+                self.vt['closure_time'] = 0
+                self.vt['closure_position'] = np.argmin(af)
+                closure = 0
+                self.vt['closed'] = False
+        
+        #%     display(vt.closed)
+            if release>0:
+                af = np.maximum(k*np.ones(af.shape),af)
+                minaf = np.max(k, minaf)
+                minaf0 = np.max(k, minaf0)
+            
+            if release > 0: 
+                self.vt['f0'] = (0.95 + 0.1 * random.random()) * voices['F0']  #opt.voices not implemented yet
+                synth.pressure = 0   #%modulation=0 
+            elif (self.vt['pressure0']  and not synth.pressure0): 
+                self.vt['f0'] = (0.95 + 0.1 * random.random()) * voices['F0']
+                synth.pressure = self.vt['pressure']
+                synth.f0 = 1.25 * self.vt['f0'] 
+                synth.pressure = 1     #%synth.modulation=1 
+            elif (not self.vt['pressure0'] and synth.pressure0 and not self.vt['closed']):
+                synth.pressure = synth.pressure/10
+            
+            
+            #% computes glottal source
+            synth.samplesperperiod = np.ceil(synth.fs/synth.f0)
+            pp = [0.6 , 0.2 - 0.1 * synth.voicing, 0.25] #%10+.15*max(0,min(1,1-vt.opening_time/100))]
+            
+            glt_in = array(np.arange(0,1-1/synth.samplesperperiod + 1/synth.samplesperperiod ,1/synth.samplesperperiod))
+            synth.glottalsource = 10 * 0.25 * glotlf(0,glt_in,pp) + \
+                                  10 * 0.025 * synth.k1 * glotlf(1,glt_in,pp)
+            numberofperiods = synth.numberofperiods
                 
-            % computes vocal tract filter
-            [synth.filt,synth.f,synth.filt_closure]=a2h(af0,d,synth.samplesperperiod,synth.fs,vt.closure_position,minaf0)
+            #% computes vocal tract filter
+            '''
+            synth.filt,synth.f,synth.filt_closure = a2h(af0,d,synth.samplesperperiod,synth.fs,vt.closure_position,minaf0)
             synth.filt=2*synth.filt/max(eps,synth.filt(1))
             synth.filt(1)=0
             synth.filt_closure=2*synth.filt_closure/max(eps,synth.filt_closure(1))
             synth.filt_closure(1)=0
+            
             
             % computes sound signal
             w=linspace(0,1,synth.samplesperperiod)'
@@ -217,7 +251,7 @@ class Diva(object):
         end
 
         
-        
+        '''
         
         
         
@@ -225,7 +259,7 @@ class Diva(object):
         
         af = 0
         
-        return s af
+        return s, af
     
         
     def get_sample(self, Art):
@@ -416,7 +450,10 @@ def glotlf(d, t = None, p = None):
     u = np.zeros((len(tt),))
     de = array([0.6, 0.1, 0.2])
     
-    p = de #Only implemented for one/two input arguments
+    if p is None: 
+        p = de 
+    else:
+        p = np.concatenate((p, de[len(p):1]))
     
     te = p[0]
     mtc = te-1

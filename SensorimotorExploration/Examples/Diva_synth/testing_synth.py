@@ -18,10 +18,12 @@ if __name__ == '__main__':
     Aud, Som, Outline, af = diva_synth.get_audsom(art)
     
     
-    arts = [0.1]*13
-    arts[10:] = ([1]*3)
-    arts = 80 * [arts]
-    arts = np.array(arts)
+    arts = [[0.1]*13, [0.7]*13]
+    arts[0][11:] = ([1]*3)
+    arts[1][11:] = ([1]*3)
+    
+    arts = np.array(arts).transpose()
+    arts = np.tile(arts, 40).transpose()
     Aud, af = diva_synth.get_sound(arts) 
     
     pass
