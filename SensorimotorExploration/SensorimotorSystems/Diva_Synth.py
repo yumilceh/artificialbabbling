@@ -10,8 +10,11 @@ import numpy as np
 from numpy import tanh, matrix, array
 from scipy.io import loadmat as loadmat
 from numpy_groupies.aggregate_weave import aggregate 
-from array import array
     
+class Object(object):
+    pass
+
+
 class Diva(object):
     '''
     Python implementation of the Diva Synthesizer
@@ -50,53 +53,181 @@ class Diva(object):
         if len(Art.shape)>1:
             n_samples = Art.shape[0]    
         else:
-            Aud, Som, Outline, af, d = self.get_sample(Art);
+            Aud, Som, Outline, af, d = self.get_sample(Art)
         return Aud, Som, Outline, af
     
     def get_sound(self, art):
-        synth = object()
-        synth.fs = 11025
-        synth.update_fs = 200 # Modify sample frequency
-        synth.f0 = 120;
-        synth.samplesperperiod = np.ceil(synth.fs/synth.f0);
+        synth = Object()
+        synth.fs = 11025.
+        synth.update_fs = 200. # Modify sample frequency
+        synth.f0 = 120.
+        synth.samplesperperiod = np.ceil(synth.fs/synth.f0)
         
-        glt_in = array(range(0,1/synth.samplesperperiod,1-1/synth.samplesperperiod))
+        glt_in = array(np.arange(0,1-1/synth.samplesperperiod + 1/synth.samplesperperiod ,1/synth.samplesperperiod))
+        synth.glottalsource = glotlf(0, glt_in)
         
-        synth.glottalsource = glotlf(0, );
+        synth.f = array([0,1])
+        synth.filt = array([0,0])
+        synth.pressure = 0.
+        #-------------------------------------------------- %synth.modulation=1;
+        synth.voicing = 1.
+        synth.pressurebuildup = 0.
+        synth.pressure0 = 0.
+        synth.sample = np.zeros((synth.samplesperperiod,))
+        synth.k1 = 1 
+        synth.numberofperiods = 1
+        synth.samplesoutput = 0
+
+        self.vt['idx'] = range(10)
+        self.vt['pressure'] = 0.
+        self.vt['f0'] = 120
+        self.vt['closed'] = 0
+        self.vt['closure_time'] = 0.
+        self.vt['closure_position'] = 0.
+        self.vt['opening_time'] = 0.
         
-        '''
-        synth.f=[0,1];
-        synth.filt=[0,0];
-        synth.pressure=0;
-        %synth.modulation=1;
-        synth.voicing=1;
-        synth.pressurebuildup=0;
-        synth.pressure0=0;
-        synth.sample=zeros(synth.samplesperperiod,1);
-        synth.k1=1;
-        synth.numberofperiods=1;
-        synth.samplesoutput=0;
-        
-        vt.idx=1:10;
-        vt.pressure=0;
-        vt.f0=120;
-        vt.closed=0;
-        vt.closure_time=0;
-        vt.closure_position=0;
-        vt.opening_time=0;
-        
-        voices=struct('F0',{120,340},'size',{1,.7});
-        opt.voices=1;
-        
-        ndata=size(Art,2);
-        dt=.005;
-        time=0;
-        s=zeros(ceil((ndata+1)*dt*synth.fs),1);
+        voices = {'F0': array([120, 340]),'size':array([1,.7])}
+        opt = Object()
+        opt.voices = 1
         
         
-        Aud = None
-        af = None
-        '''
+        ndata = art.shape[0]
+        dt = 0.005
+        time = 0.
+        s = np.zeros((np.ceil((ndata+1)*dt*synth.fs),1))
+        
+        while time<(ndata+1)*dt:
+            #---------------------------------- % sample articulatory parameters
+            t0 = np.floor(time/dt)
+            t1 = (time-t0*dt)/dt
+            [nill,nill,nill,af1,d]=diva_synth_sample(Art(:,min(ndata,1+t0)))
+            [nill,nill,nill,af2,d]=diva_synth_sample(Art(:,min(ndata,2+t0)))
+            naf1=numel(af1)
+            naf2=numel(af2)
+            if naf2<naf1,af2(end+(1:naf1-naf2))=af2(end); end
+            if naf1<naf2,af1(end+(1:naf2-naf1))=af1(end); end
+            af=af1*(1-t1)+af2*t1
+            FPV=max(-1,min(1, Art(end-2:end,min(ndata,1+t0))*(1-t1)+Art(end-2:end,min(ndata,2+t0))*t1 ))
+            vt.voicing=(1+tanh(3*FPV(3)))/2
+            vt.pressure=FPV(2)
+            vt.pressure0=vt.pressure>.01
+            vt.f0=100+20*FPV(1)
+            
+            af0=max(0,af)
+            k=.025;af0(af0>0&af0<k)=k;
+            minaf=min(af)
+            minaf0=min(af0)
+            vt.af=af
+        %      display(af)
+        %      DIVA_x.af_sample=DIVA_x.af_sample+1
+        %      DIVA_x.af(:,DIVA_x.af_sample)=af
+        %    tracks place of articulation
+            if minaf0==0, 
+                release=0
+                vt.opening_time=0; vt.closure_time=vt.closure_time+1
+                vt.closure_position=find(af0==0,1,'last')
+                if ~vt.closed, closure=vt.closure_position; else closure=0; end
+                vt.closed=1
+            else
+                if vt.closed, release=vt.closure_position; release_closure_time=vt.closure_time; else release=0; end
+                if (vt.pressure0&&~synth.pressure0) vt.opening_time=0; end
+                vt.opening_time=vt.opening_time+1
+                vt.closure_time=0
+                [nill,vt.closure_position]=min(af)
+                closure=0
+                vt.closed=0
+            end
+        %     display(vt.closed)
+            if release>0  af=max(k,af);minaf=max(k,minaf);minaf0=max(k,minaf0); end
+            
+            if release>0, 
+                            vt.f0=(.95+.1*rand)*voices(opt.voices).F0
+                            synth.pressure=0;%modulation=0 
+            elseif  (vt.pressure0&&~synth.pressure0) 
+                            vt.f0=(.95+.1*rand)*voices(opt.voices).F0
+                            synth.pressure=vt.pressure; synth.f0=1.25*vt.f0 
+                            synth.pressure=1;%synth.modulation=1 
+            elseif  (~vt.pressure0&&synth.pressure0&&~vt.closed), synth.pressure=synth.pressure/10
+            end
+            
+            % computes glottal source
+            synth.samplesperperiod=ceil(synth.fs/synth.f0)
+            pp=[.6,.2-.1*synth.voicing,.25];%10+.15*max(0,min(1,1-vt.opening_time/100))]
+            synth.glottalsource=10*.25*glotlf(0,(0:1/synth.samplesperperiod:1-1/synth.samplesperperiod)',pp)+10*.025*synth.k1*glotlf(1,(0:1/synth.samplesperperiod:1-1/synth.samplesperperiod)',pp);
+            numberofperiods=synth.numberofperiods
+                
+            % computes vocal tract filter
+            [synth.filt,synth.f,synth.filt_closure]=a2h(af0,d,synth.samplesperperiod,synth.fs,vt.closure_position,minaf0)
+            synth.filt=2*synth.filt/max(eps,synth.filt(1))
+            synth.filt(1)=0
+            synth.filt_closure=2*synth.filt_closure/max(eps,synth.filt_closure(1))
+            synth.filt_closure(1)=0
+            
+            % computes sound signal
+            w=linspace(0,1,synth.samplesperperiod)'
+            if release>0,%&&synth.pressure>.01,
+                u=synth.voicing*1*.010*(synth.pressure+20*synth.pressurebuildup)*synth.glottalsource + (1-synth.voicing)*1*.010*(synth.pressure+20*synth.pressurebuildup)*randn(synth.samplesperperiod,1)
+        %         if release_closure_time<40
+        %             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
+        %         else
+        %             u=1*.010*(synth.pressure+synth.pressurebuildup)*randn(synth.samplesperperiod,1)
+        %         end
+                v0=real(ifft(fft(u).*synth.filt_closure))
+                numberofperiods=numberofperiods-1
+                synth.pressure=synth.pressure/10
+                vnew=v0(1:synth.samplesperperiod)
+                v0=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)/synth.samplesperperiod))+w.*vnew
+                synth.sample=vnew        
+            else v0=[]; end
+            if numberofperiods>0,
+                %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
+                u=0.25*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
+                u=(synth.voicing*u+(1-synth.voicing)*.025*synth.pressure*randn(synth.samplesperperiod,1))
+                if minaf0>0&&minaf0<=k, u=minaf/k*u+(1-minaf/k)*.02*synth.pressure*randn(synth.samplesperperiod,1); end
+                v=real(ifft(fft(u).*synth.filt))
+                
+                vnew=v(1:synth.samplesperperiod)
+                v=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)'/synth.samplesperperiod))+w.*vnew
+                synth.sample=vnew
+                
+                if numberofperiods>1
+                    v=cat(1,v,repmat(vnew,[numberofperiods-1,1]))
+                end
+            else v=[]; end
+            v=cat(1,v0,v)
+            v=v+.0001*randn(size(v))
+            v=(1-exp(-v))./(1+exp(-v))
+            s(synth.samplesoutput+(1:numel(v)))=v
+            time=time+numel(v)/synth.fs
+            synth.samplesoutput=synth.samplesoutput+numel(v)
+            
+            % computes f0/amp/voicing/pressurebuildup modulation
+            synth.pressure0=vt.pressure0
+            alpha=min(1,(.1)*synth.numberofperiods);beta=100/synth.numberofperiods
+            synth.pressure=synth.pressure+alpha*(vt.pressure*(max(1,1.5-vt.opening_time/beta))-synth.pressure)
+            alpha=min(1,.5*synth.numberofperiods);beta=100/synth.numberofperiods
+            synth.f0=synth.f0+2*sqrt(alpha)*randn+alpha*(vt.f0*max(1,1.25-vt.opening_time/beta)-synth.f0)%147;%120;
+            synth.voicing=max(0,min(1, synth.voicing+.5*(vt.voicing-synth.voicing) ))
+            %synth.modulation=max(0,min(1, synth.modulation+.1*(2*(vt.pressure>0&&minaf>-k)-1) ))
+            alpha=min(1,.1*synth.numberofperiods)
+            synth.pressurebuildup=max(0,min(1, synth.pressurebuildup+alpha*(2*(vt.pressure>0&minaf<0)-1) ))
+            synth.numberofperiods=max(1,numberofperiods)
+        end
+        s=s(1:ceil(synth.fs*ndata*dt))
+        end
+
+        
+        
+        
+        
+        
+         
+        
+        af = 0
+        
+        return s af
+    
+        
     def get_sample(self, Art):
         '''
             Art numpy array 1 x n_articulators(13) 
@@ -137,8 +268,8 @@ class Diva(object):
         
         ####################### Not implemente yet (nargout = 2 or 3)
         #---------------------------- if ~isempty(fmfit)&&nargout>1&&nargout<=3,
-            #------------------------------------ Som(1:6)=fmfit.beta_som*px(:);
-            #------------------------------------------ Som(7:8)=Art(end-1:end);
+            #------------------------------------ Som(1:6)=fmfit.beta_som*px(:)
+            #------------------------------------------ Som(7:8)=Art(end-1:end)
         #------------------------------------------------------------------- end
         
         return Aud, Som, Outline, af, d 
@@ -155,7 +286,7 @@ class Diva(object):
                 ab_alpha[idx[n1]] = alpha[n1]
                 ab_beta[idx[n1]] = beta[n1]
             
-            h = np.hanning(51)/sum(np.hanning(51)); #Not same result as in hanning
+            h = np.hanning(51)/sum(np.hanning(51)) #Not same result as in hanning
             idx_2 = np.zeros((25,))
             idx_2 = np.concatenate((idx_2, np.array(range(amax))))
             idx_2 = np.concatenate((idx_2, (amax-1)*np.ones((25,))))
@@ -210,8 +341,8 @@ class Diva(object):
         iwall = range(163+10,257)
         oall = range(29,164)
         iall = range(163,302)
-        xmin = -20; 
-        ymin = -160;
+        xmin = -20 
+        ymin = -160
         amin = ymin-y0
         amax=np.ceil((x0-xmin+k-amin))  #here is the variability of the af vector
         
@@ -232,19 +363,19 @@ class Diva(object):
         mind = np.nanmin(mind_precursor.reshape((fact,6), order = 'F'), axis = 0)
         sc = mind[range(4)]    
         sc = np.append(sc,np.nanmin(mind[range(4,6)]))
-        sc = np.append(sc,lipsab1-lipsab2); 
+        sc = np.append(sc,lipsab1-lipsab2) 
         sc = d * sc #In Matlab this is a column vector
         
         w = 2
         
-        #ab1 = aggregate(max(1,min(amax, round((a(oall)-amin)))),b(oall),[amax,1],min,nan);
-        #ab2 = aggregate(max(1,min(amax, round((a(iall)-amin)))),b(iall),[amax,1],max,nan);
+        #ab1 = aggregate(max(1,min(amax, round((a(oall)-amin)))),b(oall),[amax,1],min,nan)
+        #ab2 = aggregate(max(1,min(amax, round((a(iall)-amin)))),b(iall),[amax,1],max,nan)
         
         idx_ab1 = np.int_(np.maximum(np.zeros((len(oall),)),np.minimum((amax-1)*np.ones((len(oall),)), np.round(a[oall]-amin-1))))
         idx_ab2 = np.int_(np.maximum(np.zeros((len(iall),)),np.minimum((amax-1)*np.ones((len(iall),)), np.round(a[iall]-amin-1))))
         
-        ab1 = aggregate(idx_ab1,b[oall],size = amax, func= 'min', fill_value=None);
-        ab2 = aggregate(idx_ab2,b[iall],size = amax, func = 'max', fill_value=None);
+        ab1 = aggregate(idx_ab1,b[oall],size = amax, func= 'min', fill_value=None)
+        ab2 = aggregate(idx_ab2,b[iall],size = amax, func = 'max', fill_value=None)
         
         ab1[np.isnan(ab1)] = np.inf
         ab2[np.isnan(ab2)] = -np.inf
@@ -276,19 +407,19 @@ class Diva(object):
         return a, b, sc, af, d
     
     
-def glotlf(d, t, p=None):
-    if p == None:
+def glotlf(d, t = None, p = None):
+    if t is None:
         tt = array(range(99))/100
     else:
         tt = t-np.floor(t)
     
-    u = np.zeros((len(tt),));
+    u = np.zeros((len(tt),))
     de = array([0.6, 0.1, 0.2])
     
     p = de #Only implemented for one/two input arguments
     
     te = p[0]
-    mtc = t*(10.0**(-1))
+    mtc = te-1
     e0 = 1
     wa = np.pi / (te * ( 1 - p[2] ))
     a = -np.log(-p[1]* np.sin(wa * te)) / te
@@ -310,24 +441,25 @@ def glotlf(d, t, p=None):
         rb = rb - err/derr
     e1 = 1 /(p[1]*(1 - np.exp( mtc / rb ) ))
     
-    
-    ta = np.lower(tt, te)
-    tb = ~ta
+    pre_ta_tb = np.less(tt, te)
+    ta = np.where(pre_ta_tb)
+    tb = np.where(np.logical_not(pre_ta_tb))
     
     if d == 0:
-        u(ta) = e0 * (np.multiply(np.exp(a*tt[np.where(ta)]),(a*np.sin(wa*tt[np.where(ta)])-wa*cos(wa*tt[np.where(ta)])))+wa)/(a**2.+wa**2.)
-        u(tb) = e1 * (np.exp(mtc/rb)*(tt[np.where(tb)]-1-rb)+np.exp((te-tt[np.where(tb)])/rb)*rb)
+        u[ta] = e0 * (np.multiply(np.exp(a*tt[ta]),(a*np.sin(wa*tt[ta])-wa*np.cos(wa*tt[ta])))+wa)/(a**2.+wa**2.)
+        u[tb] = e1 * (np.exp(mtc/rb)*(tt[tb]-1-rb)+np.exp((te-tt[tb])/rb)*rb)
     elif d==1:
-        u(ta) = e0 * np.multiply(np.exp(a*tt[np.where(ta)]),np.sin(wa*ttnp.where[(ta)]))
-        u(tb) = e1 * (np.exp(mtc/rb)-np.exp((te-tt[np.where(tb)])/rb))
+        u[ta] = e0 * np.multiply(np.exp(a*tt[ta]),np.sin(wa*tt[ta]))
+        u[tb] = e1 * (np.exp(mtc/rb)-np.exp((te-tt[tb])/rb))
     elif d==2:
-        u(ta) = e0 * np.multiply(np.exp(a*tt[np.where(ta)]),(a*np.sin(wa*tt[np.where(ta)])+wa*np.cos(wa*tt[np.where(ta)])))
-        u(tb) = e1 * np.exp((te-tt[np.where(tb)])/rb)/rb
+        u[ta] = e0 * np.multiply(np.exp(a*tt[ta]),(a*np.sin(wa*tt[ta])+wa*np.cos(wa*tt[ta])))
+        u[tb] = e1 * np.exp((te-tt[tb])/rb)/rb
     else:
         print('Derivative must be 0,1 or 2')
-        rise ValueError
+        raise ValueError
     
-    return 
+    return u
+     
     doc = '''
         %GLOTLF   Liljencrants-Fant glottal model U=(D,T,P)
         % d is derivative of flow waveform: must be 0, 1 or 2

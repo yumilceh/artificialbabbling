@@ -17,11 +17,12 @@ if __name__ == '__main__':
     
     Aud, Som, Outline, af = diva_synth.get_audsom(art)
     
-    art = [0.1]*13
-    art[10:] = 1
-    art = 80*art
-    art = np.array(art)
-    Aud, af = diva_synth.get_sound(art) 
+    
+    arts = [0.1]*13
+    arts[10:] = ([1]*3)
+    arts = 80 * [arts]
+    arts = np.array(arts)
+    Aud, af = diva_synth.get_sound(arts) 
     
     pass
     #plt.plot(np.real(Outline),np.imag(Outline))
