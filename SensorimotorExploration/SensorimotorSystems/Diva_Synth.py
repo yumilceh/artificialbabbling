@@ -65,7 +65,7 @@ class Diva(object):
         synth.f0 = 120.
         synth.samplesperperiod = np.ceil(synth.fs/synth.f0)
         
-        glt_in = array(np.arange(0,1-1/synth.samplesperperiod + 1/synth.samplesperperiod ,1/synth.samplesperperiod))
+        glt_in = array(np.arange(0, 1 ,1/synth.samplesperperiod))
         synth.glottalsource = glotlf(0, glt_in)
         
         synth.f = array([0,1])
@@ -88,7 +88,8 @@ class Diva(object):
         self.vt['closure_position'] = 0.
         self.vt['opening_time'] = 0.
         
-        voices = {'F0': array([120, 340]),'size':array([1,.7])}
+        voices = [{'F0': 120.,'size':1.}, {'F0': 340.,'size':0.7}]
+
         opt = Object()
         opt.voices = 0
         
@@ -164,33 +165,34 @@ class Diva(object):
         #%     display(vt.closed)
             if release>0:
                 af = np.maximum(k*np.ones(af.shape),af)
-                minaf = np.max(k, minaf)
-                minaf0 = np.max(k, minaf0)
+                minaf = np.max((k, minaf))
+                minaf0 = np.max((k, minaf0))
             
             if release > 0: 
-                self.vt['f0'] = (0.95 + 0.1 * random.random()) * voices['F0']  #opt.voices not implemented yet
+                self.vt['f0'] = (0.95 + 0. * random.random()) * voices[opt.voices]['F0']  #Maybe we must have more control over randomness
                 synth.pressure = 0   #%modulation=0 
             elif (self.vt['pressure0']  and not synth.pressure0): 
-                self.vt['f0'] = (0.95 + 0.1 * random.random()) * voices['F0']
+                self.vt['f0'] = (0.95 + 0. * random.random()) * voices[opt.voices]['F0']
                 synth.pressure = self.vt['pressure']
                 synth.f0 = 1.25 * self.vt['f0'] 
-                synth.pressure = 1     #%synth.modulation=1 
+                synth.pressure = 1.     #%synth.modulation=1 
             elif (not self.vt['pressure0'] and synth.pressure0 and not self.vt['closed']):
-                synth.pressure = synth.pressure/10
+                synth.pressure = synth.pressure/10.
             
             
             #% computes glottal source
             synth.samplesperperiod = np.ceil(synth.fs/synth.f0)
             pp = [0.6 , 0.2 - 0.1 * synth.voicing, 0.25] #%10+.15*max(0,min(1,1-vt.opening_time/100))]
             
-            glt_in = array(np.arange(0,1-1/synth.samplesperperiod + 1/synth.samplesperperiod ,1/synth.samplesperperiod))
+            glt_in = array(np.arange(0,1,1/synth.samplesperperiod))
             synth.glottalsource = 10 * 0.25 * glotlf(0,glt_in,pp) + \
                                   10 * 0.025 * synth.k1 * glotlf(1,glt_in,pp)
             numberofperiods = synth.numberofperiods
                 
             #% computes vocal tract filter
+            
+            synth.filt,synth.f,synth.filt_closure = self.a2h(af0,d,synth.samplesperperiod,synth.fs,self.vt['closure_position'],minaf0)
             '''
-            synth.filt,synth.f,synth.filt_closure = a2h(af0,d,synth.samplesperperiod,synth.fs,vt.closure_position,minaf0)
             synth.filt=2*synth.filt/max(eps,synth.filt(1))
             synth.filt(1)=0
             synth.filt_closure=2*synth.filt_closure/max(eps,synth.filt_closure(1))
@@ -211,8 +213,11 @@ class Diva(object):
                 synth.pressure=synth.pressure/10
                 vnew=v0(1:synth.samplesperperiod)
                 v0=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)/synth.samplesperperiod))+w.*vnew
-                synth.sample=vnew        
+                synth.sample=vnew   
+                 
             else v0=[]; end
+            
+            
             if numberofperiods>0,
                 %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
                 u=0.25*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
@@ -440,7 +445,116 @@ class Diva(object):
                 break
         return a, b, sc, af, d
     
+    def a2h(self, a,l,n,fs = None, closure = None, mina = None):   
+        eps = np.finfo(np.float32).eps     
+        if not isinstance(mina, float):
+            mina = np.amin(a,axis=0)
+        if not isinstance(closure, float) and not isinstance(closure, int):
+            closure = 0
+        if not isinstance(fs, float) and not isinstance(fs, int):
+            fs = 11025
+        #if np.sum(len(np.where(a.shape>1))) <= 1:
+        if not isinstance(a, np.ndarray):
+            #a = a.flatten('F')
+            N, M = (1,1)
+        else:
+            if len(a.shape)==1:
+                N = M = a.shape[0]
+            else:
+                N, M = a.shape
+            
+            
+        #if not np.sum(len(np.where(l.shape>1))) <= 1:
+        if not isinstance(l, np.ndarray):
+            #l = l.flatten('F')
+            NL, ML =(1, 1)
+        else:
+            NL, ML = l.shape
+            
+            
+        c=34326 #% speed of sound (cm/s)
+
+        m = int(np.ceil(n/2)+1)
+        f = fs*array(range(int(np.ceil(n/2)+1)))/n
+        t = l / c
+        Rrad = 0.9 * np.exp(-(np.abs(f)/4e3)**2) #% reflection at lips (low pass)
+        H = np.zeros((m,M)) #%H=zeros(n,M);
+        Hc = np.zeros((m,M)) + 0j*np.zeros((m,M))
+        if mina==0:
+            a = np.max((0.05,a))
+        #%k=0.995;%.999;
+        for nM in range(M):
+            #if 1: #%mina(nM)>0,
+            coswt = np.cos(2 * np.pi * f * sub_array(t, idx_y = np.min((ML,nM))-1))
+            sinwt = 1j * np.sin(2 * np.pi * f * sub_array(t, idx_y = np.min((ML,nM))-1))
+            #R=[.9;(a(2:N,nM)-a(1:N-1,nM))./max(eps,a(2:N,nM)+a(1:N-1,nM))];
+            R = np.concatenate(([0.9], np.divide(sub_array(a,idx_x = range(1,N,1), idx_y = nM-1) \
+                                                                         - sub_array(a,idx_x=range(N-1), idx_y = nM-1), \
+                                                    np.maximum(eps*np.ones((N-1,)),sub_array(a,idx_x = range(1,N,1), idx_y = nM-1) \
+                                                                         + sub_array(a,idx_x=range(N-1), idx_y = nM-1)))))
+            
+            U = coswt+sinwt
+            V = coswt-sinwt
+            #--------------------------------------------------------- if 1:
+            h1 = np.ones((m,))                  # % signal at glottis
+            h2 = np.zeros((m,))
+            for nN in range(N-1):
+                RnN = -R[nN]
+                u = h1 + RnN * h2
+                v = h2 + RnN * h1   # % reflection
+                if closure==nN:
+                    Hc[:,nM] = u-v
+                if NL == 1:
+                    h1 = np.multiply(U, u)
+                    h2 = np.multiply(V, v)      #  % delay
+                else:   # This case might not be working properly, It hasnot been tested
+                    h1 = np.multiply(U[:,nN],u)
+                    h2 = np.multiply(V[:,nN],v)
+                    
+                #%h(:,1)=h(:,1)/k;h(:,2)=h(:,2)*k;
+            
+            u = h1 - np.multiply(Rrad,h2) # %v=h2-Rrad.*h1; #   % reflection
+            h = u;              #%h(:,2)=v;
+            if closure >= N:  #Indexing here must be debugged
+                Hc[:,nM] = u - np.multiply(h2 - np.multiply(Rrad,h1))
+            
+            ###### CODE IN MATLAB THAT IS NEVER EXECUTED #########3
+            
+            H[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape)) + Rrad), np.prod(np.ones((Rrad.shape))+R)), h[:,0])
+            if closure>0:
+                Hc[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape))+Rrad),np.prod(np.ones((Rrad.shape))+R[closure:N]),Hc[:,nM-1]),h[:,0])
+        
+        dummy = False
+        pass
+        '''
+        
+        H=cat(1,H,conj(H(1+(n-m:-1:1),:)));
+        Hc=cat(1,Hc,conj(Hc(1+(n-m:-1:1),:)));
+        f=cat(1,f,-f(1+(n-m:-1:1)));
+        if mina==0, H=0*H; end
+        end
+        '''
     
+    
+def sub_array(x, idx_x=np.inf, idx_y=np.inf):
+    # This function supports floats, array(n,1) or array(n > 1, m > 1)
+    if isinstance(x, float):
+        return x
+    
+    n_dims = len(x.shape)
+    if n_dims == 1:
+        if not idx_x == np.inf:
+            x = x[idx_x]
+        return x 
+    
+    if not idx_x == np.inf:
+        x = x[idx_x,:]
+    if not idx_y == np.inf:
+        x = x[:,idx_y]
+    
+    return x
+                
+                
 def glotlf(d, t = None, p = None):
     if t is None:
         tt = array(range(99))/100

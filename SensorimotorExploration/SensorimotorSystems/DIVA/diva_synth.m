@@ -126,10 +126,10 @@ while time<(ndata+1)*dt;
     if release>0  af=max(k,af);minaf=max(k,minaf);minaf0=max(k,minaf0); end
     
     if release>0, 
-                    vt.f0=(.95+.1*rand)*voices(opt.voices).F0;
+                    vt.f0=(.95+.0*rand)*voices(opt.voices).F0; %MODIFIED 0.1 Noise
                     synth.pressure=0;%modulation=0; 
     elseif  (vt.pressure0&&~synth.pressure0) 
-                    vt.f0=(.95+.1*rand)*voices(opt.voices).F0;
+                    vt.f0=(.95+.0*rand)*voices(opt.voices).F0;  %MODIFIED 0.1 Noise
                     synth.pressure=vt.pressure; synth.f0=1.25*vt.f0; 
                     synth.pressure=1;%synth.modulation=1; 
     elseif  (~vt.pressure0&&synth.pressure0&&~vt.closed), synth.pressure=synth.pressure/10;
