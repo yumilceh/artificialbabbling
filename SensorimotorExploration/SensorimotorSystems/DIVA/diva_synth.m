@@ -364,7 +364,11 @@ for nM=1:M,
                 if NL==1, h1=U.*u;h2=V.*v;        % delay
                 else      h1=U(:,nN).*u;h2=V(:,nN).*v; end
                 %h(:,1)=h(:,1)/k;h(:,2)=h(:,2)*k;
+                display(sum(h1))
+                display(sum(h2))
+                display(RnN)
             end
+            
             u=h1-Rrad.*h2; %v=h2-Rrad.*h1;    % reflection
             h=u;              %h(:,2)=v;
             if closure>=N, Hc(:,nM)=u-(h2-Rrad.*h1); end

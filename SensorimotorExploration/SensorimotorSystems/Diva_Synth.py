@@ -459,7 +459,8 @@ class Diva(object):
             N, M = (1,1)
         else:
             if len(a.shape)==1:
-                N = M = a.shape[0]
+                N = a.shape[0]
+                M = 1
             else:
                 N, M = a.shape
             
@@ -478,7 +479,7 @@ class Diva(object):
         f = fs*array(range(int(np.ceil(n/2)+1)))/n
         t = l / c
         Rrad = 0.9 * np.exp(-(np.abs(f)/4e3)**2) #% reflection at lips (low pass)
-        H = np.zeros((m,M)) #%H=zeros(n,M);
+        H = np.zeros((m,M)) + 0j*np.zeros((m,M)) #%H=zeros(n,M);
         Hc = np.zeros((m,M)) + 0j*np.zeros((m,M))
         if mina==0:
             a = np.max((0.05,a))
@@ -503,14 +504,16 @@ class Diva(object):
                 u = h1 + RnN * h2
                 v = h2 + RnN * h1   # % reflection
                 if closure==nN:
-                    Hc[:,nM] = u-v
+                    Hc[:,nM] = u - v
                 if NL == 1:
                     h1 = np.multiply(U, u)
                     h2 = np.multiply(V, v)      #  % delay
                 else:   # This case might not be working properly, It hasnot been tested
                     h1 = np.multiply(U[:,nN],u)
                     h2 = np.multiply(V[:,nN],v)
-                    
+                print(sum(h1))
+                print(sum(h2))
+                print(RnN)   
                 #%h(:,1)=h(:,1)/k;h(:,2)=h(:,2)*k;
             
             u = h1 - np.multiply(Rrad,h2) # %v=h2-Rrad.*h1; #   % reflection
@@ -520,9 +523,11 @@ class Diva(object):
             
             ###### CODE IN MATLAB THAT IS NEVER EXECUTED #########3
             
-            H[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape)) + Rrad), np.prod(np.ones((Rrad.shape))+R)), h[:,0])
+            H[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape)) + Rrad), np.prod(np.ones((R.shape))+R)), sub_array(u, idx_y = 0))
             if closure>0:
-                Hc[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape))+Rrad),np.prod(np.ones((Rrad.shape))+R[closure:N]),Hc[:,nM-1]),h[:,0])
+                Hc[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape))+Rrad),\
+                                                 np.prod(np.ones((N-closure,))+R[closure:N])*Hc[:,nM-1]),\
+                                                            sub_array(h,idx_y=0))
         
         dummy = False
         pass
