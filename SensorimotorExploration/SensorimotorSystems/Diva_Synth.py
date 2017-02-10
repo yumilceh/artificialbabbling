@@ -204,17 +204,24 @@ class Diva(object):
             #% computes sound signal
             w = np.linspace(0., 1., synth.samplesperperiod)
             if release > 0: #,%&&synth.pressure>.01,
-                u=synth.voicing*1*.010*(synth.pressure+20*synth.pressurebuildup)*synth.glottalsource + (1-synth.voicing)*1*.010*(synth.pressure+20*synth.pressurebuildup)*randn(synth.samplesperperiod,1)
-        %         if release_closure_time<40
-        %             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
-        %         else
-        %             u=1*.010*(synth.pressure+synth.pressurebuildup)*randn(synth.samplesperperiod,1)
-        %         end
-                v0=real(ifft(fft(u).*synth.filt_closure))
-                numberofperiods=numberofperiods-1
-                synth.pressure=synth.pressure/10
-                vnew=v0(1:synth.samplesperperiod)
-                v0=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)/synth.samplesperperiod))+w.*vnew
+                u = synth.voicing * 1.* 0.010 * (synth.pressure + 20 * synth.pressurebuildup)\
+                                  * synth.glottalsource + (1-synth.voicing) * 1. * 0.010\
+                                  * (synth.pressure + 20. * synth.pressurebuildup)\
+                                  * np.random.rand(synth.samplesperperiod,)
+        #%         if release_closure_time<40
+        #%             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
+        #%         else
+        #%             u=1*.010*(synth.pressure+synth.pressurebuildup)*randn(synth.samplesperperiod,1)
+        #%         end
+                v0 = np.real(   np.fft.ifft(np.multiply(np.fft.fft(u), synth.filt_closure))  )
+                numberofperiods = numberofperiods - 1
+                synth.pressure = synth.pressure/10.
+                vnew = v0[range(synth.samplesperperiod)]
+                v0 = np.multiply((1-w),\
+                                 synth.sample(int(np.ceil(len(synth.sample),\
+                                                      * range(synth.samplesperperiod)\
+                                                      / synth.samplesperperiod))) + \
+                                                      np.multiply(w,vnew)
                 synth.sample=vnew   
                  
             else v0=[]; end
