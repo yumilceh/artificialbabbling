@@ -191,7 +191,7 @@ class Diva(object):
                 
             #% computes vocal tract filter
             
-            synth.filt,synth.f,synth.filt_closure = self.a2h(af0,d,synth.samplesperperiod,synth.fs,self.vt['closure_position'],minaf0)
+            synth.filt,synth.f,synth.filt_closure = self.a2h(af0, d, synth.samplesperperiod, synth.fs,self.vt['closure_position'], minaf0)
             '''
             synth.filt=2*synth.filt/max(eps,synth.filt(1))
             synth.filt(1)=0
@@ -497,7 +497,7 @@ class Diva(object):
             U = coswt+sinwt
             V = coswt-sinwt
             #--------------------------------------------------------- if 1:
-            h1 = np.ones((m,))                  # % signal at glottis
+            h1 = np.ones((m,))                  # % signal at glottis   #In this part of the code there are diferences w.r.t. MATLAB,
             h2 = np.zeros((m,))
             for nN in range(N-1):
                 RnN = -R[nN]
@@ -524,23 +524,22 @@ class Diva(object):
             ###### CODE IN MATLAB THAT IS NEVER EXECUTED #########3
             
             H[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape)) + Rrad), np.prod(np.ones((R.shape))+R)), sub_array(u, idx_y = 0))
+            #Small difference in decimal w.r.t MATLAB
             if closure>0:
                 Hc[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape))+Rrad),\
-                                                 np.prod(np.ones((N-closure,))+R[closure:N])*Hc[:,nM-1]),\
+                                                 np.prod(np.ones((N-closure-1,))+R[closure+1:N])*Hc[:,nM]),\
                                                             sub_array(h,idx_y=0))
+                
+        H = np.concatenate( (H , np.conjugate(H[1+(range(n-m,-1,-1)),:]) ) ,axis = 0)
+        
+        Hc = cat(1,Hc,conj(Hc(1+(n-m:-1:1),:)));
+        f = cat(1,f,-f(1+(n-m:-1:1)));
+        if mina==0, H=0*H; end
         
         dummy = False
         pass
-        '''
         
-        H=cat(1,H,conj(H(1+(n-m:-1:1),:)));
-        Hc=cat(1,Hc,conj(Hc(1+(n-m:-1:1),:)));
-        f=cat(1,f,-f(1+(n-m:-1:1)));
-        if mina==0, H=0*H; end
-        end
-        '''
-    
-    
+        
 def sub_array(x, idx_x=np.inf, idx_y=np.inf):
     # This function supports floats, array(n,1) or array(n > 1, m > 1)
     if isinstance(x, float):
