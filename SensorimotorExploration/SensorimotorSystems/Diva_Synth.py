@@ -12,9 +12,10 @@ from numpy import tanh, matrix, array
 from scipy.io import loadmat as loadmat
 from numpy_groupies.aggregate_weave import aggregate 
     
+eps = np.finfo(np.float32).eps
+        
 class Object(object):
     pass
-
 
 class Diva(object):
     '''
@@ -181,27 +182,28 @@ class Diva(object):
             
             
             #% computes glottal source
-            synth.samplesperperiod = np.ceil(synth.fs/synth.f0)
+            synth.samplesperperiod = int(np.ceil(synth.fs/synth.f0))
             pp = [0.6 , 0.2 - 0.1 * synth.voicing, 0.25] #%10+.15*max(0,min(1,1-vt.opening_time/100))]
             
-            glt_in = array(np.arange(0,1,1/synth.samplesperperiod))
+            glt_in = array(np.arange(0.,1.,1./synth.samplesperperiod))
             synth.glottalsource = 10 * 0.25 * glotlf(0,glt_in,pp) + \
                                   10 * 0.025 * synth.k1 * glotlf(1,glt_in,pp)
-            numberofperiods = synth.numberofperiods
+            numberofperiods = int(synth.numberofperiods)
                 
             #% computes vocal tract filter
             
-            synth.filt,synth.f,synth.filt_closure = self.a2h(af0, d, synth.samplesperperiod, synth.fs,self.vt['closure_position'], minaf0)
-            '''
-            synth.filt=2*synth.filt/max(eps,synth.filt(1))
-            synth.filt(1)=0
-            synth.filt_closure=2*synth.filt_closure/max(eps,synth.filt_closure(1))
-            synth.filt_closure(1)=0
+            synth.filt, synth.f, synth.filt_closure = \
+                                 self.a2h(af0, d, synth.samplesperperiod, synth.fs,self.vt['closure_position'], minaf0)
+                                 
             
-            
-            % computes sound signal
-            w=linspace(0,1,synth.samplesperperiod)'
-            if release>0,%&&synth.pressure>.01,
+            synth.filt = 2. * synth.filt / np.max((eps,synth.filt[0]))
+            synth.filt[0] = synth.filt[0] * 0 
+            synth.filt_closure = 2. * synth.filt_closure/np.max((eps,synth.filt_closure[0]))
+            synth.filt_closure[0] = synth.filt_closure[0] * 0 
+              
+            #% computes sound signal
+            w = np.linspace(0., 1., synth.samplesperperiod)
+            if release > 0: #,%&&synth.pressure>.01,
                 u=synth.voicing*1*.010*(synth.pressure+20*synth.pressurebuildup)*synth.glottalsource + (1-synth.voicing)*1*.010*(synth.pressure+20*synth.pressurebuildup)*randn(synth.samplesperperiod,1)
         %         if release_closure_time<40
         %             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
@@ -216,7 +218,7 @@ class Diva(object):
                 synth.sample=vnew   
                  
             else v0=[]; end
-            
+            '''
             
             if numberofperiods>0,
                 %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
@@ -446,7 +448,6 @@ class Diva(object):
         return a, b, sc, af, d
     
     def a2h(self, a,l,n,fs = None, closure = None, mina = None):   
-        eps = np.finfo(np.float32).eps     
         if not isinstance(mina, float):
             mina = np.amin(a,axis=0)
         if not isinstance(closure, float) and not isinstance(closure, int):
@@ -511,9 +512,9 @@ class Diva(object):
                 else:   # This case might not be working properly, It hasnot been tested
                     h1 = np.multiply(U[:,nN],u)
                     h2 = np.multiply(V[:,nN],v)
-                print(sum(h1))
-                print(sum(h2))
-                print(RnN)   
+                #print(sum(h1))
+                #print(sum(h2))
+                #print(RnN)   
                 #%h(:,1)=h(:,1)/k;h(:,2)=h(:,2)*k;
             
             u = h1 - np.multiply(Rrad,h2) # %v=h2-Rrad.*h1; #   % reflection
@@ -529,15 +530,18 @@ class Diva(object):
                 Hc[:,nM] = np.divide(np.multiply((np.ones((Rrad.shape))+Rrad),\
                                                  np.prod(np.ones((N-closure-1,))+R[closure+1:N])*Hc[:,nM]),\
                                                             sub_array(h,idx_y=0))
-                
-        H = np.concatenate( (H , np.conjugate(H[1+(range(n-m,-1,-1)),:]) ) ,axis = 0)
         
-        Hc = cat(1,Hc,conj(Hc(1+(n-m:-1:1),:)));
-        f = cat(1,f,-f(1+(n-m:-1:1)));
-        if mina==0, H=0*H; end
+        idxH_x =  [x + 1 for x in range(n-m-1,-1,-1)]
+              
+        H = np.concatenate( (H , np.conjugate(H[idxH_x,:]) ) ,axis = 0)
         
-        dummy = False
-        pass
+        Hc = np.concatenate( ( Hc, np.conjugate(Hc[idxH_x,:])),axis = 0)
+        
+        f = np.concatenate((f,-f[idxH_x]))
+        if mina == 0:
+            H = 0 * H
+        
+        return  H, f, Hc
         
         
 def sub_array(x, idx_x=np.inf, idx_y=np.inf):

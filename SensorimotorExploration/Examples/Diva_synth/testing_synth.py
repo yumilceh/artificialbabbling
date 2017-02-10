@@ -26,6 +26,8 @@ if __name__ == '__main__':
     arts = np.tile(arts, 40).transpose()
     Aud, af = diva_synth.get_sound(arts) 
     
+    welktjv = 0
+    
     pass
     #plt.plot(np.real(Outline),np.imag(Outline))
     #plt.show()
