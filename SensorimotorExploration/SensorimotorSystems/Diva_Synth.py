@@ -13,6 +13,8 @@ from scipy.io import loadmat as loadmat
 from numpy_groupies.aggregate_weave import aggregate 
     
 eps = np.finfo(np.float32).eps
+global_noise = False
+
         
 class Object(object):
     pass
@@ -33,6 +35,10 @@ class Diva(object):
 
         self.diva_synth_vt_file = abs_path + '/DIVA/vt_py.mat'
         self.diva_synth_fmfit_file = abs_path + '/DIVA/fmfit_py.mat'
+        
+        self.diva_hanning_file = abs_path + '/DIVA/hanning.mat'
+        self.hanning = loadmat(self.diva_hanning_file)['h']
+        
         vt = loadmat(self.diva_synth_vt_file)
         fmfit = loadmat(self.diva_synth_fmfit_file)
         
@@ -98,15 +104,16 @@ class Diva(object):
         ndata = art.shape[0]
         dt = 0.005
         time = 0.
-        s = np.zeros((np.ceil((ndata+1)*dt*synth.fs),1))
+        s = np.zeros((np.ceil((ndata+1)*dt*synth.fs),))
         
-        while time<(ndata+1)*dt:
+        while time<(ndata)*dt:
             #---------------------------------- % sample articulatory parameters
             t0 = np.floor(time/dt)
+            print(t0)
             t1 = (time-t0*dt)/dt
-            dummy1,dummy2,dummy3,af1,d = self.get_sample(art[np.minimum(ndata,0+t0),:])
-            dummy1,dummy2,dummy3,af2,d = self.get_sample(art[np.minimum(ndata,1+t0),:])
-            
+            dummy1,dummy2,dummy3,af1,d = self.get_sample(art[np.minimum(ndata-1,0+t0),:])
+            dummy1,dummy2,dummy3,af2,d = self.get_sample(art[np.minimum(ndata-1,1+t0),:])
+            #print(np.minimum(ndata-1,1+t0))
             naf1 = len(af1)
             naf2 = len(af2)
             if naf2<naf1:
@@ -114,10 +121,13 @@ class Diva(object):
             if naf1<naf2:
                 af1 = np.concatenate((af1, np.repeat(af1[-1], naf2-naf1)))
             af = af1*(1-t1) + af2*t1
-            FPV = np.maximum(-1*np.ones((1,3)),
-                         np.minimum(np.ones((1,3)), 
-                                art[np.minimum(ndata,1+t0),-3:] * (1-t1) +
-                                           art[np.minimum(ndata,2+t0),-3:]*t1 )).flatten()
+            
+            
+            FPV = art[np.minimum(ndata-1,t0),-3:]*(1-t1) + art[np.minimum(ndata-1,1+t0),-3:]*t1
+            FPV = np.minimum(np.ones((1,3)), FPV)
+            FPV = np.maximum(-1*np.ones((1,3)), FPV)
+            FPV = FPV.flatten()
+                                           
             self.vt['voicing'] = (1+np.tanh(3 * FPV[2]))/2
             self.vt['pressure'] = FPV[1]
             self.vt['pressure0'] = self.vt['pressure'] > 0.01
@@ -125,6 +135,7 @@ class Diva(object):
             
             af0 = np.maximum(0*af,af)
             k = 0.025
+                  
             idx_af0 = np.where(np.logical_and(np.greater(af0,0*af0), np.less(af0,k*np.ones(af0.shape)))) 
             af0[idx_af0] = k*np.ones((len(af0),))
             minaf = np.min(af)
@@ -143,7 +154,7 @@ class Diva(object):
                 release = 0
                 self.vt['opening_time'] = 0
                 self.vt['closure_time'] = self.vt['closure_time'] + 1
-                self.vt['closure_position'] = np.where(af0 == 0,1)[-1]
+                self.vt['closure_position'] = np.where(af0 == 0)[0][-1]
                 if not self.vt['closed']:
                     closure = self.vt['closure_position']
                 else:
@@ -164,7 +175,7 @@ class Diva(object):
                 self.vt['closed'] = False
         
         #%     display(vt.closed)
-            if release>0:
+            if release > 0:
                 af = np.maximum(k*np.ones(af.shape),af)
                 minaf = np.max((k, minaf))
                 minaf0 = np.max((k, minaf0))
@@ -195,10 +206,13 @@ class Diva(object):
             synth.filt, synth.f, synth.filt_closure = \
                                  self.a2h(af0, d, synth.samplesperperiod, synth.fs,self.vt['closure_position'], minaf0)
                                  
+            synth.filt = synth.filt[:,0] #Changes dimensions from (n,1) to (n,)
+            synth.filt_closure = synth.filt_closure[:,0] #Changes dimensions from (n,1) to (n,)
             
-            synth.filt = 2. * synth.filt / np.max((eps,synth.filt[0]))
-            synth.filt[0] = synth.filt[0] * 0 
-            synth.filt_closure = 2. * synth.filt_closure/np.max((eps,synth.filt_closure[0]))
+            
+            synth.filt = 2. * synth.filt / np.maximum(eps,synth.filt[0])
+            synth.filt[0] = synth.filt[0] * 0. 
+            synth.filt_closure = 2. * synth.filt_closure/np.maximum(eps,synth.filt_closure[0])
             synth.filt_closure[0] = synth.filt_closure[0] * 0 
               
             #% computes sound signal
@@ -207,7 +221,7 @@ class Diva(object):
                 u = synth.voicing * 1.* 0.010 * (synth.pressure + 20 * synth.pressurebuildup)\
                                   * synth.glottalsource + (1-synth.voicing) * 1. * 0.010\
                                   * (synth.pressure + 20. * synth.pressurebuildup)\
-                                  * np.random.rand(synth.samplesperperiod,)
+                                  * array([0. * random.random() + 1 for i in range(synth.samplesperperiod)])
         #%         if release_closure_time<40
         #%             u=1*.010*synth.pressure*synth.glottalsource;%.*(0.25+.025*randn(synth.samplesperperiod,1)); % vocal tract filter
         #%         else
@@ -217,62 +231,67 @@ class Diva(object):
                 numberofperiods = numberofperiods - 1
                 synth.pressure = synth.pressure/10.
                 vnew = v0[range(synth.samplesperperiod)]
-                v0 = np.multiply((1-w),\
-                                 synth.sample(int(np.ceil(len(synth.sample),\
-                                                      * range(synth.samplesperperiod)\
-                                                      / synth.samplesperperiod))) + \
+                v0 = np.multiply( array([1- x for x in w]) ,\
+                                 synth.sample[(np.ceil(len(synth.sample)\
+                                                      * array(range(synth.samplesperperiod))\
+                                                      / synth.samplesperperiod)).astype(int)]) + \
                                                       np.multiply(w,vnew)
                 synth.sample=vnew   
                  
-            else v0=[]; end
-            '''
+            else:
+                v0=array([])
+          
             
-            if numberofperiods>0,
-                %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
-                u=0.25*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
-                u=(synth.voicing*u+(1-synth.voicing)*.025*synth.pressure*randn(synth.samplesperperiod,1))
-                if minaf0>0&&minaf0<=k, u=minaf/k*u+(1-minaf/k)*.02*synth.pressure*randn(synth.samplesperperiod,1); end
-                v=real(ifft(fft(u).*synth.filt))
+            if numberofperiods>0:
+                # %u=0.25*synth.modulation*synth.pressure*synth.glottalsource.*(1+.1*randn(synth.samplesperperiod,1)) % vocal tract filter
+                u = 0.25 * synth.pressure * np.multiply(synth.glottalsource, array([ 0.0 * random.random() + 1 for i in range(synth.samplesperperiod)])) #% vocal tract filter #NOISE
+                u = synth.voicing * u + (1 - synth.voicing) * 0.025 * synth.pressure * array([ 0.0 * random.random() + 1 for i in range(synth.samplesperperiod)])
+                if minaf0>0 and minaf0<=k:
+                    u = minaf / k * u + (1-minaf/k) * 0.02 * synth.pressure * array([ 0.0 * random.random() + 1 for i in range(synth.samplesperperiod)])
+                    
+                v = np.real(np.fft.ifft(np.multiply(np.fft.fft(u), synth.filt)))
                 
-                vnew=v(1:synth.samplesperperiod)
-                v=(1-w).*synth.sample(ceil(numel(synth.sample)*(1:synth.samplesperperiod)'/synth.samplesperperiod))+w.*vnew
-                synth.sample=vnew
+                vnew = v[0:synth.samplesperperiod]
+                v = np.multiply([1 - x for x in w],\
+                                  synth.sample[[int(np.ceil(len(synth.sample) * (x)/synth.samplesperperiod)) for x in range(synth.samplesperperiod)]])\
+                                  + np.multiply(w, vnew)
+                synth.sample = vnew
                 
-                if numberofperiods>1
-                    v=cat(1,v,repmat(vnew,[numberofperiods-1,1]))
-                end
-            else v=[]; end
-            v=cat(1,v0,v)
-            v=v+.0001*randn(size(v))
-            v=(1-exp(-v))./(1+exp(-v))
-            s(synth.samplesoutput+(1:numel(v)))=v
-            time=time+numel(v)/synth.fs
-            synth.samplesoutput=synth.samplesoutput+numel(v)
+                if numberofperiods>1:
+                    v= np.concatenate((v,np.repeat(vnew,numberofperiods-1)))
+                
+            else:
+                v = array([])
+                
+            print(time, ': ', len(v0), ', ,', len(v))
+                
+            v = np.concatenate((v0,v))
+            v = v + [.0000 * random.random() for i in range(len(v))]    #Does not support matices
+            v = np.divide([1-np.exp(-x) for x in v]   , [1+np.exp(-x) for x in v] )
+            try:
+                s[[synth.samplesoutput + x for x in range(len(v))]] = v
+            except IndexError:
+                s = np.concatenate((s, np.zeros(synth.samplesoutput + len(v)-len(s),)))
+                s[[synth.samplesoutput + x for x in range(len(v))]] = v
+                
+            time = time + len(v)/synth.fs
+            synth.samplesoutput = synth.samplesoutput + len(v)
             
-            % computes f0/amp/voicing/pressurebuildup modulation
-            synth.pressure0=vt.pressure0
-            alpha=min(1,(.1)*synth.numberofperiods);beta=100/synth.numberofperiods
-            synth.pressure=synth.pressure+alpha*(vt.pressure*(max(1,1.5-vt.opening_time/beta))-synth.pressure)
-            alpha=min(1,.5*synth.numberofperiods);beta=100/synth.numberofperiods
-            synth.f0=synth.f0+2*sqrt(alpha)*randn+alpha*(vt.f0*max(1,1.25-vt.opening_time/beta)-synth.f0)%147;%120;
-            synth.voicing=max(0,min(1, synth.voicing+.5*(vt.voicing-synth.voicing) ))
-            %synth.modulation=max(0,min(1, synth.modulation+.1*(2*(vt.pressure>0&&minaf>-k)-1) ))
-            alpha=min(1,.1*synth.numberofperiods)
-            synth.pressurebuildup=max(0,min(1, synth.pressurebuildup+alpha*(2*(vt.pressure>0&minaf<0)-1) ))
-            synth.numberofperiods=max(1,numberofperiods)
-        end
-        s=s(1:ceil(synth.fs*ndata*dt))
-        end
+            # % computes f0/amp/voicing/pressurebuildup modulation
+            synth.pressure0 = self.vt['pressure0']
+            alpha = np.min((1,(0.1)*synth.numberofperiods))
+            beta= 100. / synth.numberofperiods
+            synth.pressure = synth.pressure + alpha*(self.vt['pressure']*(np.max((1, 1.5 - self.vt['opening_time']/beta)))-synth.pressure)
+            alpha = np.min((1,.5*synth.numberofperiods))
+            beta = 100./synth.numberofperiods
+            synth.f0 = synth.f0 + 2 * np.square(alpha) * 0. * random.random() + alpha * (self.vt['f0'] * np.max((1. ,1.25-self.vt['opening_time']/beta))-synth.f0) #%147;%120;
+            synth.voicing = np.max((0, np.min((1, synth.voicing + 0.5 * (self.vt['voicing']-synth.voicing) ))))
+            #%synth.modulation=max(0,min(1, synth.modulation+.1*(2*(vt.pressure>0&&minaf>-k)-1) ))
+            alpha = np.min((1 , 0.1 * synth.numberofperiods))
+            synth.pressurebuildup = np.max((0, np.min((1, synth.pressurebuildup + alpha * (2 * float(self.vt['pressure'] > 0 and minaf < 0 ) -1) ))))
+            synth.numberofperiods = np.max((1,numberofperiods))
 
-        
-        '''
-        
-        
-        
-         
-        
-        af = 0
-        
+        s = s[0:int(np.ceil(synth.fs*ndata*dt))]
         return s, af
     
         
@@ -334,7 +353,8 @@ class Diva(object):
                 ab_alpha[idx[n1]] = alpha[n1]
                 ab_beta[idx[n1]] = beta[n1]
             
-            h = np.hanning(51)/sum(np.hanning(51)) #Not same result as in hanning
+            h = self.hanning.flatten()
+            #h = hanning(51)/np.sum(hanning(51)) #Not same result as in hanning (matlab hann vs hanning) Source of numnerial differences
             idx_2 = np.zeros((25,))
             idx_2 = np.concatenate((idx_2, np.array(range(amax))))
             idx_2 = np.concatenate((idx_2, (amax-1)*np.ones((25,))))
@@ -405,7 +425,7 @@ class Diva(object):
         wallab2 = aggregate(idx_wallab2,b[iwall], size = fact*9, func = 'max', fill_value=None)
         
         lipsab1 = np.nanmin(b[olips])
-        lipsab2 = np.max(b[ilips])
+        lipsab2 = np.nanmax(b[ilips])
         
         mind_precursor = wallab1[range(fact*2,fact*8)]-wallab2[range(fact*2,fact*8)]
         mind = np.nanmin(mind_precursor.reshape((fact,6), order = 'F'), axis = 0)
@@ -432,8 +452,8 @@ class Diva(object):
         for n1 in range(w):
             ab2[1:-1] = np.maximum(np.maximum(ab2[1:-1], ab2[0:-2]), ab2[2:])
         
-
-        idx_af = np.logical_and(np.greater(ab1,0),np.greater(ab2,0))
+        ab1[np.isinf(ab1)] = np.NINF
+        idx_af = np.where(np.logical_and(  np.greater(ab1,0)   ,np.greater(ab2,0)))[0]
         af = d*(ab1[idx_af]-ab2[idx_af])
         idx = None
         for ii in range(len(af)):
@@ -444,8 +464,11 @@ class Diva(object):
         #=======================================================================
         # % af: area function
         #=======================================================================
-        af_tmp = np.minimum(np.zeros((len(af),)),af)  
-        af = af_tmp + np.multiply(ab_alpha[idx_af], np.power(np.maximum(np.zeros((len(af),)),af), ab_beta[idx_af]))
+        af_tmp = np.minimum(np.zeros((len(af),)),af)
+        af_power = np.power(np.maximum(np.zeros((len(af),)),af), ab_beta[idx_af])
+        af = af_tmp + np.multiply(ab_alpha[idx_af], af_power ) # np.power(np.maximum(np.zeros((len(af),)),af), ab_beta[idx_af]) introduces an small error
+        
+        
         af = af[idx:]
         for ii in range(len(af)-1,-1,-1):
             if np.isinf(af[ii]):
@@ -490,7 +513,7 @@ class Diva(object):
         H = np.zeros((m,M)) + 0j*np.zeros((m,M)) #%H=zeros(n,M);
         Hc = np.zeros((m,M)) + 0j*np.zeros((m,M))
         if mina==0:
-            a = np.max((0.05,a))
+            a = array([np.max((0.05, x)) for x in a])
         #%k=0.995;%.999;
         for nM in range(M):
             #if 1: #%mina(nM)>0,
@@ -550,6 +573,12 @@ class Diva(object):
         
         return  H, f, Hc
         
+def arr_minus_noise(arr, noise_magnitude=0.):
+    if global_noise:
+        return array([x - random.random() for x in arr])
+        
+def arr_plus_cte(arr, cte):
+    return array([x + cte for x in arr])
         
 def sub_array(x, idx_x=np.inf, idx_y=np.inf):
     # This function supports floats, array(n,1) or array(n > 1, m > 1)
