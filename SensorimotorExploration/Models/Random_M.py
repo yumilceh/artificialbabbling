@@ -3,7 +3,7 @@ Created on Jan 26, 2017
 
 @author: Juan Manuel Acevedo Valle
 '''
-from Algorithm.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
+from Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
     
 class Random_M(object):
     '''

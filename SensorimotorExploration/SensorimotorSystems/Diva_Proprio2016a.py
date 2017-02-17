@@ -66,7 +66,7 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         auditoryStates = self.matlabSession.getvalue('auditoryStates')
         self.auditoryStates = auditoryStates;
         minaf = self.matlabSession.getvalue('minaf')
-        self.somatoOutput = minaf
+        self.somato_out = minaf
         '''print('audStates')
         print(auditoryStates)
         print('minaf')
@@ -97,10 +97,10 @@ class Diva_Proprio2016a(Diva_Proprio2015a):
         self.auditoryResult[4]=self.auditoryResult[4]/nPerceptionSamples
         self.auditoryResult[5]=self.auditoryResult[5]/nPerceptionSamples
                 
-        self.somatoOutput=0.0
+        self.somato_out=0.0
         if((proprioceptiveAv[0]<0.0) or (proprioceptiveAv[1]<0.0)):
-            self.somatoOutput=1.0
-        self.sensorOutput=self.auditoryResult;     
+            self.somato_out=1.0
+        self.sensor_out=self.auditoryResult;     
             
     def interactiveSystem(self):
         ### Main window container

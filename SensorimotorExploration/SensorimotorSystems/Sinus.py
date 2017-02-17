@@ -50,33 +50,33 @@ class Sinus:
         
         
         self.motor_command =np.array( [0.0] * n_motor )
-        self.sensorOutput = np.array( [0.0] * n_sensor )
+        self.sensor_out = np.array( [0.0] * n_sensor )
         self.sensor_goal = np.array([ 0.0] * n_sensor )
-        self.somatoOutput = np.array( [0.0] * n_somato )
+        self.somato_out = np.array( [0.0] * n_somato )
         self.competence_result = 0.0;
         
     def setMotorCommand(self,motor_command):
         self.motor_command = motor_command    
         
     def executeMotorCommand(self):
-        self.somatoOutput = 0.0
-        self.sensorOutput = math.sin(self.motor_command)     
+        self.somato_out = 0.0
+        self.sensor_out = math.sin(self.motor_command)     
         
 class Constrained_Sinus(Sinus):
     def executeMotorCommand(self):
         Sinus.executeMotorCommand(self)
         if (self.motor_command > 0.0 and self.motor_command < np.pi/4.0):
-            self.somatoOutput = 1.0
-            self.sensorOutput = 0.0
+            self.somato_out = 1.0
+            self.sensor_out = 0.0
         elif(self.motor_command >= np.pi/4.0 and self.motor_command < np.pi/2.0):
-            self.somatoOutput = 1.0
-            self.sensorOutput = 1.0
+            self.somato_out = 1.0
+            self.sensor_out = 1.0
         elif(self.motor_command > np.pi and self.motor_command < 5.0*np.pi/4.0):
-            self.somatoOutput = 1.0
-            self.sensorOutput = 0.0 
+            self.somato_out = 1.0
+            self.sensor_out = 0.0 
         elif(self.motor_command >= 5.0*np.pi/4.0 and self.motor_command < 3.0*np.pi/2.0):
-            self.somatoOutput = 1.0
-            self.sensorOutput =- 1.0 
+            self.somato_out = 1.0
+            self.sensor_out =- 1.0 
             
             
             

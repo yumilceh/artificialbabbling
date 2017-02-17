@@ -1,10 +1,10 @@
 clc
-
+close all
 % art = 0.7 * ones(13,1);
 % [Aud,Som,Outline,af] = diva_synth(art);
 
 
-art = [0.2 * ones(13,1), 0.7 * ones(13,1)];
+art = [3 * ones(13,1), 0.7 * ones(13,1)];
 art(11:13,1) = 1;
 art(11:13,2) = 1;
 

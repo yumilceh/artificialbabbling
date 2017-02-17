@@ -6,7 +6,6 @@ This sensorimor system defines the DIVA agent used for the CCIA 2015's paper
 
 #import sys
 #import wave
-import math
 import numpy as np
 
 from explauto import Environment
@@ -54,15 +53,15 @@ class SimpleArm:
         self.somato_threshold = somato_threshold 
 
         self.motor_command =np.array( [0.0] * n_motor )
-        self.sensorOutput = np.array( [0.0] * n_sensor )
+        self.sensor_out = np.array( [0.0] * n_sensor )
         self.sensor_goal = np.array([ 0.0] * n_sensor )
-        self.somatoOutput = np.array( [0.0] * n_somato )
+        self.somato_out = np.array( [0.0] * n_somato )
         self.competence_result = 0.0;
         
     def setMotorCommand(self,motor_command):
         self.motor_command = motor_command    
         
     def executeMotorCommand(self):
-        self.somatoOutput = 0.0
-        self.sensorOutput = self.environment.update(self.motor_command)
+        self.somato_out = 0.0
+        self.sensor_out = self.environment.update(self.motor_command)
         

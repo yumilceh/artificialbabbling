@@ -51,11 +51,11 @@ class Diva_Proprio2015a:
         self.max_sensor_values=max_sensor_values
         
         self.motor_command=[0.0] * n_motor
-        self.sensorOutput=[0.0] * n_sensor
+        self.sensor_out=[0.0] * n_sensor
         self.sensor_goal=[0.0] * n_sensor
-        self.somatoOutput=[0.0] * n_somato
+        self.somato_out=[0.0] * n_somato
         self.competence_result=0.0;
-        self.matlabSession=ml.session_factory()        
+        self.matlabSession=ml.session_factory()    
         self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/SensorimotorSystems/DIVA/') #Path to DIVA functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
@@ -104,7 +104,7 @@ class Diva_Proprio2015a:
         auditoryStates=self.matlabSession.getvalue('auditoryStates')
         self.auditoryStates=auditoryStates;
         minaf=self.matlabSession.getvalue('minaf')
-        self.somatoOutput=minaf
+        self.somato_out=minaf
         '''print('audStates')
         print(auditoryStates)
         print('minaf')
@@ -135,10 +135,10 @@ class Diva_Proprio2015a:
         self.auditoryResult[4]=self.auditoryResult[4]/nPerceptionSamples
         self.auditoryResult[5]=self.auditoryResult[5]/nPerceptionSamples
                 
-        self.somatoOutput=0.0
+        self.somato_out=0.0
         if((proprioceptiveAv[0]<0.0) or (proprioceptiveAv[1]<0.0)):
-            self.somatoOutput=1.0
-        self.sensorOutput=self.auditoryResult;     
+            self.somato_out=1.0
+        self.sensor_out=self.auditoryResult;     
             
     def executeMotorCommand(self):
         self.getMotorDynamics()
@@ -156,8 +156,8 @@ class Diva_Proprio2015a:
             plt.hold(True)
         plt.show()
         
-    def plotSomatoOutput(self):
-        plt.plot(self.time,self.somatoOutput)
+    def plotsomato_out(self):
+        plt.plot(self.time,self.somato_out)
         plt.show;
            
     def getVocaltractShape(self,artStates,returnShape=0):

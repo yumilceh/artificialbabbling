@@ -74,9 +74,9 @@ class ConstrainedParabolicArea:
         self.somato_threshold = somato_threshold 
 
         self.motor_command =np.array( [0.0] * n_motor )
-        self.sensorOutput = np.array( [0.0] * n_sensor )
+        self.sensor_out = np.array( [0.0] * n_sensor )
         self.sensor_goal = np.array([ 0.0] * n_sensor )
-        self.somatoOutput = np.array( [0.0] * n_somato )
+        self.somato_out = np.array( [0.0] * n_somato )
         self.competence_result = 0.0
         
     def setMotorCommand(self,motor_command):
@@ -89,9 +89,9 @@ class ConstrainedParabolicArea:
         b = self.params.b
         c = self.params.c
         
-        self.somatoOutput = 0.0
-        self.sensorOutput[0] = self.motor_command[0]
-        self.sensorOutput[1] = math.pow(self.motor_command[1]-b,2.0) 
+        self.somato_out = 0.0
+        self.sensor_out[0] = self.motor_command[0]
+        self.sensor_out[1] = math.pow(self.motor_command[1]-b,2.0) 
         
     def executeMotorCommand(self):
         self.motor_command = self.boundMotorCommand(self.motor_command)    
@@ -100,8 +100,8 @@ class ConstrainedParabolicArea:
         self.executeMotorCommand_unconstrained()
         self.applyConstraints()
                
-        self.sensorOutput[0] = self.sensorOutput[0] + np.random.normal(0.0,self.params.sigma_noise,1)
-        self.sensorOutput[1] = self.sensorOutput[1] + np.random.normal(0.0,self.params.sigma_noise,1)
+        self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0,self.params.sigma_noise,1)
+        self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0,self.params.sigma_noise,1)
      
         self.applyConstraints()
         
@@ -119,8 +119,8 @@ class ConstrainedParabolicArea:
         m2 = self.params.m2
         
         r = c - a  
-        x=self.sensorOutput[0]
-        y=self.sensorOutput[1]
+        x=self.sensor_out[0]
+        y=self.sensor_out[1]
         
         changed = False
         onParabola = False
@@ -157,23 +157,23 @@ class ConstrainedParabolicArea:
          
         if circle_condition < math.pow(r, 2.0): #Circle
             changed = True
-            self.somatoOutput = 1.0                       
+            self.somato_out = 1.0                       
             x, y = closestPointInCircle(circle, point)
             point.x = x
             point.y = y
          
-        # if math.pow(self.motor_command[0]-b,2.0) > self.sensorOutput[1]: #Parabola
-        if math.pow(self.sensorOutput[0]-b,2.0) > self.sensorOutput[1]: #Parabola
+        # if math.pow(self.motor_command[0]-b,2.0) > self.sensor_out[1]: #Parabola
+        if math.pow(self.sensor_out[0]-b,2.0) > self.sensor_out[1]: #Parabola
             changed = True
             onParabola = True
-            self.somatoOutput = 1.0
+            self.somato_out = 1.0
             x, y = closestPointInParabola(parabola, point)
             point.x = x
             point.y = y
                 
         if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1): #Lines
             changed = True
-            self.somatoOutput = 1.0
+            self.somato_out = 1.0
             x1, y1, distance1 = closestPointToLine(up_line, point)
             x2, y2, distance2 = closestPointToLine(down_line, point)
             
@@ -218,7 +218,7 @@ class ConstrainedParabolicArea:
                     
         if checkLineCondition(uppest_line, point) == 1: # Upper limit
             changed = True
-            self.somatoOutput = 1.0
+            self.somato_out = 1.0
             x, y, distance = closestPointToLine(uppest_line, point)
             point.x = x
             point.y = y
@@ -231,8 +231,8 @@ class ConstrainedParabolicArea:
                 point.x = x
                 point.y = y
                 
-        self.sensorOutput[0] = x
-        self.sensorOutput[1] = y
+        self.sensor_out[0] = x
+        self.sensor_out[1] = y
         return changed
     
         
@@ -305,7 +305,7 @@ def closestPointInParabola(parabola, point):   #Parabola: y=ax^2+bx+c
     x = point.x
     y = point.y
     
-    #self.sensorOutput[0] = self.motor_command[1] #Simply takes the value of the other motor command
+    #self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
     
     coeff = [2.0 * a**2, 3.0 * a * b, b**2 + 2 * a * (c - y) + 1, b * (c - y) - x ]
     
@@ -342,7 +342,7 @@ def intersectionParabolaLine(parabola, line):   #Parabola: y=ax^2+bx+c
     y_0 = line.y_0
     m = line.m
     
-    #self.sensorOutput[0] = self.motor_command[1] #Simply takes the value of the other motor command
+    #self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
     
     coeff = [a, b-m, c-y_0]
     

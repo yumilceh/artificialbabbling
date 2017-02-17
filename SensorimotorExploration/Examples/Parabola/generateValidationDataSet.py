@@ -16,8 +16,8 @@ if __name__ == '__main__':
 
     ## Adding libraries##
     from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from Algorithm.Algorithm_Random import Algorithm_Random as Algorithm
-    from Algorithm.Algorithm_Random import MODELS 
+    from Algorithm.AlgorithmRandom import Algorithm_Random as Algorithm
+    from Algorithm.AlgorithmRandom import MODELS 
     from Models.GMM_SM import GMM_SM 
     from Models.GMM_SS import GMM_SS
     from DataManager.PlotTools import initializeFigure
