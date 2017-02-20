@@ -9,8 +9,8 @@ import datetime
 import pandas as pd
 
 
-from DataManager.SimulationData import SimulationData, loadSimulationData_h5
-from Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
+from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
+from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
 
 now = datetime.datetime.now().strftime("DSG_%Y_%m_%d_%H_%M_")
 

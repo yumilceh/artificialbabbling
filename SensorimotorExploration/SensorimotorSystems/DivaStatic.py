@@ -102,7 +102,7 @@ class DivaStatic(object):
         ts = 0.005
         n_samples = int(time/ts)+1
         soundArtStates = np.tile(self.motor_command,(n_samples,1))
-        print(soundArtStates)
+        #print(soundArtStates)
         #print('ts=0.005')
         #print(soundArtStates.shape)
         #print('ts=0.01')

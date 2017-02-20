@@ -4,7 +4,7 @@ Created on Feb 22, 2016
 @author: Juan Manuel Acevedo Valle
 '''
 
-from DataManager.DataTemplates.TabularData import TabularData
+from .DataTemplates.TabularData import TabularData
 #===============================================================================
 # import gzip
 # import shutil
@@ -12,7 +12,7 @@ from DataManager.DataTemplates.TabularData import TabularData
 #===============================================================================
 import matplotlib.pyplot as plt
 #----------------------------------------------------------- import pandas as pd
-from DataManager.PlotTools import movingAverage
+from .PlotTools import movingAverage
 import numpy as np
 import pandas as pd
 
