@@ -5,67 +5,73 @@ Created on Feb 5, 2016
 '''
 from numpy import linspace
 from numpy import random as np_rnd
-import pandas as pd
 
 if __name__ == '__main__':
-   
-     
     ## Adding the projects folder to the path##
     import os,sys,random
     sys.path.append("../../")
 
     ## Adding libraries##
-    from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from Algorithm.Algorithm_Random import Algorithm_Random as Algorithm
-    from Algorithm.Algorithm_Random import MODELS 
-    from Models.ILGMM_SM import GMM_SM 
-    from Models.GMM_SS import GMM_SS
-    from Algorithm.ModelEvaluation import SM_ModelEvaluation
-    from DataManager.PlotTools import *
-   
-    ## Simulation Parameters ##
-    n_initialization=200
-    n_evaluation_samples=200
-    n_experiments=200
-    
-    random_seed=1234
-    
-    k_sm = 30
-    sm_step=100
-    alpha_sm=0.05
-    
-    k_ss = 6
-    ss_step=100
-    alpha_ss=0.05
+    from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
+    from SensorimotorExploration.Algorithm.Social2017 import Social as Algorithm
+    from SensorimotorExploration.Algorithm.Social2017 import MODELS
+    from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
+    from SensorimotorExploration.DataManager.PlotTools import *
 
-    ## To guarantee reproductible experiments##
+    # Models
+
+    # To guarantee reproductible experiments##
+    n_initialization = 35
+    n_evaluation_samples = 100
+    n_experiments = 400
+    random_seed = 1234
+
     random.seed(random_seed)
     np_rnd.seed(random_seed)
 
     ## Creating Agent ##
     system=System()
-    
+
     ## Creating Models ##
     models=MODELS()
     
     models.f_sm = GMM_SM(system,
-                         min_components = k_sm,
-                         sm_step=sm_step,
-                         forgetting_factor=alpha_sm,
-                         plot = False)
+                         sm_step = sm_step,
+                         min_components = k_sm_min, max_components = k_sm_max,
+                         max_step_components = k_sm_step,
+                         forgetting_factor = alpha_sm,
+                         plot = False,
+                         plot_dims=[2,3])
     
     models.f_ss = GMM_SS(system,
-                         k_ss,
                          ss_step=ss_step,
-                         alpha=alpha_ss)
-
+                         min_components = k_ss_min, max_components = k_ss_max,
+                         max_step_components = k_ss_step,
+                         forgetting_factor = alpha_ss)
+    
+    models.f_im = GMM_IM(system,
+                         k_im,
+                         n_training_samples=im_samples,
+                         im_step=im_step)
+    
+    evaluation_sim=SM_ModelEvaluation(system,
+                                      100,
+                                      models.f_sm)
+    evaluation_sim.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
+    
+    
+    
     ## Creating Simulation object, running simulation and plotting experiments##
-    file_prefix='Sinus_GMM_'
+    file_prefix='Test_Parabola_NPro_ILGMM_'
     simulation1=Algorithm(system,
                           models,
                           file_prefix=file_prefix,
-                          n_experiments = n_experiments
-                          )
+                          n_experiments = n_experiments,
+                          n_initialization_experiments = n_initialization,
+                          g_im_initialization_method = 'non-painful',
+                          n_save_data=100,
+                          evaluation=evaluation_sim,
+                          sm_all_samples = sm_all_samples)
     
 
     simulation1.runNonProprioceptiveAlgorithm()
@@ -73,12 +79,8 @@ if __name__ == '__main__':
     initialization_data_sm_ss=simulation1.data.initialization_data_sm_ss
     initialization_data_im=simulation1.data.initialization_data_im
     simulation_data=simulation1.data.simulation_data
-
-    fig1,ax1=initializeFigure();
-    fig1,ax1=simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
     
-    
-    ## Validation of the model ##
+        ## Validation of the model ##
     n_samples=n_evaluation_samples
     evaluation=SM_ModelEvaluation(system,
                                   n_samples,
@@ -130,27 +132,23 @@ if __name__ == '__main__':
     ax5.relim()
     ax5.autoscale_view()
     
-    #===========================================================================
-    # fig6, ax6=initializeFigure()
-    # fig6.suptitle('Inialization data: S_g1 vs S_g2')
-    # fig6, ax6=initialization_data_im.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"ob")
-    # plt.hold(True)
-    # fig6, ax6=simulation_data.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"or")
-    # fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
-    # ax6.relim()
-    # ax6.autoscale_view()    
-    #===========================================================================
+    fig6, ax6=initializeFigure()
+    fig6.suptitle('Inialization data: S_g1 vs S_g2')
+    fig6, ax6=initialization_data_im.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"ob")
+    plt.hold(True)
+    fig6, ax6=simulation_data.plotSimulatedData2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"or")
+    fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
+    ax6.relim()
+    ax6.autoscale_view()    
     
     
-    #===========================================================================
-    # fig7, ax7 =  initializeFigure();
-    # fig7.suptitle('Evaluation Error Evolution')
-    # plt.plot(simulation1.evaluation_error[1:],'b')
-    # plt.hold(True)
-    # plt.xlabel('Sensorimotor training step')
-    # plt.ylabel('Mean error') 
-    # 
-    #===========================================================================
+    fig7, ax7 =  initializeFigure();
+    fig7.suptitle('Evaluation Error Evolution')
+    plt.plot(simulation1.evaluation_error[1:],'b')
+    plt.hold(True)
+    plt.xlabel('Sensorimotor training step')
+    plt.ylabel('Mean error') 
+    
     
     
     fig8, ax8 =  initializeFigure();
@@ -179,7 +177,4 @@ if __name__ == '__main__':
         if str_opt == 'H':
             plt.show()
     except SyntaxError:
-        pass
-        pass
-    
-    
+        pass    

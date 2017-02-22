@@ -6,7 +6,7 @@ Created on May 23, 2016
 import tarfile
 import os
 import pandas as pd
-from DataManager.SimulationData import SimulationData, loadSimulationData_h5
+from ...DataManager.SimulationData import SimulationData, loadSimulationData_h5
 
 
 def saveSimulationData(in_file_names,out_file_name):

@@ -7,11 +7,11 @@ Created on Jun 30, 2016
 import numpy as np
 import random
 
-from DataManager.SimulationData import SimulationData, loadSimulationData_h5
-from Algorithm.utils.StorageDataFunctions import saveSimulationData, loadSimulationData
-from Algorithm.utils.RndSensorimotorFunctions import get_random_sensor_set
+from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
+from .utils.StorageDataFunctions import saveSimulationData, loadSimulationData
+from .utils.RndSensorimotorFunctions import get_random_sensor_set
 
-from Algorithm.utils.CompetenceFunctions import get_competence_Moulin2013
+from .utils.CompetenceFunctions import get_competence_Moulin2013
 
 #===============================================================================
 # from Algorithm.utils.CompetenceFunctions import get_competence_Baraglia2015 as get_competence

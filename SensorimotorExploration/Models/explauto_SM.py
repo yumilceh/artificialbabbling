@@ -3,11 +3,7 @@ Created on Jan 22, 2017
 
 @author: Juan Manuel Acevedo Valle
 '''
-#----------------------------------------------------------- import pandas as pd
-#------------------------------------------------------------ import numpy as np
-#-------------------------------------------------------------------- import sys
-#------------------------------------------------- from termcolor import colored
-#----------------------------------------------------- from copy import deepcopy
+
 from explauto.sensorimotor_model.sensorimotor_model import SensorimotorModel
 import numpy as np
 

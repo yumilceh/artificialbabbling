@@ -50,9 +50,9 @@ class DivaStatic(object):
         self.max_sensor_values=max_sensor_values
         
         self.motor_command=[0.0] * n_motor
-        self.sensorOutput=[0.0] * n_sensor
+        self.sensor_out=[0.0] * n_sensor
         self.sensor_goal=[0.0] * n_sensor
-        self.somatoOutput=[0.0] * n_somato
+        self.somato_out=[0.0] * n_somato
         self.competence_result=0.0;
         self.matlabSession=ml.session_factory()   
 

@@ -8,12 +8,12 @@ import numpy as np
 import numpy.linalg as linalg
 
 def get_competence_Moulin2013(agent):
-    y=agent.sensorOutput
+    y=agent.sensor_out
     y_g=agent.sensor_goal      
     agent.competence_result = get_competence_Moulin2013_explauto(y_g, y)
     
 def get_competence_Baraglia2015(agent):
-    y=agent.sensorOutput
+    y=agent.sensor_out
     y_g=agent.sensor_goal    
     agent.competence_result = get_competence_Baraglia2015_explauto(y_g, y)
     

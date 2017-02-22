@@ -3,8 +3,8 @@ Created on Sep, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from Models.GeneralModels.Mixture import GMM as GMMmix
-from DataManager.PlotTools import initializeFigure
+from .Mixture import GMM as GMMmix
+from ...DataManager.PlotTools import initializeFigure
 
 import matplotlib.pyplot as plt
 import numpy as np

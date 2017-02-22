@@ -29,9 +29,9 @@ class SimulationData(object):
     
     def appendData(self,system):
         self.motor_data.appendData(system.motor_command.flatten())
-        self.sensor_data.appendData(system.sensorOutput)
+        self.sensor_data.appendData(system.sensor_out)
         self.sensor_goal_data.appendData(system.sensor_goal)
-        self.somato_data.appendData(system.somatoOutput)
+        self.somato_data.appendData(system.somato_out)
         self.competence_data.appendData(system.competence_result)
         
     def saveData(self,file_name):

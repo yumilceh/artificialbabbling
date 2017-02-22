@@ -4,7 +4,7 @@ Created on Jan 24, 2017
 @author: Juan Manuel Acevedo Valle
 '''
 from importlib import import_module
-from Models.explauto_SM import generateConfigurationExplauto
+from ..Models.explauto_SM import generateConfigurationExplauto
 import numpy as np
 
 model_class_name = {'discretized_progress': 'DiscretizedProgress',
