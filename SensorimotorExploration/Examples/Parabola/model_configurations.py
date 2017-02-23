@@ -23,9 +23,9 @@ model_class = {'gmm_sm': GMM_SM,
                'igmm_sm': IGMM_SM,
                'igmm_ss': IGMM_SS,
                'gmm_im': GMM_IM,
-               'explauto_IM': ea_IM,
-               'explauto_SM': ea_SM,
-               'explauto_SS': ea_SS,
+               'explauto_im': ea_IM,
+               'explauto_sm': ea_SM,
+               'explauto_ss': ea_SS,
                'random': RdnM}
 
 
@@ -52,8 +52,15 @@ models_params = {'gmm_sm': {'k_sm': 10,
                  'gmm_im': {'k_im': 10,
                             'im_step': 30,
                             'im_samples': 800},
-                 'explauto_IM': {},
-                 'explauto_SM': {},
-                 'explauto_SS': {},
-                 'random': {}
+                 'explauto_sm': {'model_type': 'nearest_neighbor'},
+                 'explauto_ss': {'model_type': 'nearest_neighbor'},
+                 'explauto_im': {'model_type': 'discretized_progress'},
+                 'random': {'model_type': 'motor'}
                  }
+
+
+def model_(model_key, system, competence_func = None):
+    if type(competence_func) == type(None):
+        return model_class[model_key](system, **models_params[model_key])
+    else:
+        return model_class[model_key](system, competence_func, **models_params[model_key])

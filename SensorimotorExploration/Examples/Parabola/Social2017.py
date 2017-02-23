@@ -1,106 +1,124 @@
 '''
 Created on Feb 5, 2016
 
-@author: yumilceh
+@author: Juan Manuel Acevedo Valle
 '''
 from numpy import linspace
 from numpy import random as np_rnd
+import datetime
+
+now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
 
 if __name__ == '__main__':
-    ## Adding the projects folder to the path##
-    import os,sys,random
+    #  Adding the projects folder to the path##
+    import os, sys, random
+
     sys.path.append("../../")
 
-    ## Adding libraries##
+    #  Adding libraries##
     from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from SensorimotorExploration.Algorithm.Social2017 import Social as Algorithm
-    from SensorimotorExploration.Algorithm.Social2017 import MODELS
+    from SensorimotorExploration.Algorithm.Social2017 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
+    from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013_expl as comp_func_expl
+    from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013 as comp_func
+
+    from model_configurations import model_
 
     # Models
+    f_sm_key = 'explauto_sm'
+    f_ss_key = 'explauto_ss'
+    f_im_key = 'explauto_im'
 
-    # To guarantee reproductible experiments##
-    n_initialization = 35
-    n_evaluation_samples = 100
-    n_experiments = 400
+    '''
+       'gmm_sm':  GMM_SM,
+       'gmm_ss':  GMM_SS,
+       'igmm_sm': IGMM_SM,
+       'igmm_ss': IGMM_SS,
+       'gmm_im':  GMM_IM,
+       'explauto_im': ea_IM,
+       'explauto_sm': ea_SM,
+       'explauto_ss': ea_SS,
+       'random':  RdnM
+    '''
+
+    # To guarantee reproducible experiments
     random_seed = 1234
+
+    n_initialization = 35
+    n_experiments = 400
+    n_save_data = 200
+
+    eval_step = 100
 
     random.seed(random_seed)
     np_rnd.seed(random_seed)
 
-    ## Creating Agent ##
-    system=System()
+    # Creating Agent ##
+    system = System()
 
-    ## Creating Models ##
-    models=MODELS()
-    
-    models.f_sm = GMM_SM(system,
-                         sm_step = sm_step,
-                         min_components = k_sm_min, max_components = k_sm_max,
-                         max_step_components = k_sm_step,
-                         forgetting_factor = alpha_sm,
-                         plot = False,
-                         plot_dims=[2,3])
-    
-    models.f_ss = GMM_SS(system,
-                         ss_step=ss_step,
-                         min_components = k_ss_min, max_components = k_ss_max,
-                         max_step_components = k_ss_step,
-                         forgetting_factor = alpha_ss)
-    
-    models.f_im = GMM_IM(system,
-                         k_im,
-                         n_training_samples=im_samples,
-                         im_step=im_step)
-    
-    evaluation_sim=SM_ModelEvaluation(system,
-                                      100,
-                                      models.f_sm)
+    # Creating Models ##
+    models = OBJECT()
+
+    models.f_sm = model_(f_sm_key, system)
+    models.f_ss = model_(f_ss_key, system)
+    models.f_im = model_(f_im_key, system, competence_func=comp_func_expl)
+
+    evaluation_sim = SM_ModelEvaluation(system,
+                                        models.f_sm, comp_func=comp_func)
+
     evaluation_sim.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
-    
-    
-    
-    ## Creating Simulation object, running simulation and plotting experiments##
-    file_prefix='Test_Parabola_NPro_ILGMM_'
-    simulation1=Algorithm(system,
-                          models,
-                          file_prefix=file_prefix,
-                          n_experiments = n_experiments,
-                          n_initialization_experiments = n_initialization,
-                          g_im_initialization_method = 'non-painful',
-                          n_save_data=100,
-                          evaluation=evaluation_sim,
-                          sm_all_samples = sm_all_samples)
-    
 
-    simulation1.runNonProprioceptiveAlgorithm()
+    #  Creating Simulation object, running simulation and plotting experiments##
+    file_prefix = 'Parabola_Sim_' + now
+    simulation = Algorithm(system,
+                           models,
+                           n_experiments,
+                           comp_func,
+                           n_initialization_experiments=n_initialization,
+                           random_seed=1234,
+                           g_im_initialization_method='all',
+                           n_save_data=n_save_data,
+                           evaluation=evaluation_sim,
+                           eval_step = eval_step,
+                           sm_all_samples=False)
+
+    simulation.run_simple()
+
+
+    init_data_sm = simulation.data.initialization_data_sm_ss
+    init_data_im = simulation.data.initialization_data_im
+    sim_data = simulation.data.simulation_data
     
-    initialization_data_sm_ss=simulation1.data.initialization_data_sm_ss
-    initialization_data_im=simulation1.data.initialization_data_im
-    simulation_data=simulation1.data.simulation_data
-    
-        ## Validation of the model ##
-    n_samples=n_evaluation_samples
-    evaluation=SM_ModelEvaluation(system,
-                                  n_samples,
-                                  simulation1.models.f_sm,
-                                  file_prefix=file_prefix)
+    ## Validation of the model ##
+    evaluation = SM_ModelEvaluation(system,
+                                  simulation.models.f_sm)
+
     evaluation.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
     
     validation_valSet_data = evaluation.evaluateModel(saveData=True)   
     
     fig1,ax1 = initializeFigure()
     fig1.suptitle('All Sensory Results')
-    fig1, ax1 = initialization_data_sm_ss.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ok")
-    fig1, ax1 = initialization_data_im.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"og")
-    fig1,ax1 = simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
+    fig1, ax1 = init_data_sm.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ok")
+    fig1, ax1 = init_data_im.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"og")
+    fig1,ax1 = sim_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
     fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    
-    fig1, ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
+    #fig1, ax1 = simulation.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
     ax1.relim()
     ax1.autoscale_view()
-    
-    
+
+    plt.draw()
+    plt.pause(0.001)
+    try:
+        str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
+        if str_opt == 'H':
+            plt.show()
+    except SyntaxError:
+        pass
+
+    '''
     fig2,ax2=initializeFigure()
     fig2.suptitle('Motor Commands: M1 vs M2')
     fig2,ax2=simulation_data.plotSimulatedData2D(fig2,ax2,'motor', 0, 'motor', 1,"or")
@@ -170,11 +188,6 @@ if __name__ == '__main__':
     
     
     
-    plt.draw()
-    plt.pause(0.001)
-    try:
-        str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
-        if str_opt == 'H':
-            plt.show()
-    except SyntaxError:
-        pass    
+
+
+'''

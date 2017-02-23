@@ -7,21 +7,19 @@ if __name__ == '__main__':
     import sys, os
     import numpy as np
     
-    from Models.explauto_SM import explauto_SM
-    from Models.explauto_IM import explauto_IM
-    from DataManager.SimulationData import SimulationData
+    from SensorimotorExploration.Models.explauto_SM import explauto_SM
+    from SensorimotorExploration.Models.explauto_IM import explauto_IM
+    from SensorimotorExploration.DataManager.SimulationData import SimulationData
     
     # from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from SensorimotorSystems.Arm_explauto import SimpleArm as System
+    from SensorimotorExploration.SensorimotorSystems.Arm_explauto import SimpleArm as System
     # from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a as System
+
+    from SensorimotorExploration.Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
+    from SensorimotorExploration.Algorithm.CompetenceFunctions import get_competence_Moulin2013_explauto as competence
     
-    # from Algorithm.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
-    # from Algorithm.CompetenceFunctions import get_competence_Baraglia2015_explauto as competence
-    from Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
-    from Algorithm.CompetenceFunctions import get_competence_Moulin2013_explauto as competence
-    
-    from Algorithm.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
-    from Algorithm.ModelEvaluation import SM_ModelEvaluation
+    from SensorimotorExploration.Algorithm.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
+    from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
 
 
     system = System()
@@ -63,7 +61,7 @@ if __name__ == '__main__':
         #-------------- system.sensor_goal = get_random_sensor_set(system, 1)[0]
         
         #------------------------------------------------------------- #CURIOSITY
-        system.sensor_goal = im_model.get_interesting_goal(system)
+        system.sensor_goal = im_model.get_goal(system)
         
         sm_model.getMotorCommand(system)
         system.executeMotorCommand() 

@@ -12,9 +12,9 @@ class PARAMS(object):
         pass
 
 class explauto_SM(object):
-    '''
+    """
     Implemented for non-parametric models
-    '''
+    """
     def __init__(self, agent, model_type, model_conf = "default"):
         conf = generateConfigurationExplauto(agent)
         self.conf = conf
@@ -41,8 +41,8 @@ class explauto_SM(object):
     def set_sigma_explo_ratio(self, new_value):
         conf = self.conf
         self.model.sigma_expl = (conf.m_maxs - conf.m_mins) * float(new_value)
-     
-        
+
+
 def generateConfigurationExplauto(agent):
     conf = PARAMS()
     conf.m_maxs = agent.max_motor_values

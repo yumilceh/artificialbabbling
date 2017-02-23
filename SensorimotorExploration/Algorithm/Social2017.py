@@ -9,7 +9,7 @@ Created on Feb 20, 2017
 # ===============================================================================
 import numpy as np
 from numpy import linalg
-import datetime, copy  # copy.deepcopy
+import datetime  # copy.deepcopy
 from ..DataManager.SimulationData import SimulationData
 from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
 from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
@@ -24,7 +24,7 @@ now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
 
 class OBJECT(object):
     def __init__(self):
-        self.sm_all_samples = None
+        pass
 
 
 class DATA(object):
@@ -48,9 +48,10 @@ class Social(object):
                  n_initialization_experiments=100,
                  random_seed=np.random.random((1, 1)),
                  g_im_initialization_method='non-zero',  # 'non-zero' 'all' 'non-painful'
-                 n_save_data=50000,
+                 n_save_data=-1,
                  sm_all_samples=False,
-                 evaluation=None,
+                 evaluation = None,
+                 eval_step = -1,
                  file_prefix=now):
         """
         Social(learner, instructor, models, n_experiments, competence_func)
@@ -65,17 +66,23 @@ class Social(object):
         """
 
         self.params = OBJECT()
+        self.params.sm_all_samples = None
         self.params.n_initialization_experiments = n_initialization_experiments
         self.params.n_experiments = n_experiments
         self.params.random_seed = random_seed
         self.params.g_im_initialization_method = g_im_initialization_method
+
+        if n_save_data == -1:
+            n_save_data = np.floor(n_experiments/5)
+
         self.params.n_save_data = n_save_data
+
         self.params.sm_all_samples = sm_all_samples
 
         self.learner = learner
         self.initialization_models = OBJECT()
         self.models = models
-        self.get_competece = competence_func
+        self.get_competence = competence_func
 
         self.data = DATA(self)
         self.data.file_prefix = file_prefix
@@ -85,6 +92,9 @@ class Social(object):
         if not type(evaluation) == type(None):
             self.evaluation_error = [np.infty]
             self.evaluate = True
+            if eval_step == -1:
+                eval_step = np.floor(n_experiments / 5)
+        self.params.eval_step = eval_step
 
     def run(self, proprio = True):
         if proprio:
@@ -222,9 +232,13 @@ class Social(object):
                             self.data.file_prefix + 'initialization_data_im.h5',
                             self.data.file_prefix + 'simulation_data.h5'], 'simulation_data.tar.gz')
 
-    print('SM Exploration (Proprio), Experiment was finished')
+        print('SM Exploration (Proprio), Experiment was finished')
 
     def run_simple(self):
+        if self.params.g_im_initialization_method is 'non-painful':
+            print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
+            print('G_IM, init: Switching to all samples method')
+            self.params.g_im_initialization_method = 'all'
         n_init = self.params.n_initialization_experiments
         motor_commands = self.data.init_motor_commands
 
@@ -236,13 +250,21 @@ class Social(object):
             # print('SM , Line 1: Initialize G_SM, experiment: {} of {}'.format(i + 1,n_init)) # Slow
         self.models.f_sm.train(self.data.initialization_data_sm_ss)
         self.models.f_ss.train(self.data.initialization_data_sm_ss)
-        self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
-        self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
+        try:
+            self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
+            self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
+        except AttributeError:
+            self.initialization_models.f_sm = self.models.f_sm.model
+            self.initialization_models.f_ss = self.models.f_ss.model
+
         print('SM Exploration (Simple), Line 1: G_SM awas initialized')
 
         print('SM Exploration (Simple), Line 1: First evaluation of G_SM')
         if self.evaluate:
-            self.evaluation.model = self.models.f_sm.return_copy()
+            try:
+                self.evaluation.model = self.models.f_sm.return_copy()
+            except AttributeError:
+                self.evaluation.model = self.models.f_sm
             eval_data = self.evaluation.evaluateModel()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis=1)
             self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
@@ -280,11 +302,18 @@ class Social(object):
 
         self.data.initialization_data_im.saveData(self.data.file_prefix + 'initialization_data_im.h5')
         self.models.f_im.train(self.data.initialization_data_im)
-        self.initialization_models.f_im = self.models.f_im.model.return_copy()
+
+        try:
+            self.initialization_models.f_im = self.models.f_im.model.return_copy()
+        except AttributeError:
+            self.initialization_models.f_im = self.models.f_im.model
+
         print('SM Exploration (Simple), Line 2: G_IM was initialized')
 
         n_save_data = self.params.n_save_data;
         n_experiments = self.params.n_experiments
+        eval_step = self.params.eval_step
+
         print('SM Exploration (Simple), Lines 4-22: : Main simulation running...')
         for i in range(n_experiments):
             self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
@@ -294,7 +323,7 @@ class Social(object):
             self.data.simulation_data.appendData(self.learner)
 
             ''' Train Interest Model'''
-            if ((i + 1) % self.models.f_im.params.im_step) == 0:
+            if (i + 1)%self.models.f_im.params.im_step==0:
                 # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
                 if i < self.models.f_im.params.n_training_samples:
                     self.models.f_im.train(
@@ -303,37 +332,37 @@ class Social(object):
                     self.models.f_im.train(self.data.simulation_data)
 
             ''' Train Sensorimotor Model'''
-            if ((i + 1) % self.models.f_sm.params.sm_step) == 0:
+            if (i + 1)%self.models.f_sm.params.sm_step==0:
                 # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples):  ###BE CAREFUL WITH MEMORY
                     self.models.f_sm.trainIncrementalLearning(
                         self.data.simulation_data.mixDataSets(self.learner,
-                                                              self.data.initialization_data_im.mixDataSets(self.learner,
-                                                                                                           self.data.initialization_data_sm_ss)))
+                                                              self.data.initialization_data_im.mixDataSets(
+                                                                  self.learner,self.data.initialization_data_sm_ss)))
                 else:
                     self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
-                if not self.evaluation == None:
-                    self.evaluation.model = self.models.f_sm
-                    eval_data = self.evaluation.evaluateModel()
-                    error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis=1)
-                    self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
+            if self.evaluate and (i + 1)%eval_step == 0:
+                self.evaluation.model = self.models.f_sm
+                eval_data = self.evaluation.evaluateModel()
+                error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis=1)
+                self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
 
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
-            if (np.mod(i, n_save_data) == 0):
+            if (i + 1)%n_save_data == 0:
                 self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
                 print('SM Exploration (Simple), Line 4-22: Experiment: Saving data at samples {} of {}'.format(i + 1,
-                                                                                                                n_experiments))
+                                                                                                         n_experiments))
 
         self.data.simulation_data.saveData('simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'initialization_data_sm.h5',
                             self.data.file_prefix + 'initialization_data_im.h5',
                             self.data.file_prefix + 'simulation_data.h5'], 'simulation_data.tar.gz')
 
-    print('SM Exploration (Simple), Experiment was finished')
+        print('SM Exploration (Simple), Experiment was finished and data saved')
 
 
-def returnEvaluationError(simulation):
+def get_eval_error(simulation):
     evaluation = SM_ModelEvaluation(simulation.system,
                                     10,
                                     simulation.models.f_sm)

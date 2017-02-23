@@ -6,7 +6,7 @@ Created on May 23, 2016
 from ..DataManager.SimulationData import SimulationData
 
 from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
-from ..Algorithm.utils.CompetenceFunctions import get_competence_Moulin2013 as get_competence
+from ..Algorithm.utils.CompetenceFunctions import comp_Moulin2013 as get_competence
 
 import numpy as np
 import numpy.linalg as linalg

@@ -81,7 +81,7 @@ if __name__ == '__main__':
     n_chosen_experiments=50
     
     for i in range(n_chosen_experiments):
-        diva_agent.sensor_goal=gmm_im.get_interesting_goal()
+        diva_agent.sensor_goal=gmm_im.get_goal()
         gmm_sm.getMotorCommand(diva_agent)
         diva_agent.getMotorDynamics()
         diva_agent.vocalize()

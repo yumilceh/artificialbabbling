@@ -1,18 +1,17 @@
-'''
+"""
 Created on Jan 23, 2017
 
 @author: Juan Manuel Acevedo Valle
-'''
+"""
 if __name__ == '__main__':
     import sys, os
     import numpy as np
     sys.path.append("../../")
     
-    from Models.explauto_SM import explauto_SM as SM_Model
-    from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from Algorithm.RndSensorimotorFunctions import get_random_motor_set
-    
-    from DataManager.SimulationData import SimulationData
+    from SensorimotorExploration.Models.explauto_SM import explauto_SM as SM_Model
+    from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
+    from SensorimotorExploration.Algorithm.RndSensorimotorFunctions import get_random_motor_set
+    from SensorimotorExploration.DataManager.SimulationData import SimulationData
 
 
     system = System()
@@ -35,7 +34,7 @@ if __name__ == '__main__':
     
     system.executeMotorCommand()
     
-    from DataManager.PlotTools import * 
+    from SensorimotorExploration.DataManager.PlotTools import initializeFigure, plt
     from matplotlib.pyplot import show
     
     fig1,ax1=initializeFigure()

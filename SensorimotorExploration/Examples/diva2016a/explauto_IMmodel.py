@@ -67,7 +67,7 @@ if __name__ == '__main__':
         
         #------------------------------------------------------------ #CURIOSITY
         
-        system.sensor_goal = im_model.get_interesting_goal(system)
+        system.sensor_goal = im_model.get_goal(system)
         
         sm_model.getMotorCommand(system)
         system.executeMotorCommand() 

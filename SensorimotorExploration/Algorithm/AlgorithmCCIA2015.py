@@ -148,7 +148,7 @@ class Algorithm_CCIA2015(object):
         n_save_data = self.params.n_save_data;
         n_experiments = self.params.n_experiments
         for i in range(n_experiments):
-            self.agent.sensor_goal = self.models.f_im.get_interesting_goal(self.agent)
+            self.agent.sensor_goal = self.models.f_im.get_goal(self.agent)
             self.models.f_sm.getMotorCommand(self.agent)
             self.agent.executeMotorCommand()
             get_competence(self.agent)

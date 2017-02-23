@@ -40,7 +40,7 @@ class explauto_IM(object):
     '''
     Implemented for non-parametric models
     '''
-    def __init__(self, agent, model_type, competence_func, model_conf = model_conf):
+    def __init__(self, agent,competence_func,  model_type, model_conf = model_conf):
         model_competence_conf = {'discretized_progress': {'measure': competence_func},
                                  'tree':{'competence_measure': lambda target,reached : competence_func(target, reached)},
                                  'gmm_progress_beta':    {'measure': competence_func}             
@@ -63,23 +63,21 @@ class explauto_IM(object):
         
         self.params = PARAMS()
         self.params.im_step = 1 #only ok with non-parametric
-       
+        self.params.n_training_samples = 1  # only ok with non-parametric
     def train(self,simulation_data):  
         m = simulation_data.motor_data.data.iloc[-1]
         s = simulation_data.sensor_data.data.iloc[-1]  
         s_g =  simulation_data.sensor_goal_data.data.iloc[-1]
         self.model.update(np.hstack((m, s_g)) , np.hstack((m, s)))  
             
-    def get_interesting_goal(self,agent):
+    def get_goal(self, agent):
         return self.model.sample()
-        
-           
+
     def get_interesting_goal_proprioception(self,agent,sm_model,ss_model):
         ''' Not implemented yet'''
-        return get_interesting_goal(agent)
-        
-            
-    def get_interesting_goals(self,agent,n_goals=1):
+        return self.get_goal(agent)
+
+    def get_goals(self, agent, n_goals=1):
         s_g = np.zeros((n_goals,agent.n_sensor))
         for i in range(n_goals):
             s_g[i,:] = self.model.sample()

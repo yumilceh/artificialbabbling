@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from Models.GeneralModels.ILGMM_GREC import ILGMM as GMM
+from ..Models.GeneralModels.ILGMM_GREC import ILGMM as GMM
 import numpy as np
 import pandas as pd
 
