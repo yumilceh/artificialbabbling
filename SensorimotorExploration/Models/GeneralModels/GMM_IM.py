@@ -132,7 +132,7 @@ class GMM_IM(object):
                     self.model.Active[selected_gauss]=0     
                     y_g_tmp = np.random.multivariate_normal(gmm_means[selected_gauss,:], gmm_covars[selected_gauss], 1)
                     y_g=y_g_tmp[0,1:1+goal_size]
-                    motor_command_tmp=sm_model.getMotorCommand(agent, boundSensorGoal(agent, y_g))
+                    motor_command_tmp=sm_model.get_action(agent, boundSensorGoal(agent, y_g))
                     if ss_model.predictProprioceptiveEffect(agent, motor_command_tmp)==0:
                         return boundSensorGoal(agent,y_g)
                     else:
@@ -149,7 +149,7 @@ class GMM_IM(object):
                     greatest_cov=Covar[time_index,competence_index]#Why absolute value???
                     y_g_tmp = np.random.multivariate_normal(Mean,Covar, 1);
                     y_g = y_g_tmp[1:1+goal_size]
-                    motor_command_tmp=sm_model.getMotorCommand(agent, boundSensorGoal(agent, y_g))
+                    motor_command_tmp=sm_model.get_action(agent, boundSensorGoal(agent, y_g))
                     if ss_model.getProprioceptivePrediction(agent, motor_command_tmp)==0:
                         return boundSensorGoal(agent,y_g)
             return boundSensorGoal(agent,y_g)

@@ -1,17 +1,19 @@
-'''
+"""
 Created on Jan 22, 2017
 
 @author: Juan Manuel Acevedo Valle
-'''
+"""
 
 from explauto.sensorimotor_model.sensorimotor_model import SensorimotorModel
 import numpy as np
+
 
 class PARAMS(object):
     def __init__(self):
         pass
 
-class explauto_SM(object):
+
+class ExplautoSS(object):
     """
     Implemented for non-parametric models
     """
@@ -23,16 +25,16 @@ class explauto_SM(object):
         self.params = PARAMS()
         self.params.sm_step=1 #only ok with non-parametric
        
-    def getMotorCommand(self,Agent,sensor_goal=None):          
-        if sensor_goal==None:
-            sensor_goal=Agent.sensor_goal  #s_g
+    def getSomatoPrediction(self,agent,motor_command=None):          
+        if motor_command==None:
+            motor_command = agent.sensor_goal  #s_g
         
-        Agent.motor_command = self.model.inverse_prediction(sensor_goal)
-        return  Agent.motor_command
+        agent.somato_prediction = self.model.forward_prediction(motor_command)
+        return  agent.somato_prediction
     
     def train(self, simulation_data):
         m = simulation_data.motor_data.data.iloc[-1]
-        s = simulation_data.sensor_data.data.iloc[-1]
+        s = simulation_data.somato_data.data.iloc[-1]
         self.model.update(m,s)
         
     def trainIncrementalLearning(self, simulation_data):
@@ -41,17 +43,17 @@ class explauto_SM(object):
     def set_sigma_explo_ratio(self, new_value):
         conf = self.conf
         self.model.sigma_expl = (conf.m_maxs - conf.m_mins) * float(new_value)
-
-
+     
+        
 def generateConfigurationExplauto(agent):
     conf = PARAMS()
     conf.m_maxs = agent.max_motor_values
     conf.m_mins = agent.min_motor_values
-    conf.s_maxs = agent.max_sensor_values
-    conf.s_mins = agent.min_sensor_values
+    conf.s_maxs = agent.max_somato_values
+    conf.s_mins = agent.min_somato_values
    
     n_motor = agent.n_motor;
-    n_sensor = agent.n_sensor;
+    n_sensor = agent.n_somato;
     
     conf.m_ndims = n_motor
     conf.s_ndims = n_sensor

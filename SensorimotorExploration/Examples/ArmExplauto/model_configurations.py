@@ -12,10 +12,10 @@ from SensorimotorExploration.Models.ILGMM_SM import GMM_SM as IGMM_SM
 from SensorimotorExploration.Models.ILGMM_SS import GMM_SS as IGMM_SS
 
 from SensorimotorExploration.Models.explauto_IM import explauto_IM as ea_IM
-from SensorimotorExploration.Models.explauto_SM import explauto_SM as ea_SM
-from SensorimotorExploration.Models.explauto_SS import explauto_SS as ea_SS
+from SensorimotorExploration.Models.ExplautoSM import ExplautoSM as ea_SM
+from SensorimotorExploration.Models.ExplautoSS import ExplautoSS as ea_SS
 
-from SensorimotorExploration.Models.random_model import RandomModel as RdnM
+from SensorimotorExploration.Models.Random import RandomModel as RdnM
 
 
 model_class = {'gmm_sm': GMM_SM,

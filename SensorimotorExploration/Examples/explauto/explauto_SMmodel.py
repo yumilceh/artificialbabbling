@@ -8,7 +8,7 @@ if __name__ == '__main__':
     import numpy as np
     sys.path.append("../../")
     
-    from SensorimotorExploration.Models.explauto_SM import explauto_SM as SM_Model
+    from SensorimotorExploration.Models.ExplautoSM import ExplautoSM as SM_Model
     from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
     from SensorimotorExploration.Algorithm.RndSensorimotorFunctions import get_random_motor_set
     from SensorimotorExploration.DataManager.SimulationData import SimulationData
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         
     s_g = np.array([4, 3.5])
     
-    sm_model.getMotorCommand(system,sensor_goal = s_g)
+    sm_model.get_action(system, sensor_goal = s_g)
     
     # system.setMotorCommand(np.array([system.motor_command[1], system.motor_command[0]]))
     

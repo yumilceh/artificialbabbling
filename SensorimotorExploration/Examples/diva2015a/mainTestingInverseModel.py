@@ -64,7 +64,7 @@ if __name__ == '__main__':
     
     for i in range(n_random_examples):
         diva_agent.sensor_goal=sensor_goals[i]
-        gmm_sm.getMotorCommand(diva_agent)
+        gmm_sm.get_action(diva_agent)
         diva_agent.getMotorDynamics()
         diva_agent.vocalize()
         simulation_data.appendData(diva_agent)

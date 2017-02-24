@@ -4,7 +4,7 @@ Created on Jan 24, 2017
 @author: Juan Manuel Acevedo Valle
 '''
 from importlib import import_module
-from ..Models.explauto_SM import generateConfigurationExplauto
+from ..Models.ExplautoSM import generateConfigurationExplauto
 import numpy as np
 
 model_class_name = {'discretized_progress': 'DiscretizedProgress',
@@ -64,6 +64,7 @@ class explauto_IM(object):
         self.params = PARAMS()
         self.params.im_step = 1 #only ok with non-parametric
         self.params.n_training_samples = 1  # only ok with non-parametric
+
     def train(self,simulation_data):  
         m = simulation_data.motor_data.data.iloc[-1]
         s = simulation_data.sensor_data.data.iloc[-1]  

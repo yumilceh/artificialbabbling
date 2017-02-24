@@ -21,15 +21,14 @@ if __name__ == '__main__':
     from SensorimotorExploration.Algorithm.Social2017 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
-    from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013_expl as comp_func_expl
     from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013 as comp_func
 
     from model_configurations import model_
 
     # Models
-    f_sm_key = 'gmm_sm'
-    f_ss_key = 'gmm_ss'
-    f_im_key = 'explauto_im'
+    f_sm_key = 'explauto_sm'
+    f_ss_key = 'explauto_ss'
+    f_im_key = 'random'
 
     '''
        'gmm_sm':  GMM_SM,
@@ -46,11 +45,11 @@ if __name__ == '__main__':
     # To guarantee reproducible experiments
     random_seed = 1234
 
-    n_initialization = 35
-    n_experiments = 400
-    n_save_data = 200
+    n_initialization = 40
+    n_experiments = 3000
+    n_save_data = 300
 
-    eval_step = 100
+    eval_step = 200
 
     random.seed(random_seed)
     np_rnd.seed(random_seed)
@@ -63,7 +62,7 @@ if __name__ == '__main__':
 
     models.f_sm = model_(f_sm_key, system)
     models.f_ss = model_(f_ss_key, system)
-    models.f_im = model_(f_im_key, system, competence_func=comp_func_expl)
+    models.f_im = model_(f_im_key, system)
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func)
@@ -112,7 +111,7 @@ if __name__ == '__main__':
     fig7.suptitle('Evaluation Error Evolution')
     plt.plot(simulation.evaluation_error[1:], 'b')
     plt.hold(True)
-    plt.xlabel('Sensorimotor training step')
+    plt.xlabel('Evaluation training step')
     plt.ylabel('Mean error')
 
     fig8, ax8 = initializeFigure()

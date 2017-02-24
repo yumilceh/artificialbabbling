@@ -107,7 +107,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
                 if(linalg.norm(sensor_goals[i])>0):
                     self.agent.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.models.f_sm.get_action(self.agent)
                     self.agent.executeMotorCommand()
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
@@ -119,7 +119,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
                 if((proprio_data[i])==0):
                     self.agent.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.models.f_sm.get_action(self.agent)
                     self.agent.executeMotorCommand()
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
@@ -129,7 +129,7 @@ class Algorithm_CCIA2015(object):
             for i in range(n_init):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
                 self.agent.sensor_goal = sensor_goals[i]
-                self.models.f_sm.getMotorCommand(self.agent)
+                self.models.f_sm.get_action(self.agent)
                 self.agent.executeMotorCommand()
                 get_competence(self.agent)
                 self.data.initialization_data_im.appendData(self.agent)
@@ -149,7 +149,7 @@ class Algorithm_CCIA2015(object):
         n_experiments = self.params.n_experiments
         for i in range(n_experiments):
             self.agent.sensor_goal = self.models.f_im.get_goal(self.agent)
-            self.models.f_sm.getMotorCommand(self.agent)
+            self.models.f_sm.get_action(self.agent)
             self.agent.executeMotorCommand()
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
@@ -231,7 +231,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i+1,n_init))
                 if(linalg.norm(sensor_goals[i])>0):
                     self.agent.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.models.f_sm.get_action(self.agent)
                     self.agent.executeMotorCommand()
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
@@ -243,7 +243,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Non-proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i,n_init))
                 if((proprio_data[i])==0):
                     self.agent.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.agent)
+                    self.models.f_sm.get_action(self.agent)
                     self.agent.executeMotorCommand()
                     get_competence(self.agent)
                     self.data.initialization_data_im.appendData(self.agent)
@@ -254,7 +254,7 @@ class Algorithm_CCIA2015(object):
             for i in range(n_init):
                 print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, experiment: {} of {}'.format(i+1,n_init))
                 self.agent.sensor_goal = sensor_goals[i]
-                self.models.f_sm.getMotorCommand(self.agent)
+                self.models.f_sm.get_action(self.agent)
                 self.agent.executeMotorCommand()
                 get_competence(self.agent)
                 self.data.initialization_data_im.appendData(self.agent)
@@ -268,7 +268,7 @@ class Algorithm_CCIA2015(object):
         for i in range(n_experiments):
             self.agent.sensor_goal = self.models.f_im.get_interesting_goal_proprioception(self.agent,self.models.f_sm,self.models.f_ss)
             self.models.f_im.activateAllComponents()
-            self.models.f_sm.getMotorCommand(self.agent)
+            self.models.f_sm.get_action(self.agent)
             self.agent.executeMotorCommand()
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)

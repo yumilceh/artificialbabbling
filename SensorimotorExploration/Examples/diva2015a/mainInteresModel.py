@@ -65,7 +65,7 @@ if __name__ == '__main__':
     
     for i in range(n_random_examples):
         diva_agent.sensor_goal=sensor_goals[i]
-        gmm_sm.getMotorCommand(diva_agent)
+        gmm_sm.get_action(diva_agent)
         diva_agent.getMotorDynamics()
         diva_agent.vocalize()
         get_competence_Moulin2013(diva_agent)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     
     for i in range(n_chosen_experiments):
         diva_agent.sensor_goal=gmm_im.get_goal()
-        gmm_sm.getMotorCommand(diva_agent)
+        gmm_sm.get_action(diva_agent)
         diva_agent.getMotorDynamics()
         diva_agent.vocalize()
         get_competence_Moulin2013(diva_agent)

@@ -7,7 +7,7 @@ if __name__ == '__main__':
     import sys, os
     import numpy as np
     
-    from SensorimotorExploration.Models.explauto_SM import explauto_SM
+    from SensorimotorExploration.Models.ExplautoSM import ExplautoSM
     from SensorimotorExploration.Models.explauto_IM import explauto_IM
     from SensorimotorExploration.DataManager.SimulationData import SimulationData
     
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     model_type = 'discretized_progress'  #'tree' 'discretized_progress''gmm_progress_beta'
     im_model = explauto_IM(system, model_type, competence)
     
-    sm_model = explauto_SM(system, "nearest_neighbor")
+    sm_model = ExplautoSM(system, "nearest_neighbor")
     sigma_explo_ratio = 0.1
     sm_model.set_sigma_explo_ratio(sigma_explo_ratio)
     
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         
     for s_g in get_random_sensor_set(system, 10):
         system.sensor_goal = s_g
-        sm_model.getMotorCommand(system)
+        sm_model.get_action(system)
         system.executeMotorCommand()        
         simulation_data.appendData(system)
         sm_model.train(simulation_data)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         #------------------------------------------------------------- #CURIOSITY
         system.sensor_goal = im_model.get_goal(system)
         
-        sm_model.getMotorCommand(system)
+        sm_model.get_action(system)
         system.executeMotorCommand() 
         get_competence(system)
         simulation_data.appendData(system)

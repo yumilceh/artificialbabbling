@@ -4,7 +4,6 @@ Created on Jun 30, 2016
 @author: Juan Manuel Acevedo Valle
 """
 
-
 import numpy as np
 import random
 
@@ -14,25 +13,26 @@ from .utils.RndSensorimotorFunctions import get_random_sensor_set
 
 from .utils.CompetenceFunctions import comp_Moulin2013
 
+
 class PARAMS(object):
     def __init__(self):
         pass
 
 
 class SM_ModelEvaluation(object):
-    '''
+    """
         This class uses data in order to estimate a sensorimotor model and evaluate it.
-    '''
+    """
 
     def __init__(self, system,
                  model,
-                 comp_func = comp_Moulin2013,
+                 comp_func=comp_Moulin2013,
                  data=None,
                  file_prefix='',
                  ratio_samples_val=0.2):
-        '''
+        """
             Initialize
-        '''
+        """
         self.agent = system
         self.data = PARAMS()
         self.data = data
@@ -96,7 +96,7 @@ class SM_ModelEvaluation(object):
                 y_ = self.data.sensor_data.data.iloc[i].as_matrix()
 
                 self.agent.sensor_goal = y_
-                self.model.getMotorCommand(self.agent)
+                self.model.get_action(self.agent)
                 self.agent.getMotorDynamics()
                 self.agent.executeMotorCommand()
                 self.comp_func(self.agent)
@@ -109,14 +109,14 @@ class SM_ModelEvaluation(object):
         # Validation against Validation set
         validation_valSet_data = SimulationData(self.agent)
         progress = 1;
-        print('Evaluating model with validation data set of {} samples...'. format(self.n_samples_val))
+        print('Evaluating model with validation data set of {} samples...'.format(self.n_samples_val))
         for i in self.random_indexes_val:
             #  print('Testing using sample {current} of {total} in the validation set'.format(current=progress,
             #                                                                     total=self.n_samples_val))  #Slow
             y_ = self.data.sensor_data.data.iloc[i].as_matrix()
 
             self.agent.sensor_goal = y_
-            self.model.getMotorCommand(self.agent)
+            self.model.get_action(self.agent)
             self.agent.executeMotorCommand()
             self.comp_func(self.agent)
             validation_valSet_data.appendData(self.agent)
@@ -139,7 +139,6 @@ class SM_ModelEvaluation(object):
                 return validation_trainSet_data, validation_valSet_data
             else:
                 return validation_valSet_data
-
 
 
 def generateTestDatafromrawData(data_in, min_distance=0.01):

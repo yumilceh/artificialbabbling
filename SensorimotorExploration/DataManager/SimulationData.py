@@ -1,25 +1,20 @@
-'''
+"""
 Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
-'''
+"""
 
 from .DataTemplates.TabularData import TabularData
-#===============================================================================
-# import gzip
-# import shutil
-# import os
-#===============================================================================
 import matplotlib.pyplot as plt
-#----------------------------------------------------------- import pandas as pd
 from .PlotTools import movingAverage
 import numpy as np
 import pandas as pd
 
+
 class SimulationData(object):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self, system):
         self.motor_data=TabularData(system.motor_names)
         self.sensor_data=TabularData(system.sensor_names)

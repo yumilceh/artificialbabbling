@@ -14,6 +14,7 @@ from ..DataManager.SimulationData import SimulationData
 from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
 from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
 from ..Algorithm.utils.StorageDataFunctions import saveSimulationData
+
 # import logging
 # logging.basicConfig(filename='cylinder.log', level=logging.DEBUG,\
 #         format="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
@@ -45,13 +46,14 @@ class Social(object):
                  models,
                  n_experiments,
                  competence_func,
+                 sigma_expl=0.08,
                  n_initialization_experiments=100,
                  random_seed=np.random.random((1, 1)),
                  g_im_initialization_method='non-zero',  # 'non-zero' 'all' 'non-painful'
                  n_save_data=-1,
                  sm_all_samples=False,
-                 evaluation = None,
-                 eval_step = -1,
+                 evaluation=None,
+                 eval_step=-1,
                  file_prefix=now):
         """
         Social(learner, instructor, models, n_experiments, competence_func)
@@ -66,6 +68,7 @@ class Social(object):
         """
 
         self.params = OBJECT()
+        self.params.sigma_expl = sigma_expl
         self.params.sm_all_samples = None
         self.params.n_initialization_experiments = n_initialization_experiments
         self.params.n_experiments = n_experiments
@@ -73,7 +76,7 @@ class Social(object):
         self.params.g_im_initialization_method = g_im_initialization_method
 
         if n_save_data == -1:
-            n_save_data = np.floor(n_experiments/5)
+            n_save_data = np.floor(n_experiments / 5)
 
         self.params.n_save_data = n_save_data
 
@@ -89,18 +92,114 @@ class Social(object):
 
         self.evaluation = evaluation
         self.evaluate = False
-        if not type(evaluation) == type(None):
+        if evaluation is not None:
             self.evaluation_error = [np.infty]
             self.evaluate = True
             if eval_step == -1:
                 eval_step = np.floor(n_experiments / 5)
         self.params.eval_step = eval_step
 
-    def run(self, proprio = True):
+        self.models.f_sm.set_sigma_explo_ratio(sigma_expl)
+
+    def run(self, proprio=True):
         if proprio:
             self.run_proprio()
         else:
             self.run_simple()
+
+    def run_simple(self):
+        if self.params.g_im_initialization_method is 'non-painful':
+            print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
+            print('G_IM, init: Switching to all samples method')
+            self.params.g_im_initialization_method = 'all'
+        n_init = self.params.n_initialization_experiments
+        motor_commands = self.data.init_motor_commands
+
+        print('SM Exploration (Simple), Line 1: Initializing G_SM')
+        for i in range(n_init):
+            self.learner.setMotorCommand(motor_commands[i, :])
+            self.learner.executeMotorCommand()
+            self.data.initialization_data_sm_ss.appendData(self.learner)
+            self.do_training(i, up_=['sm'])
+        # add training for models different from explauto
+        print('G_SM initialized')
+        # try:
+        #     self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
+        #     self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
+        # except AttributeError:
+        #     self.initialization_models.f_sm = self.models.f_sm.model
+        #     self.initialization_models.f_ss = self.models.f_ss.model
+        print('SM Exploration (Simple), Line 1: First evaluation of G_SM')
+        self.do_evaluation(0)
+
+        # print('Algorithm 1 , Line 1: Initialize G_SM and G_SS, experiment {} of {}'.format(i + 1, n_init)) # Slow
+        self.data.initialization_data_sm_ss.saveData(self.data.file_prefix + 'initialization_data_sm.h5')
+
+        f_im_init = self.params.g_im_initialization_method
+        if f_im_init == 'non-zero':
+            print('SM Exploration (Simple),, Line 2: Initialize G_IM, Non-null sensory result considered ')
+            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
+            for i in range(n_init):
+                # print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM,
+                # experiment: {} of {}'.format(i + 1, n_init))
+                if (linalg.norm(sensor_goals[i]) > 0):
+                    self.learner.sensor_goal = sensor_goals[i]
+                    self.models.f_sm.get_action(self.learner)
+                    self.learner.executeMotorCommand()
+                    self.get_competence(self.learner)
+                    self.data.initialization_data_im.appendData(self.learner)
+                    self.do_training(i, up_=['im', 'sm'])
+
+        elif f_im_init == 'all':
+            print('SM Exploration (Simple), Line 2: Initialize G_IM, All sensory result considered ')
+            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
+            for i in range(n_init):
+                # print('Algorithm 1 , Line 2: Initialize G_IM,'
+                #       ' experiment: {} of {}'.format(i + 1, n_init))
+                self.learner.sensor_goal = sensor_goals[i]
+                self.models.f_sm.get_action(self.learner)
+                self.learner.executeMotorCommand()
+                self.get_competence(self.learner)
+                self.data.initialization_data_im.appendData(self.learner)
+                self.do_training(i, up_=['im','sm'])
+        print('G_IM initialized')
+        self.data.initialization_data_im.saveData(self.data.file_prefix + 'initialization_data_im.h5')
+        # self.models.f_im.train(self.data.initialization_data_im)
+        #
+        # try:
+        #     self.initialization_models.f_im = self.models.f_im.model.return_copy()
+        # except AttributeError:
+        #     self.initialization_models.f_im = self.models.f_im.model
+        n_save_data = self.params.n_save_data;
+        n_experiments = self.params.n_experiments
+        eval_step = self.params.eval_step
+
+        print('SM Exploration (Simple), Lines 4-22: : Main simulation running...')
+        for i in range(n_experiments):
+            self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
+            self.models.f_sm.get_action(self.learner)
+            self.learner.executeMotorCommand()
+            self.get_competence(self.learner)
+            self.data.simulation_data.appendData(self.learner)
+
+            self.do_training(i, up_= ['sm', 'im'])
+            self.do_evaluation(i)
+
+            # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
+            if (i + 1) % n_save_data == 0:
+                self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
+                print('SM Exploration (Simple), Line 4-22: Experiment: Saving data at samples {} of {}'.\
+                      format(i + 1, n_experiments))
+
+        self.models.f_sm.set_sigma_explo_ratio(0.)
+        self.do_evaluation(0)
+
+        self.data.simulation_data.saveData('simulation_data.h5')
+        saveSimulationData([self.data.file_prefix + 'initialization_data_sm.h5',
+                            self.data.file_prefix + 'initialization_data_im.h5',
+                            self.data.file_prefix + 'simulation_data.h5'], 'simulation_data.tar.gz')
+
+        print('SM Exploration (Simple), Experiment was finished and data saved')
 
     def run_proprio(self):
         n_init = self.params.n_initialization_experiments
@@ -139,7 +238,7 @@ class Social(object):
                 # experiment: {} of {}'.format(i + 1, n_init))
                 if (linalg.norm(sensor_goals[i]) > 0):
                     self.learner.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.learner)
+                    self.models.f_sm.get_action(self.learner)
                     self.learner.executeMotorCommand()
                     self.get_competence(self.learner)
                     self.data.initialization_data_im.appendData(self.learner)
@@ -153,7 +252,7 @@ class Social(object):
                 # experiment: {} of {}'.format(i, n_init))
                 if proprio_data[i] == 0:
                     self.learner.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.learner)
+                    self.models.f_sm.get_action(self.learner)
                     self.learner.executeMotorCommand()
                     self.get_competence(self.learner)
                     self.data.initialization_data_im.appendData(self.learner)
@@ -166,7 +265,7 @@ class Social(object):
                 # print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM,'
                 #       ' experiment: {} of {}'.format(i + 1, n_init))
                 self.learner.sensor_goal = sensor_goals[i]
-                self.models.f_sm.getMotorCommand(self.learner)
+                self.models.f_sm.get_action(self.learner)
                 self.learner.executeMotorCommand()
                 self.get_competence(self.learner)
                 self.data.initialization_data_im.appendData(self.learner)
@@ -181,7 +280,7 @@ class Social(object):
         print('SM Exploration (Proprio), Lines 4-22: : Main simulation running...')
         for i in range(n_experiments):
             self.learner.sensor_goal = self.models.f_im.get_goal(self.learner, self.models.f_sm, self.models.f_ss)
-            self.models.f_sm.getMotorCommand(self.learner)
+            self.models.f_sm.get_action(self.learner)
             self.learner.executeMotorCommand()
             self.get_competence(self.learner)
             self.data.simulation_data.appendData(self.learner)
@@ -225,7 +324,8 @@ class Social(object):
             # print('SM Exploration (Proprio), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
             if (np.mod(i, n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
-                print('SM Exploration (Proprio), Line 4-22: Experiment: Saving data at samples {} of {}'.format(i + 1, n_experiments))
+                print('SM Exploration (Proprio), Line 4-22: Experiment: Saving data at samples {} of {}'.format(i + 1,
+                                                                                                                n_experiments))
 
         self.data.simulation_data.saveData('simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'initialization_data_sm_ss.h5',
@@ -234,132 +334,36 @@ class Social(object):
 
         print('SM Exploration (Proprio), Experiment was finished')
 
-    def run_simple(self):
-        if self.params.g_im_initialization_method is 'non-painful':
-            print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
-            print('G_IM, init: Switching to all samples method')
-            self.params.g_im_initialization_method = 'all'
-        n_init = self.params.n_initialization_experiments
-        motor_commands = self.data.init_motor_commands
+    def do_training(self, i, up_=['sm', 'ss', 'im'], force=False):
+        """ Train Interest Model"""
+        if 'im' in up_ and ((i + 1) % self.models.f_im.params.im_step == 0 or force):
+            # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
+            if i < self.models.f_im.params.im_step:
+                self.models.f_im.train(
+                    self.data.initialization_data_im.mixDataSets(self.learner, self.data.simulation_data))
+            else:
+                self.models.f_im.train(self.data.simulation_data)
 
-        print('SM Exploration (Simple), Line 1: Initializing G_SM')
-        for i in range(n_init):
-            self.learner.setMotorCommand(motor_commands[i, :])
-            self.learner.executeMotorCommand()
-            self.data.initialization_data_sm_ss.appendData(self.learner)
-            # print('SM , Line 1: Initialize G_SM, experiment: {} of {}'.format(i + 1,n_init)) # Slow
-        self.models.f_sm.train(self.data.initialization_data_sm_ss)
-        self.models.f_ss.train(self.data.initialization_data_sm_ss)
-        try:
-            self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
-            self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
-        except AttributeError:
-            self.initialization_models.f_sm = self.models.f_sm.model
-            self.initialization_models.f_ss = self.models.f_ss.model
+        """Train Sensorimotor Model"""
+        if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
+            # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
+            if i < self.params.n_initialization_experiments or self.params.sm_all_samples:  ###BE CAREFUL WITH MEMORY
+                self.models.f_sm.trainIncrementalLearning(
+                    self.data.simulation_data.mixDataSets(
+                        self.learner,
+                        self.data.initialization_data_im.mixDataSets(
+                            self.learner, self.data.initialization_data_sm_ss)))
+            else:
+                self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
 
-        print('SM Exploration (Simple), Line 1: G_SM awas initialized')
-
-        print('SM Exploration (Simple), Line 1: First evaluation of G_SM')
-        if self.evaluate:
-            try:
-                self.evaluation.model = self.models.f_sm.return_copy()
-            except AttributeError:
-                self.evaluation.model = self.models.f_sm
+    def do_evaluation(self, i):
+        if self.evaluate and (i + 1) % self.params.eval_step == 0:
+            self.evaluation.model = self.models.f_sm
             eval_data = self.evaluation.evaluateModel()
-            error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis=1)
+            error_ = np.linalg.norm(eval_data.sensor_goal_data.data.as_matrix() -
+                                    eval_data.sensor_data.data.as_matrix(), axis=1)
             self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
-
-        # print('Algorithm 1 , Line 1: Initialize G_SM and G_SS,
-        # experiment {} of {}'.format(i + 1, n_init)) # Slow
-
-        self.data.initialization_data_sm_ss.saveData(self.data.file_prefix + 'initialization_data_sm.h5')
-
-        g_im_initialization_method = self.params.g_im_initialization_method
-        if g_im_initialization_method == 'non-zero':
-            print('SM Exploration (Simple),, Line 2: Initialize G_IM, Non-null sensory result considered ')
-            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
-            for i in range(n_init):
-                # print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM,
-                # experiment: {} of {}'.format(i + 1, n_init))
-                if (linalg.norm(sensor_goals[i]) > 0):
-                    self.learner.sensor_goal = sensor_goals[i]
-                    self.models.f_sm.getMotorCommand(self.learner)
-                    self.learner.executeMotorCommand()
-                    self.get_competence(self.learner)
-                    self.data.initialization_data_im.appendData(self.learner)
-
-        elif g_im_initialization_method == 'all':
-            print('SM Exploration (Simple), Line 2: Initialize G_IM, All sensory result considered ')
-            sensor_goals = self.data.initialization_data_sm_ss.sensor_data.data.as_matrix()
-            for i in range(n_init):
-                # print('Algorithm 1 , Line 2: Initialize G_IM,'
-                #       ' experiment: {} of {}'.format(i + 1, n_init))
-                self.learner.sensor_goal = sensor_goals[i]
-                self.models.f_sm.getMotorCommand(self.learner)
-                self.learner.executeMotorCommand()
-                self.get_competence(self.learner)
-                self.data.initialization_data_im.appendData(self.learner)
-
-        self.data.initialization_data_im.saveData(self.data.file_prefix + 'initialization_data_im.h5')
-        self.models.f_im.train(self.data.initialization_data_im)
-
-        try:
-            self.initialization_models.f_im = self.models.f_im.model.return_copy()
-        except AttributeError:
-            self.initialization_models.f_im = self.models.f_im.model
-
-        print('SM Exploration (Simple), Line 2: G_IM was initialized')
-
-        n_save_data = self.params.n_save_data;
-        n_experiments = self.params.n_experiments
-        eval_step = self.params.eval_step
-
-        print('SM Exploration (Simple), Lines 4-22: : Main simulation running...')
-        for i in range(n_experiments):
-            self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
-            self.models.f_sm.getMotorCommand(self.learner)
-            self.learner.executeMotorCommand()
-            self.get_competence(self.learner)
-            self.data.simulation_data.appendData(self.learner)
-
-            ''' Train Interest Model'''
-            if (i + 1)%self.models.f_im.params.im_step==0:
-                # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
-                if i < self.models.f_im.params.n_training_samples:
-                    self.models.f_im.train(
-                        self.data.initialization_data_im.mixDataSets(self.learner, self.data.simulation_data))
-                else:
-                    self.models.f_im.train(self.data.simulation_data)
-
-            ''' Train Sensorimotor Model'''
-            if (i + 1)%self.models.f_sm.params.sm_step==0:
-                # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
-                if (i < n_init or self.params.sm_all_samples):  ###BE CAREFUL WITH MEMORY
-                    self.models.f_sm.trainIncrementalLearning(
-                        self.data.simulation_data.mixDataSets(self.learner,
-                                                              self.data.initialization_data_im.mixDataSets(
-                                                                  self.learner,self.data.initialization_data_sm_ss)))
-                else:
-                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
-            if self.evaluate and (i + 1)%eval_step == 0:
-                self.evaluation.model = self.models.f_sm
-                eval_data = self.evaluation.evaluateModel()
-                error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis=1)
-                self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
-
-
-            # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
-            if (i + 1)%n_save_data == 0:
-                self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
-                print('SM Exploration (Simple), Line 4-22: Experiment: Saving data at samples {} of {}'.format(i + 1,
-                                                                                                         n_experiments))
-
-        self.data.simulation_data.saveData('simulation_data.h5')
-        saveSimulationData([self.data.file_prefix + 'initialization_data_sm.h5',
-                            self.data.file_prefix + 'initialization_data_im.h5',
-                            self.data.file_prefix + 'simulation_data.h5'], 'simulation_data.tar.gz')
-
-        print('SM Exploration (Simple), Experiment was finished and data saved')
+            print('Evaluation finished.')
 
 
 def get_eval_error(simulation):

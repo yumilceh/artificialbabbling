@@ -115,7 +115,7 @@ class Algorithm_Random(object):
         
         for i in range(n_experiments):
             self.agent.sensor_goal = sensor_goals[i,:]
-            self.models.f_sm.getMotorCommand(self.agent)
+            self.models.f_sm.get_action(self.agent)
             self.agent.executeMotorCommand()
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
