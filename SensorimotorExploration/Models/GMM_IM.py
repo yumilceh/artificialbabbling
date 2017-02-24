@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from Models.GeneralModels.Mixture import GMM
+from ..Models.GeneralModels.Mixture import GMM
 from sklearn import mixture 
 import pandas as pd
 import numpy as np 
@@ -21,14 +21,14 @@ class GMM_IM(object):
     '''
 
 
-    def __init__(self, agent, n_gauss_components, im_step=120, n_training_samples=4200):
+    def __init__(self, agent, n_gauss_components, im_step=12, im_samples=4200):
         '''
         Constructor
         '''
         
         self.params=PARAMS()
         self.params.im_step = im_step
-        self.params.n_training_samples = n_training_samples
+        self.params.n_training_samples = im_samples
         self.params.size_data = 2*agent.n_sensor+1
         self.params.goal_size = agent.n_sensor
         self.params.competence_index = 2*agent.n_sensor+1; #Considering that one column will be time

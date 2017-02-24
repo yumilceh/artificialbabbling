@@ -29,34 +29,28 @@ model_class = {'gmm_sm': GMM_SM,
                'random': RdnM}
 
 
-models_params_list = {'gmm_sm': [10],
-                     'gmm_ss': [10],
-                 'igmm_sm': [],
-                 'igmm_ss': [],
-                 'gmm_im': [10],
-                 'explauto_sm': [],
-                 'explauto_ss': [],
-                 'explauto_im': [],
-                 'random': []
-                 }
-
-models_params_dict = {'gmm_sm': {'sm_step': 50,
-                            'alpha': 0.5},
-                 'gmm_ss': {'ss_step': 50,
-                            'alpha': 0.5},
+models_params = {'gmm_sm': {'k_sm': 10,
+                            'sm_step': 50,
+                            'alpha_sm': 0.5,
+                            'sm_all_samples': False},
+                 'gmm_ss': {'k_ss': 10,
+                            'ss_step': 50,
+                            'alpha_ss': 0.5,
+                            'ss_all_samples': False},
                  'igmm_sm': {'k_sm_min': 3,
                              'k_sm_step': 5,
                              'k_sm_max': 10,
                              'sm_step': 50,
-                             'alpha': 0.05,
+                             'alpha_sm': 0.05,
                              'sm_all_samples': False},
                  'igmm_ss': {'k_ss_min': 3,
                              'k_ss_step': 5,
                              'k_ss_max': 10,
                              'ss_step': 50,
-                             'alpha': 0.05,
+                             'alpha_ss': 0.05,
                              'sm_all_samples': False},
-                 'gmm_im': {'im_step': 30,
+                 'gmm_im': {'k_im': 10,
+                            'im_step': 30,
                             'im_samples': 800},
                  'explauto_sm': {'model_type': 'nearest_neighbor'},
                  'explauto_ss': {'model_type': 'nearest_neighbor'},
@@ -67,6 +61,6 @@ models_params_dict = {'gmm_sm': {'sm_step': 50,
 
 def model_(model_key, system, competence_func = None):
     if type(competence_func) == type(None):
-        return model_class[model_key](system, *models_params_list[model_key], **models_params_dict[model_key])
+        return model_class[model_key](system, **models_params[model_key])
     else:
-        return model_class[model_key](system, competence_func, *models_params_list[model_key], **models_params_dict[model_key])
+        return model_class[model_key](system, competence_func, **models_params[model_key])

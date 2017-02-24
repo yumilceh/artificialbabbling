@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from Models.GeneralModels.Mixture import GMM
+from ..Models.GeneralModels.Mixture import GMM
 import numpy as np
 import pandas as pd
 
@@ -40,7 +40,7 @@ class GMM_SM(object):
         
     def trainIncrementalLearning(self,simulation_data):
         alpha=self.params.alpha
-        self.model.trainIncrementalLearning(returnTrainData(simulation_data, alpha))
+        self.model.trainIncrementalLearning(self.returnTrainData(simulation_data), alpha)
          
     def returnTrainData(self,simulation_data):
         sm_step = self.params.sm_step

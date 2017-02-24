@@ -121,7 +121,7 @@ class SM_ModelEvaluation(object):
             self.comp_func(self.agent)
             validation_valSet_data.appendData(self.agent)
             progress = progress + 1;
-        print('Evaluating has been finished.')
+        print('Evaluation has been finished.')
 
         if (saveData):
             validation_valSet_data.saveData(self.files.file_prefix + 'validation_valSet_data.h5')

@@ -27,8 +27,8 @@ if __name__ == '__main__':
     from model_configurations import model_
 
     # Models
-    f_sm_key = 'explauto_sm'
-    f_ss_key = 'explauto_ss'
+    f_sm_key = 'gmm_sm'
+    f_ss_key = 'gmm_ss'
     f_im_key = 'explauto_im'
 
     '''
@@ -104,10 +104,23 @@ if __name__ == '__main__':
     fig1, ax1 = init_data_sm.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ok")
     fig1, ax1 = init_data_im.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"og")
     fig1,ax1 = sim_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
-    fig1, ax1 = validation_valSet_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ob")    
-    #fig1, ax1 = simulation.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
+    ax1.legend(['SM init', 'IM init',  'Experiment'])
     ax1.relim()
     ax1.autoscale_view()
+
+    fig7, ax7 = initializeFigure()
+    fig7.suptitle('Evaluation Error Evolution')
+    plt.plot(simulation.evaluation_error[1:], 'b')
+    plt.hold(True)
+    plt.xlabel('Sensorimotor training step')
+    plt.ylabel('Mean error')
+
+    fig8, ax8 = initializeFigure()
+    fig8.suptitle('Validation: S1 vs S2')
+    fig8, ax8 = validation_valSet_data.plotSimulatedData2D(fig8, ax8, 'sensor', 0, 'sensor', 1, "ob")
+    plt.hold(True)
+    fig8, ax8 = validation_valSet_data.plotSimulatedData2D(fig8, ax8, 'sensor_goal', 0, 'sensor_goal', 1, "or")
+    ax8.legend(['Results', 'Goal'])
 
     plt.draw()
     plt.pause(0.001)
