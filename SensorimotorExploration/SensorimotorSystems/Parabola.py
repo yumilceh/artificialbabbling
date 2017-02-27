@@ -19,7 +19,7 @@ class CustomObject:
 
 class ConstrainedParabolicArea:
     
-    def __init__(self, sigma_noise=0.000001):
+    def __init__(self, sigma_noise=0.0000001):
         
         a = 2.0
         b = 3.0

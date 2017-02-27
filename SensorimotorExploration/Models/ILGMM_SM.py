@@ -70,9 +70,9 @@ class GMM_SM(object):
         self.model.train(train_data_tmp.as_matrix(columns=None))
          
     
-    def getMotorCommand(self,Agent,sensor_goal=None):
-        n_motor=Agent.n_motor;
-        n_sensor=Agent.n_sensor;
+    def get_action(self, Agent, sensor_goal=None):
+        n_motor=Agent.n_motor
+        n_sensor=Agent.n_sensor
         
         if sensor_goal==None:
             sensor_goal=Agent.sensor_goal  #s_g
@@ -96,12 +96,14 @@ class GMM_SM(object):
         
         # return boundMotorCommand(Agent,self.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
         return copy.deepcopy(Agent.motor_command)
-        
-                
+
+    def set_sigma_explo_ratio(self, *args):
+        pass
+
 def boundMotorCommand(Agent,motor_command):
-    n_motor=Agent.n_motor;
-    min_motor_values = Agent.min_motor_values;
-    max_motor_values = Agent.max_motor_values;
+    n_motor=Agent.n_motor
+    min_motor_values = Agent.min_motor_values
+    max_motor_values = Agent.max_motor_values
     for i in range(n_motor):
         if (motor_command[i] < min_motor_values[i]):
             motor_command[i] = min_motor_values[i]

@@ -78,10 +78,8 @@ class GMM(object):
                 lowest_bic = bic[-1]
                 best_gmm = n_components
             try:    
-                if (bic[-1] > bic[-2] and 
-                    bic[-2] > bic[-3] and
-                    bic[-3] < bic[-4] and
-                    bic[-4] < bic[-5]):
+                if (bic[-1] > bic[-2] > bic[-3] and
+                                bic[-3] < bic[-4] < bic[-5]):
                     best_gmm = n_components - 2
                     break    
                 
@@ -123,7 +121,7 @@ class GMM(object):
         
     def trainIncrementalLearning(self,new_data,alpha):
         if self.initialized:
-            self.model.init_params='';
+            self.model.init_params=''
             n_new_samples = np.size(new_data,0)
             n_persistent_samples = np.round(((1-alpha)*n_new_samples)/alpha)
             persistent_data = self.model.sample(n_persistent_samples)
@@ -139,9 +137,9 @@ class GMM(object):
         return self.model.bic(data)        
         
     def predict(self, x_dims, y_dims, y):
-        '''
+        """
             This method returns the value of x that maximaze the probability P(x|y)
-        '''
+        """
         y=np.mat(y)
         n_dimensions=np.amax(len(x_dims))+np.amax(len(y_dims))
         n_components=self.model.n_components

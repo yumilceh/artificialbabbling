@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 5, 2016
 
 @author: Juan Manuel Acevedo Valle
-'''
+"""
 from numpy import linspace
 from numpy import random as np_rnd
 import datetime
@@ -26,11 +26,11 @@ if __name__ == '__main__':
     from model_configurations import model_
 
     # Models
-    f_sm_key = 'explauto_sm'
-    f_ss_key = 'explauto_ss'
-    f_im_key = 'random'
+    f_sm_key = 'igmm_sm'
+    f_ss_key = 'igmm_ss'
+    f_im_key = 'explauto_im'
 
-    '''
+    """
        'gmm_sm':  GMM_SM,
        'gmm_ss':  GMM_SS,
        'igmm_sm': IGMM_SM,
@@ -40,16 +40,16 @@ if __name__ == '__main__':
        'explauto_sm': ea_SM,
        'explauto_ss': ea_SS,
        'random':  RdnM
-    '''
+    """
 
     # To guarantee reproducible experiments
     random_seed = 1234
 
     n_initialization = 40
-    n_experiments = 3000
-    n_save_data = 300
+    n_experiments = 500
+    n_save_data = 200
 
-    eval_step = 200
+    eval_step = 100
 
     random.seed(random_seed)
     np_rnd.seed(random_seed)
@@ -80,30 +80,25 @@ if __name__ == '__main__':
                            g_im_initialization_method='all',
                            n_save_data=n_save_data,
                            evaluation=evaluation_sim,
-                           eval_step = eval_step,
+                           eval_step=eval_step,
                            sm_all_samples=False)
 
     simulation.run_simple()
 
+    sim_data = simulation.data
+    val_data = evaluation_sim.evaluateModel(saveData=False)
 
-    init_data_sm = simulation.data.initialization_data_sm_ss
-    init_data_im = simulation.data.initialization_data_im
-    sim_data = simulation.data.simulation_data
-    
     ## Validation of the model ##
-    evaluation = SM_ModelEvaluation(system,
-                                  simulation.models.f_sm)
+    # evaluation = SM_ModelEvaluation(system,
+    #                               simulation.models.f_sm)
+    #
+    # evaluation.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
+    #
+    # validation_valSet_data = evaluation.evaluateModel(saveData=True)
 
-    evaluation.loadEvaluationDataSet('parabola_validation_data_set_2.h5')
-    
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)   
-    
-    fig1,ax1 = initializeFigure()
+    fig1, ax1 = initializeFigure()
     fig1.suptitle('All Sensory Results')
-    fig1, ax1 = init_data_sm.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"ok")
-    fig1, ax1 = init_data_im.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"og")
-    fig1,ax1 = sim_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
-    ax1.legend(['SM init', 'IM init',  'Experiment'])
+    fig1, ax1 = sim_data.plotSimulatedData2D(fig1, ax1, 'sensor', 0, 'sensor', 1, ".b")
     ax1.relim()
     ax1.autoscale_view()
 
@@ -116,13 +111,14 @@ if __name__ == '__main__':
 
     fig8, ax8 = initializeFigure()
     fig8.suptitle('Validation: S1 vs S2')
-    fig8, ax8 = validation_valSet_data.plotSimulatedData2D(fig8, ax8, 'sensor', 0, 'sensor', 1, "ob")
+    fig8, ax8 = val_data.plotSimulatedData2D(fig8, ax8, 'sensor', 0, 'sensor', 1, ".b")
     plt.hold(True)
-    fig8, ax8 = validation_valSet_data.plotSimulatedData2D(fig8, ax8, 'sensor_goal', 0, 'sensor_goal', 1, "or")
+    fig8, ax8 = val_data.plotSimulatedData2D(fig8, ax8, 'sensor_goal', 0, 'sensor_goal', 1, ".r")
     ax8.legend(['Results', 'Goal'])
 
     plt.draw()
     plt.pause(0.001)
+
     try:
         str_opt = raw_input("Press [enter] to continue or [H + ENTER] to keep plots.")
         if str_opt == 'H':
@@ -130,7 +126,7 @@ if __name__ == '__main__':
     except SyntaxError:
         pass
 
-    '''
+    """
     fig2,ax2=initializeFigure()
     fig2.suptitle('Motor Commands: M1 vs M2')
     fig2,ax2=simulation_data.plotSimulatedData2D(fig2,ax2,'motor', 0, 'motor', 1,"or")
@@ -202,4 +198,4 @@ if __name__ == '__main__':
     
 
 
-'''
+"""
