@@ -11,8 +11,8 @@ if __name__ == '__main__':
     import numpy as np
     from matplotlib.pyplot  import draw, show
 
-    from Models.GeneralModels.ILGMM_GREC import ILGMM
-    from DataManager.PlotTools import initializeFigure
+    from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM
+    from SensorimotorExploration.DataManager.PlotTools import initializeFigure
 
     # Number of samples per component
     n_samples = 500

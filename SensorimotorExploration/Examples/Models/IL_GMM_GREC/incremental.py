@@ -14,8 +14,8 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from matplotlib.pyplot  import draw, show
 
-    from Models.GeneralModels.ILGMM_GREC import ILGMM
-    from DataManager.PlotTools import initializeFigure
+    from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM
+    from SensorimotorExploration.DataManager.PlotTools import initializeFigure
 
     # Number of samples per component
     n_samples = 500
@@ -29,20 +29,13 @@ if __name__ == '__main__':
               .7 * np.random.randn(n_samples, 2) + np.array([-6, 3])]
 
 
-    model = ILGMM(min_components=2,plot_dims= [0,1])
+    model = ILGMM(min_components=2, max_components=5, plot_dims= [0,1])
     model.train(X)
-    Y_  = model.model.predict(X)
-    
-            
+
+    #  Y_  = model.model.predict(X)
+
+
     #Model computed with three Gaussians
-    #-------------------------------------------- fig1, ax1 = initializeFigure()
-    #------------------------- fig1, ax1 = model.plotGMMProjection(fig1,ax1,0,1)
-    
-    #- for i, (mean,  color) in enumerate(zip(model.model.means_,  color_iter)):
-        #----------- plt.scatter(X[Y_ == i, 0], X[Y_ == i, 1], 0.8, color=color)
-        
-    #----------------------------- plt.scatter(X[:, 0], X[:, 1], 0.8, color='k')
-             
     n_samples2=150
     C2 = np.array([[0., -0.1], [0.2, 0.4]])
     X2 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.5*C),
@@ -51,30 +44,12 @@ if __name__ == '__main__':
               .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
               .5 * np.random.randn(n_samples2, 2) + np.array([1, 3]),
               .4 * np.random.randn(n_samples, 2) + np.array([-2, -0.5])]
-    
-    
-    
-    #--------------------------- plt.scatter(X2[:, 0], X2[:, 1], 0.8, color='r')
-    
-
-    #---------------------------- model2 = ILGMM(min_components=2, plot = False)
-#------------------------------------------------------------------------------ 
-    #-------------------------------------- model2.params['max_components'] = 10
-    #---------------------------------------------------------- model2.train(X2)
-    
-    #------------------------ fig1, ax1 = model2.plotGMMProjection(fig1,ax1,0,1)
-#------------------------------------------------------------------------------ 
-    #--------------------------------------------------------------- ax1.relim()
-    #------------------------------------------------------ ax1.autoscale_view()
-
     model.train(X2)
-        
+
+
+
+
     #Model merging similar Gaussians
-    #-------------------------------------------- fig2, ax2 = initializeFigure()
-    #---------------------- fig2, ax2 = model.plotGMMProjection(fig2, ax2, 0, 1)
-    #--------------------------------------------------------------- ax2.relim()
-    #------------------------------------------------------ ax2.autoscale_view()
-    
     X3 = np.r_[np.dot(np.random.randn(n_samples2, 2), 0.1*C),
                 .1 * np.random.randn(n_samples, 2) + np.array([-5, 4]),
                 .1 * np.random.randn(n_samples2, 2) + np.array([-2, 1]),
@@ -83,10 +58,10 @@ if __name__ == '__main__':
                 .4 * np.random.randn(n_samples, 2) + np.array([-2, 3]),
                 .4 * np.random.randn(n_samples, 2) + np.array([-6, 0]),
                 .4 * np.random.randn(n_samples, 2) + np.array([4, 5])]
-    
+
     model.train(X3)
-  
+
     draw()
     show()
-    
+
     

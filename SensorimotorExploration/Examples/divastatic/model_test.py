@@ -6,7 +6,7 @@ if __name__ == '__main__':
     '''
     import matplotlib.pyplot as plt
     from numpy import array as arr
-    from SensorimotorExploration.SensorimotorSystems.DivaStatic import DivaStatic
+    from SensorimotorExploration.Systems.DivaStatic import DivaStatic
     diva_system=DivaStatic()
     
     # Test motor execution

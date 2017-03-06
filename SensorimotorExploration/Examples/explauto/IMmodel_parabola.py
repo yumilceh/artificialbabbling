@@ -11,27 +11,26 @@ if __name__ == '__main__':
     from SensorimotorExploration.Models.explauto_IM import explauto_IM
     from SensorimotorExploration.DataManager.SimulationData import SimulationData
     
-    # from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from SensorimotorExploration.SensorimotorSystems.Arm_explauto import SimpleArm as System
-    # from SensorimotorSystems.Diva_Proprio2016a import Diva_Proprio2016a as System
+    from SensorimotorExploration.Systems.Parabola import ConstrainedParabolicArea as System
+    # from SensorimotorExploration.Systems.Arm_explauto import SimpleArm as System
+    # from Systems.Diva_Proprio2016a import Diva_Proprio2016a as System
 
-    from SensorimotorExploration.Algorithm.CompetenceFunctions import get_competence_Moulin2013 as get_competence
-    from SensorimotorExploration.Algorithm.CompetenceFunctions import get_competence_Moulin2013_explauto as competence
+    from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013 as get_competence
+    from SensorimotorExploration.Algorithm.utils.CompetenceFunctions import comp_Moulin2013_expl as competence
     
-    from SensorimotorExploration.Algorithm.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
+    from SensorimotorExploration.Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
 
 
     system = System()
     model_type = 'discretized_progress'  #'tree' 'discretized_progress''gmm_progress_beta'
-    im_model = explauto_IM(system, model_type, competence)
+    im_model = explauto_IM(system, competence,  model_type)
     
     sm_model = ExplautoSM(system, "nearest_neighbor")
     sigma_explo_ratio = 0.1
     sm_model.set_sigma_explo_ratio(sigma_explo_ratio)
     
     evaluation = SM_ModelEvaluation(system,
-                                    0,
                                     sm_model)
     evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
     
@@ -51,7 +50,7 @@ if __name__ == '__main__':
         sm_model.train(simulation_data)
         im_model.train(simulation_data)
     
-    n_experiments = 3000
+    n_experiments = 400
     evaluation_samples = range(10,n_experiments+1, 1000)
     evaluation_error=[]
     
@@ -80,8 +79,11 @@ if __name__ == '__main__':
             
     
         #evaluate
-    
-    from DataManager.PlotTools import * 
+    evaluation = SM_ModelEvaluation(system,
+                                    sm_model)
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+
+    from SensorimotorExploration.DataManager.PlotTools import *
     from matplotlib.pyplot import show
     
         
@@ -95,8 +97,31 @@ if __name__ == '__main__':
     simulation_data.plotTemporalSimulatedData(fig3,ax3,'competence',0,'r',moving_average=10)
     t_evaluation = np.asmatrix(np.array(evaluation_samples)) + 20.
     plt.plot(t_evaluation.tolist()[0], evaluation_error, 'k')
-    
-    show(block=True)
+
+    sm_model.set_sigma_explo_ratio(0)
+    evaluation = SM_ModelEvaluation(system,
+                                    sm_model)
+
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+
+    validation_valSet_data = evaluation.evaluateModel(saveData=True)
+
+    fig4, ax4 = initializeFigure()
+    fig4.suptitle('All Sensory Results')
+    fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4, ax4, 'sensor_goal', 0, 'sensor_goal', 1, "ob")
+    ax4.relim()
+    ax4.autoscale_view()
+
+    fig10, ax10 = initializeFigure()
+    fig10.suptitle('Competence and Error during validation')
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10, ax10, 'competence', 0, "--b",
+                                                                   moving_average=10)
+    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10, ax10, 'error', 0, "r", moving_average=10)
+
+    plt.draw()
+    plt.show()
+
+show(block=True)
  
      
      

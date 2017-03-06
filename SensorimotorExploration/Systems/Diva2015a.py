@@ -4,7 +4,7 @@ This sensorimor system defines the DIVA agent used for the CCIA 2015's paper
 @author: Juan Manuel Acevedo Valle
 '''
 
-#import sys
+import os  #sys
 #import wave
 import subprocess as sp
 import math
@@ -55,8 +55,9 @@ class Diva_Proprio2015a:
         self.sensor_goal=[0.0] * n_sensor
         self.somato_out=[0.0] * n_somato
         self.competence_result=0.0;
-        self.matlabSession=ml.session_factory()    
-        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/SensorimotorSystems/DIVA/') #Path to DIVA functions
+        self.matlabSession=ml.session_factory()
+        abs_path = os.path.dirname(os.path.abspath(__file__))
+        self.matlabSession.run('cd ' + abs_path + '/DIVA/') #Path to DIVA functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
     def setMotorCommand(self,motor_command):
@@ -216,9 +217,47 @@ class Diva_Proprio2015a:
             sp.call(command)
         if(show):
             figVocalTract.show();
-            
-        
-               
+
+    def getVideo(self, art_states, show=0, file_name='vt', keep_audio=0):
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=1 / 0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
+        figVocalTract = plt.figure()
+
+        self.get_sound_wave(art_states, save=1, file_name=file_name)
+
+        outline = self.getVocaltractShape(art_states, returnShape=1)
+        nSamples = art_states.shape[0]
+
+        print(nSamples)
+        sequence = []
+        for index in range(nSamples):
+            sequence.append((plt.plot(np.real(outline[:, index]), np.imag(outline[:, index]))))
+        im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False, blit=True)
+        im_ani.save(file_name + '.mp4', writer=writer, codec="libx264")
+        command = ["ffmpeg",
+                   '-i', file_name + '.wav',
+                   '-i', file_name + '.mp4',
+                   '-c:v', "libx264", '-strict', '-2', file_name + '_audio.mp4']
+        sp.call(command)
+        if keep_audio == 0:
+            command = ["rm",
+                       file_name + '.wav',
+                       file_name + '.mp4']
+            sp.call(command)
+        if (show):
+            figVocalTract.show();
+
+    def get_sound_wave(self, art_states, play=0, save=0, file_name='vt'): #based on explauto
+        self.matlabSession.putvalue('artStates', art_states)
+        self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
+        self.soundWave = self.matlabSession.getvalue('soundWave')
+        if(play):
+            self.playSoundWave()
+        if(save):
+            scaled = np.int16(self.soundWave/np.max(np.abs(self.soundWave)) * 32767)
+            write(file_name + '.wav', 11025, scaled)
+
+
     def getSoundWave(self, play=0,save=0,returnArtStates=0, file_name='vt'): #based on explauto
         soundArtStates=self.getMotorDynamics(sound=1)
         #print('ts=0.005')

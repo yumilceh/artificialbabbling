@@ -56,7 +56,7 @@ class Diva_Proprio2015a:
         self.somatoOutput=[0.0] * n_somato
         self.competence_result=0.0;
         self.matlabSession=ml.session_factory()        
-        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/SensorimotorSystems/DIVA/') #Path to DIVA functions
+        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/Systems/DIVA/') #Path to DIVA functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
     def setMotorCommand(self,motor_command):

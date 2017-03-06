@@ -16,7 +16,7 @@ if __name__ == '__main__':
     sys.path.append("../../")
 
     #  Adding libraries##
-    from SensorimotorExploration.SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
+    from SensorimotorExploration.Systems.Parabola import ConstrainedParabolicArea as System
     from SensorimotorExploration.Algorithm.Social2017 import Social as Algorithm
     from SensorimotorExploration.Algorithm.Social2017 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation

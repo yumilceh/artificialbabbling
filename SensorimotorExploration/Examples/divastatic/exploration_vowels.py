@@ -27,7 +27,7 @@ if __name__ == '__main__' and explore:
      ORIGINAL EXPERIMENT: Script to look for motor configurations producing english
      vowels using a random approach.
     '''
-    from SensorimotorExploration.SensorimotorSystems.DivaStatic import DivaStatic
+    from SensorimotorExploration.Systems.DivaStatic import DivaStatic
     from SensorimotorExploration.Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
     from SensorimotorExploration.DataManager.SimulationData import SimulationData
 
@@ -102,7 +102,7 @@ if __name__ == '__main__' and report:
     file_name_articulations = 'exploration_VDSG_articulations.npy'
     file_name_distances = 'exploration_VDSG_dist_to_vowel.npy'
 
-    from SensorimotorExploration.SensorimotorSystems.DivaStatic import DivaStatic
+    from SensorimotorExploration.Systems.DivaStatic import DivaStatic
     import sys
 
     sys.path.append('../../')
@@ -131,7 +131,7 @@ if __name__ == '__main__' and file_conv:
     file_name_articulations = 'exploration_VDSG_articulations.npy'
     file_name = 'exploration_VDSG_articulation_'
 
-    from SensorimotorExploration.SensorimotorSystems.DivaStatic import DivaStatic
+    from SensorimotorExploration.Systems.DivaStatic import DivaStatic
     import sys
 
     sys.path.append('../../')

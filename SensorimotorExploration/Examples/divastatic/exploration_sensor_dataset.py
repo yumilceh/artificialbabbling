@@ -20,7 +20,7 @@ now = datetime.datetime.now().strftime("DSG_%Y_%m_%d_%H_%M_")
 file_name = "exploration_" + now
 
 if __name__ == '__main__' and explore:
-    from SensorimotorExploration.SensorimotorSystems.DivaStatic import DivaStatic
+    from SensorimotorExploration.Systems.DivaStatic import DivaStatic
     from SensorimotorExploration.Algorithm.DatasetGenerator import DatasetGenerator as Generator
 
     n_experiments = 1000000

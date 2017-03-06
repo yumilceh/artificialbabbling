@@ -3,7 +3,7 @@ Created on Feb 5, 2016
 
 @author: yumilceh
 '''
-from SensorimotorExploration.SensorimotorSystems.Diva2015a import Diva_Proprio2015a
+from SensorimotorExploration.Systems.Diva2015a import Diva_Proprio2015a
 from SensorimotorExploration.DataManager.SimulationData import SimulationData
 from SensorimotorExploration.Models.GMM_SM  import GMM_SM
 from SensorimotorExploration.DataVisualization.PlotTools import *
