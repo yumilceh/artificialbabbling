@@ -10,7 +10,7 @@ from Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
 from Algorithm.utils.CompetenceFunctions import get_competence_Moulin2013 as get_competence
 
 #===============================================================================
-# from Algorithm.utils.CompetenceFunctions import get_competence_Baraglia2015 as get_competence
+# from Algorithm.utils.CompetenceFunctions import comp_Baraglia2015 as get_competence
 #===============================================================================
 
 from Algorithm.ModelEvaluation import SM_ModelEvaluation
@@ -81,7 +81,7 @@ class Algorithm_CCIA2015(object):
         n_init = self.params.n_initialization_experiments
         motor_commands = self.data.init_motor_commands
         for i in range(n_init):
-            self.agent.setMotorCommand(motor_commands[i,:])
+            self.agent.set_action(motor_commands[i, :])
             self.agent.executeMotorCommand()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             print('Algorithm 1 (Non-proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i,n_init))
@@ -205,7 +205,7 @@ class Algorithm_CCIA2015(object):
         n_init = self.params.n_initialization_experiments
         motor_commands = self.data.init_motor_commands
         for i in range(n_init):
-            self.agent.setMotorCommand(motor_commands[i,:])
+            self.agent.set_action(motor_commands[i, :])
             self.agent.executeMotorCommand()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             print('Algorithm 1 (Proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i+1,n_init))

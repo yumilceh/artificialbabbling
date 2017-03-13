@@ -43,7 +43,7 @@ class ManualSimulation(object):
         for i in range(len(motor_command)):
             motor_command[i] = float(input("Insert the element " + str(i) + " of the motor command vector: "))
             
-        self.agent.setMotorCommand(motor_command)
+        self.agent.set_action(motor_command)
         self.agent.executeMotorCommand_unconstrained()
         plt.plot(self.agent.sensorOutput[0], self.agent.sensorOutput[1], "*k")
         self.agent.executeMotorCommand()

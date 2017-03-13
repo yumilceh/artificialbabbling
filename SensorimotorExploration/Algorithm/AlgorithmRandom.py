@@ -5,8 +5,8 @@ Created on May 23, 2016
 '''
 from ..DataManager.SimulationData import SimulationData
 
-from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set, get_random_sensor_set
-from ..Algorithm.utils.CompetenceFunctions import comp_Moulin2013 as get_competence
+from ..Algorithm.utils.functions import get_random_motor_set, get_random_sensor_set
+from ..Algorithm.utils.competence_funcs import comp_Moulin2013 as get_competence
 
 import numpy as np
 import numpy.linalg as linalg
@@ -71,7 +71,7 @@ class Algorithm_Random(object):
                                                n_experiments)    
         
         for i in range(n_experiments):
-            self.agent.setMotorCommand(motor_commands[i,:])
+            self.agent.set_action(motor_commands[i, :])
             self.agent.executeMotorCommand()
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
@@ -97,7 +97,7 @@ class Algorithm_Random(object):
                                              n_experiments)
         
         for i in range(n_motor_initialization):
-            self.agent.setMotorCommand(motor_commands[i,:])
+            self.agent.set_action(motor_commands[i, :])
             self.agent.executeMotorCommand()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:

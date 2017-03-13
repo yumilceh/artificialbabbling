@@ -10,7 +10,7 @@ import pandas as pd
 
 
 from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
-from ..Algorithm.utils.RndSensorimotorFunctions import get_random_motor_set
+from ..Algorithm.utils.functions import get_random_motor_set
 
 now = datetime.datetime.now().strftime("DSG_%Y_%m_%d_%H_%M_")
 
@@ -63,7 +63,7 @@ class DatasetGenerator(object):
                                                n_experiments)    
         
         for i in range(n_experiments):
-            self.system.setMotorCommand(motor_commands[i,:])
+            self.system.set_action(motor_commands[i, :])
             self.system.executeMotorCommand()
             self.data.appendData(self.system)
             if (np.mod(i,n_save_data) == 0):

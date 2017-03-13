@@ -37,6 +37,9 @@ class SimpleArm:
         max_somato_values = np.array([1])
         somato_threshold = np.array([0.6])
 
+        name = 'arm_explauto'
+        self.name = name
+
         self.n_motor = n_motor
         self.n_sensor = n_sensor
         self.n_somato = n_somato

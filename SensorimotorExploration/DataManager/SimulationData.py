@@ -10,17 +10,20 @@ from .PlotTools import movingAverage
 import numpy as np
 import pandas as pd
 
+class Object(object):
+    def __init__(self):
+        pass
 
 class SimulationData(object):
-    """
+    """0,
     classdocs
     """
     def __init__(self, system):
-        self.motor_data=TabularData(system.motor_names)
-        self.sensor_data=TabularData(system.sensor_names)
-        self.sensor_goal_data=TabularData(system.sensor_names)
-        self.somato_data=TabularData(system.somato_names)
-        self.competence_data=TabularData(['competence'])
+        self.motor_data = TabularData(system.motor_names)
+        self.sensor_data = TabularData(system.sensor_names)
+        self.sensor_goal_data = TabularData(system.sensor_names)
+        self.somato_data = TabularData(system.somato_names)
+        self.competence_data = TabularData(['competence'])
     
     def appendData(self,system):
         self.motor_data.appendData(system.motor_command.flatten())
@@ -52,8 +55,7 @@ class SimulationData(object):
         sim_data_1.somato_data.data = self.somato_data.data.append(sim_data_2.somato_data.data)
         sim_data_1.competence_data.data = self.competence_data.data.append(sim_data_2.competence_data.data)
         return sim_data_1
-        
-        
+
     def plotSimulatedData2D(self,fig,axes,src1,column1,src2,column2,color):
         motor_names=list(self.motor_data.data.columns.values)
         sensor_names=list(self.sensor_data.data.columns.values)
@@ -133,12 +135,57 @@ class SimulationData(object):
         tmp.competence_data.data = self.competence_data.data.copy(deep=True)
         return tmp
 
-def loadSimulationData_h5(file_name, system):
-    tmp = SimulationData(system)
-    tmp.motor_data.data = pd.read_hdf(file_name,'motor_data')
-    tmp.sensor_data.data = pd.read_hdf(file_name,'sensor_data')
-    tmp.sensor_goal_data.data = pd.read_hdf(file_name,'sensor_goal_data')
-    tmp.somato_data.data = pd.read_hdf(file_name,'somato_data')
-    tmp.competence_data.data = pd.read_hdf(file_name,'competence_data')
+class SimulationDataSocial(SimulationData):
+    def __init__(self, system):
+        SimulationData.__init__(self)
+        self.social_data = TabularData['social']
+
+    def appendData(self,system):
+        SimulationData.appendData(self, system)
+        self.social_data.appendData(system.social_answer.flatten())
+
+    def saveData(self,file_name):
+        SimulationData.saveData(self, file_name)
+        self.social_data.data.to_hdf(file_name, 'social_data')
+
+    def cutData(self, system, start, stop):
+        simulationdata_tmp=SimulationDataSocial(system)
+        simulationdata_tmp.motor_data.data=self.motor_data.data.iloc[start:stop]
+        simulationdata_tmp.sensor_data.data=self.sensor_data.data.iloc[start:stop]
+        simulationdata_tmp.somato_data.data=self.somato_data.data.iloc[start:stop]
+        simulationdata_tmp.competence_data.data=self.competence_data.data.iloc[start:stop]
+        simulationdata_tmp.social_data.data = self.social_data.data.iloc[start:stop]
+        return simulationdata_tmp
+
+
+def loadSimulationData_h5(file_name, system=None):
+    motor_data = pd.read_hdf(file_name,'motor_data')
+    sensor_data = pd.read_hdf(file_name,'sensor_data')
+    sensor_goal_data = pd.read_hdf(file_name,'sensor_goal_data')
+    somato_data = pd.read_hdf(file_name,'somato_data')
+    competence_data = pd.read_hdf(file_name,'competence_data')
+    try:
+        social_data = pd.read_hdf(file_name,'social_data')
+        social = True
+    except KeyError:
+        social = False
+
+    if system is None:
+        system = Object()
+        system.motor_names = ['M' + str(x) for x in range(motor_data.shape[0])]
+        system.sensor_names = ['S' + str(x) for x in range(sensor_data.shape[0])]
+        system.somato_names = ['Som' + str(x) for x in range(somato_data.shape[0])]
+
+    if social:
+        tmp = SimulationDataSocial(system)
+        tmp.social_data.data = social_data
+    else:
+        tmp = SimulationData(system)
+
+    tmp.motor_data.data = motor_data
+    tmp.sensor_data.data = sensor_data
+    tmp.sensor_goal_data.data = sensor_goal_data
+    tmp.somato_data.data = somato_data
+    tmp.competence_data.data = competence_data
     return tmp
         

@@ -9,9 +9,9 @@ import random
 
 from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
 from .utils.StorageDataFunctions import saveSimulationData, loadSimulationData
-from .utils.RndSensorimotorFunctions import get_random_sensor_set
+from .utils.functions import get_random_sensor_set
 
-from .utils.CompetenceFunctions import comp_Moulin2013
+from .utils.competence_funcs import comp_Moulin2013
 
 
 class PARAMS(object):

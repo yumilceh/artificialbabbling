@@ -20,6 +20,12 @@ import os
 #from matplotlib.pyplot import autoscale
 #from matplotlib.animation import Animation
 #from scipy.interpolate.interpolate_wrapper import block
+english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [532.0, 1656.0, 1.0],
+                  'ae': [667.0, 1565.0, 1.0], 'A': [661.0, 1296.0, 1.0], 'a': [680.0, 1193.0, 1.0],
+                  'b': [643.0, 1019.0, 1.0], 'c': [480.0, 857.0, 1.0], 'U': [395.0, 1408.0, 1.0],
+                  'u': [386.0, 1587.0, 1.0], 'E': [519.0, 1408.0, 1.0]}
+
+diva_output_scale = [100.0, 500.0, 1500.0, 3000.0]
 
 class DivaStatic(object):
     
@@ -36,7 +42,10 @@ class DivaStatic(object):
         
         min_sensor_values=np.array([0.0, 0.0, 0.0])
         max_sensor_values=np.array([2.0, 2.0, 1.0])
-        
+
+        name = 'DivaStatic'
+        self.name = name
+
         self.n_motor=n_motor
         self.n_sensor=n_sensor
         self.n_somato=n_somato

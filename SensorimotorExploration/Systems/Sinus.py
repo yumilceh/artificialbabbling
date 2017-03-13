@@ -16,6 +16,7 @@ import numpy as np
 class Sinus:
     
     def __init__(self):
+        name = 'Sinus'
         motor_names = ['M1']
         sensor_names = ['S1']
         somato_names = ['P1']
@@ -32,6 +33,7 @@ class Sinus:
         max_somato_values = np.array([1])
         somato_threshold = np.array([0.6])
 
+        self.name = name
         self.n_motor = n_motor
         self.n_sensor = n_sensor
         self.n_somato = n_somato
