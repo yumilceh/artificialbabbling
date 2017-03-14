@@ -8,7 +8,7 @@ import numpy as np
 import random
 
 from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
-from .utils.StorageDataFunctions import saveSimulationData, loadSimulationData
+from .utils.data_storage_funcs import saveSimulationData, loadSimulationData
 from .utils.functions import get_random_sensor_set
 
 from .utils.competence_funcs import comp_Moulin2013
@@ -104,7 +104,7 @@ class SM_ModelEvaluation(object):
                 progress = progress + 1;
 
             if (saveData):
-                validation_trainSet_data.saveData([self.files.file_prefix + 'validation_trainSet_data.h5'])
+                validation_trainSet_data.saveData([self.files.file_prefix + 'eval_trainset.h5'])
 
         # Validation against Validation set
         validation_valSet_data = SimulationData(self.agent)
@@ -124,15 +124,15 @@ class SM_ModelEvaluation(object):
         print('Evaluation has been finished.')
 
         if (saveData):
-            validation_valSet_data.saveData(self.files.file_prefix + 'validation_valSet_data.h5')
+            validation_valSet_data.saveData(self.files.file_prefix + 'eva_valset.h5')
             if (eva_train_set > 0):
-                saveSimulationData([self.files.file_prefix + 'validation_trainSet_data.h5',
-                                    self.files.file_prefix + 'validation_valSet_data.h5'],
-                                   [self.files.file_prefix + 'validation_results.tar.gz'])
+                # saveSimulationData([self.files.file_prefix + 'validation_trainSet_data.h5',
+                #                     self.files.file_prefix + 'validation_valSet_data.h5'],
+                #                    [self.files.file_prefix + 'validation_results.tar.gz'])
                 return validation_trainSet_data, validation_valSet_data
             else:
-                saveSimulationData([self.files.file_prefix + 'validation_valSet_data.h5'],
-                                   self.files.file_prefix + 'validation_results.tar.gz')
+                # saveSimulationData([self.files.file_prefix + 'validation_valSet_data.h5'],
+                #                    self.files.file_prefix + 'validation_results.tar.gz')
                 return validation_valSet_data
         else:
             if (eva_train_set > 0):

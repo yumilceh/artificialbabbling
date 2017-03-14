@@ -13,7 +13,7 @@ import datetime  # copy.deepcopy
 from ..DataManager.SimulationData import SimulationData
 from ..Algorithm.utils.functions import get_random_motor_set
 from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
-from ..Algorithm.utils.StorageDataFunctions import saveSimulationData
+from ..Algorithm.utils.data_storage_funcs import saveSimulationData
 
 # import logging
 # logging.basicConfig(filename='cylinder.log', level=logging.DEBUG,\

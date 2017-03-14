@@ -74,10 +74,11 @@ if __name__ == '__main__':
     proprio = True
     #  Creating Simulation object, running simulation and plotting experiments##
     file_prefix = 'Parabola_Sim_' + now
-    simulation = Algorithm(system, instructor,
+    simulation = Algorithm(system,
                            models,
                            n_experiments,
                            comp_func,
+                           instructor = instructor,
                            n_initialization_experiments=n_initialization,
                            random_seed=1234,
                            g_im_initialization_method='all',
@@ -85,6 +86,12 @@ if __name__ == '__main__':
                            evaluation=evaluation_sim,
                            eval_step=eval_step,
                            sm_all_samples=False)
+
+    simulation.mode = 'autonomous' # social or autonomous
+
+    simulation.f_sm_key = f_sm_key
+    simulation.f_ss_key = f_ss_key
+    simulation.f_im_key = f_im_key
 
     simulation.run(proprio=proprio)
 

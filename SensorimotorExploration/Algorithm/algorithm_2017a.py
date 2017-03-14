@@ -13,14 +13,14 @@ import datetime  # copy.deepcopy
 from ..DataManager.SimulationData import SimulationData
 from ..Algorithm.utils.functions import get_random_motor_set
 from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
-from ..Algorithm.utils.StorageDataFunctions import saveSimulationData
-
+from ..Algorithm.utils.logging import write_config_log
+from ..Algorithm.utils.data_storage_funcs import ndarray_to_h5
 # import logging
 # logging.basicConfig(filename='cylinder.log', level=logging.DEBUG,\
 #         format="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 # logging.info("Volume of a Cylinder with radius {} and height {} is {}".format(args.radius, args.height, volume))
 
-now = datetime.datetime.now().strftime("Alg2017aSocial_%Y_%m_%d_%H_%M_")
+now = datetime.datetime.now().strftime("Alg2017a_%Y_%m_%d_%H_%M_")
 
 
 class OBJECT(object):
@@ -34,10 +34,10 @@ class InteractionAlgorithm(object):
     """
 
     def __init__(self, learner,
-                 instructor,
                  models,
                  n_experiments,
                  competence_func,
+                 instructor = None,
                  n_initialization_experiments=100,
                  random_seed=np.random.random((1, 1)),
                  g_im_initialization_method='non-zero',  # 'non-zero' 'all' 'non-painful'
@@ -47,7 +47,8 @@ class InteractionAlgorithm(object):
                  eval_step=-1,
                  file_prefix=now):
 
-
+        self.name = 'InteractionAlgorithm2017a'
+        self.type = 'Simple'
         self.params = OBJECT()
         self.params.sm_all_samples = None
         self.params.n_initialization_experiments = n_initialization_experiments
@@ -69,8 +70,11 @@ class InteractionAlgorithm(object):
 
         self.init_motor_commands = get_random_motor_set(learner,
                                                         n_initialization_experiments)
-
-        self.instructor = instructor
+        self.mode = 'autonomous'
+        if instructor is not None:
+            self.instructor = instructor
+            self.imitation = []
+            self.mode = 'social'
 
         self.data = SimulationData(learner)
         self.data.file_prefix = file_prefix
@@ -86,11 +90,10 @@ class InteractionAlgorithm(object):
 
     def run(self, proprio=True):
         if proprio:
-            self.label = 'Proprio'
-            self.run_()
-        else:
-            self.label = 'Simple'
-            self.run_()
+            self.type = 'Proprio'
+        if self.params.n_save_data is not np.nan:
+            write_config_log(self, self.data.file_prefix + 'conf.txt')
+        self.run_()
 
     def run_(self):
         if self.params.g_im_initialization_method is 'non-painful':
@@ -103,7 +106,7 @@ class InteractionAlgorithm(object):
 
         n_save_data = self.params.n_save_data
 
-        print('SM Exploration (Social, {}), Line 1: Initializing G_SM'.format(self.label))
+        print('SM Exploration ({}, {}), Line 1: Initializing G_SM'.format(self.type, self.mode))
         for i in range(n_init):
             self.learner.set_action(motor_commands[i, :])
             self.learner.executeMotorCommand()
@@ -134,47 +137,51 @@ class InteractionAlgorithm(object):
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
         self.do_training(i, up_=['sm', 'ss', 'im'], force=True)
 
-        print('SM Exploration (Social, {}), First evaluation of G_SM'.format(self.label))
+        print('SM Exploration ({}, {}), First evaluation of G_SM'.format(self.type, self.mode))
         self.do_evaluation(-1)
 
         n_experiments = self.params.n_experiments
         eval_step = self.params.eval_step
 
-        print('SM Exploration (Social, {}), Lines 4-22: : Main simulation running ({} samples)...'.
-              format(self.label,n_experiments))
+        print('SM Exploration ({}, {}), Lines 4-22: : Main simulation running ({} samples)...'.
+              format(self.type, self.mode, n_experiments))
 
         i = 0
-        self.imitation = []
         while i < n_experiments:
-            if self.label is 'Proprio':
+            if self.type is 'Proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
                                                                          self.models.f_sm,
                                                                          self.models.f_ss)
             else:
                 self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
+
             self.models.f_sm.get_action(self.learner)
             self.learner.executeMotorCommand()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
-            reinforce = self.instructor.interaction(self.learner.sensor_out)
             i += 1
-            if reinforce:
-                self.imitation += [i, self.instructor.min_idx]
-                self.learner.sensor_goal = self.instructor.sensor_out
-                self.models.f_sm.get_action(self.learner)
-                self.learner.executeMotorCommand()
-                self.get_competence(self.learner)
-                self.data.appendData(self.learner)
-                i += 1
+
+            if self.instructor is not None:
+                reinforce = self.instructor.interaction(self.learner.sensor_out)
+                if reinforce:
+                    self.imitation += [i, self.instructor.min_idx]
+                    if self.mode is 'social':
+                        self.learner.sensor_goal = self.instructor.sensor_out
+                        self.models.f_sm.get_action(self.learner)
+                        self.learner.executeMotorCommand()
+                        self.get_competence(self.learner)
+                        self.data.appendData(self.learner)
+                        i += 1
 
             self.do_training(i, up_=['sm', 'ss', 'im'])
             self.do_evaluation(i)
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
             if (i + 1) % n_save_data == 0:
+                print('SM Exploration ({}, {}), Line 4-22: Experiment: Saving data at samples {} of {}'. \
+                      format(self.type, self.mode, i + 1, n_experiments))
                 self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-                print('SM Exploration (Social, {}), Line 4-22: Experiment: Saving data at samples {} of {}'. \
-                      format(self.label,i + 1, n_experiments))
+                ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
 
         self.do_training(i, up_=['sm', 'ss', 'im'], force=True)
 
@@ -182,8 +189,11 @@ class InteractionAlgorithm(object):
         self.do_evaluation(-1)
 
         if n_save_data is not np.nan:
+            print('SM Exploration ({}, {}), Saving data...'.format(self.type, self.mode))
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-        print('SM Exploration (Social, {}), Experiment was finished and data saved'.format(self.label))
+            ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
+        print('SM Exploration ({}, {}), Experiment was finished.'.format(self.type, self.mode))
+
 
     def get_im_init_data(self, method='all'):  # Non-painful is missing
         if method == 'non-zero':

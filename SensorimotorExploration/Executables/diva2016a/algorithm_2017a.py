@@ -66,15 +66,18 @@ if __name__ == '__main__':
     models.f_ss = model_(f_ss_key, system)
     models.f_im = model_(f_im_key, system)
 
+    # Creating Simulation object, running simulation and plotting experiments##
+    # tree/DP Interest Model
+    file_prefix = 'Vowels_Tree_' + now
+
     evaluation_sim = SM_ModelEvaluation(system,
-                                        models.f_sm, comp_func=comp_func)
+                                        models.f_sm, comp_func=comp_func,
+                                        file_prefix=file_prefix)
 
     evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_1.h5')
 
     proprio = True
-    #  Creating Simulation object, running simulation and plotting experiments##
-    #(P/NP) Proprio or not, expla/igmm SM Model, tree/DP Interest Model
-    file_prefix = 'Eva_vowels_NP_expla_Tree_' + now
+
 
     simulation = Algorithm(system, instructor,
                            models,
@@ -88,47 +91,22 @@ if __name__ == '__main__':
                            eval_step=eval_step,
                            sm_all_samples=False)
 
+    simulation.f_sm_key = f_sm_key
+    simulation.f_ss_key = f_ss_key
+    simulation.f_im_key = f_im_key
+
     simulation.run(proprio=proprio)
 
     sim_data = simulation.data
 
     evaluation_sim.model.set_sigma_explo_ratio(0.)
-    val_data = evaluation_sim.evaluateModel(saveData=False)
+    val_data = evaluation_sim.evaluateModel(saveData=True)
     error_ = np.linalg.norm(val_data.sensor_goal_data.data.as_matrix() -
                             val_data.sensor_data.data.as_matrix(), axis=1)
     print("Mean evaluation error is {} (max: {}, min: {})".format(np.mean(error_),
                                                                   np.max(error_),
                                                                   np.min(error_)))
 
-    #  Looking at the proprioceptive model
-    somato_th = system.somato_threshold
-
-    n_motor_samples = 1000
-
-    m1, m2 = generate_motor_grid(system, n_motor_samples)
-
-    proprio_val = []
-    for m in zip(m1.flatten(), m2.flatten()):
-        system.somato_out = 0.
-        system.set_action(np.array([m[0], m[1]]))
-        somato_pred = simulation.models.f_ss.predict_somato(system)
-        system.executeMotorCommand()
-        somato_res = system.somato_out
-        # print("We predicted {} but got {}.".format(somato_pred, somato_res))
-        system.executeMotorCommand_unconstrained()
-
-        if somato_pred >= somato_th and somato_res >= somato_th:
-            proprio_val += [[system.sensor_out[0], system.sensor_out[1], '.k']]
-
-        if somato_pred >= somato_th > somato_res:
-            proprio_val += [[system.sensor_out[0], system.sensor_out[1], 'xr']]
-
-        if somato_pred < somato_th and somato_res < somato_th:
-            proprio_val += [[system.sensor_out[0], system.sensor_out[1], '.b']]
-
-        if somato_pred < somato_th <= somato_res:
-            proprio_val += [[system.sensor_out[0], system.sensor_out[1], 'xk']]
-
     from plot_results import show_results
 
-    show_results(system, simulation, val_data, proprio_val)
+    show_results(system, simulation, val_data)

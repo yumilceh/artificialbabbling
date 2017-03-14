@@ -19,13 +19,10 @@ class OBJECT(object):
         pass
        
 class DatasetGenerator(object):
-
     '''
-            
         This class is used to generate randoms data sets of sensory spaces that later can be used for 
         the evaluation of models. It is prepared also to take simulation files and create new datasets
-        or enrich existing ones. 
-
+        or enrich existing ones.
     '''
 
     def __init__(self,  system,  

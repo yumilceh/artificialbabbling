@@ -10,7 +10,7 @@ from ..Algorithm.utils.competence_funcs import comp_Moulin2013 as get_competence
 
 import numpy as np
 import numpy.linalg as linalg
-from ..Algorithm.utils.StorageDataFunctions import saveSimulationData
+from ..Algorithm.utils.data_storage_funcs import saveSimulationData
 
 class PARAMS(object):
     def __init__(self):
