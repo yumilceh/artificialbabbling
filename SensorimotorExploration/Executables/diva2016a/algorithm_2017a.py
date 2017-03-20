@@ -22,7 +22,6 @@ if __name__ == '__main__':
     from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
-    from SensorimotorExploration.Algorithm.utils.functions import generate_motor_grid
 
     from model_configurations import model_, comp_func
 
@@ -68,7 +67,8 @@ if __name__ == '__main__':
 
     # Creating Simulation object, running simulation and plotting experiments##
     # tree/DP Interest Model
-    file_prefix = 'Vowels_Tree_' + now
+    directory = 'RndExperiments'
+    file_prefix = directory + '/Vowels_Tree_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,
@@ -76,24 +76,28 @@ if __name__ == '__main__':
 
     evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_1.h5')
 
-    proprio = True
+    proprio = False
+    mode = 'social'
 
-
-    simulation = Algorithm(system, instructor,
+    simulation = Algorithm(system,
                            models,
                            n_experiments,
                            comp_func,
+                           instructor = instructor,
                            n_initialization_experiments=n_initialization,
                            random_seed=1234,
                            g_im_initialization_method='all',
                            n_save_data=n_save_data,
                            evaluation=evaluation_sim,
                            eval_step=eval_step,
-                           sm_all_samples=False)
+                           sm_all_samples=False,
+                           file_prefix=file_prefix)
 
     simulation.f_sm_key = f_sm_key
     simulation.f_ss_key = f_ss_key
     simulation.f_im_key = f_im_key
+
+    simulation.mode = mode
 
     simulation.run(proprio=proprio)
 
@@ -101,8 +105,8 @@ if __name__ == '__main__':
 
     evaluation_sim.model.set_sigma_explo_ratio(0.)
     val_data = evaluation_sim.evaluateModel(saveData=True)
-    error_ = np.linalg.norm(val_data.sensor_goal_data.data.as_matrix() -
-                            val_data.sensor_data.data.as_matrix(), axis=1)
+    error_ = np.linalg.norm(val_data.sensor_goal.data.as_matrix() -
+                            val_data.sensor.data.as_matrix(), axis=1)
     print("Mean evaluation error is {} (max: {}, min: {})".format(np.mean(error_),
                                                                   np.max(error_),
                                                                   np.min(error_)))

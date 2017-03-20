@@ -30,16 +30,16 @@ class GMM_SS(object):
         self.model=GMM(n_gauss_components)
         
     def train(self,simulation_data):
-        train_data_tmp=pd.concat([simulation_data.motor_data.data, simulation_data.somato_data.data], axis=1)
+        train_data_tmp=pd.concat([simulation_data.motor.data, simulation_data.somato.data], axis=1)
         self.model.train(train_data_tmp)
         
     def trainIncrementalLearning(self,simulation_data):
         ss_step=self.params.ss_step
         alpha=self.params.alpha
-        motor_data_size=len(simulation_data.motor_data.data.index)
-        motor_data=simulation_data.motor_data.data[motor_data_size-ss_step:]
-        somato_data_size=len(simulation_data.somato_data.data.index)
-        somato_data=simulation_data.somato_data.data[somato_data_size-ss_step:]
+        motor_data_size=len(simulation_data.motor.data.index)
+        motor_data=simulation_data.motor.data[motor_data_size-ss_step:]
+        somato_data_size=len(simulation_data.somato.data.index)
+        somato_data=simulation_data.somato.data[somato_data_size-ss_step:]
         new_data=pd.concat([motor_data,somato_data],axis=1)
         self.model.trainIncrementalLearning(new_data, alpha)
         

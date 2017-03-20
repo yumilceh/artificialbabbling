@@ -67,7 +67,7 @@ if __name__ == '__main__':
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_validation_data_set_2.h5')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_2.h5')
 
     #  Creating Simulation object, running simulation and plotting experiments##
     file_prefix = 'Parabola_Sim_' + now

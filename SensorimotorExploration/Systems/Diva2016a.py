@@ -28,6 +28,41 @@ english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [53
 
 diva_output_scale = [100.0, 500.0, 1500.0, 3000.0]
 
+def motorDynamics(y, t, self, m):
+    dumpingFactor = 1.01
+    w0 = 2 * math.pi / 0.01
+
+    dy1 = y[13]
+    dy2 = y[14]
+    dy3 = y[15]
+    dy4 = y[16]
+    dy5 = y[17]
+    dy6 = y[18]
+    dy7 = y[19]
+    dy8 = y[20]
+    dy9 = y[21]
+    dy10 = y[22]
+    dy11 = y[23]
+    dy12 = y[24]
+    dy13 = y[25]
+
+    dy14 = -2 * dumpingFactor * w0 * y[13] - (pow(w0, 2)) * y[0] + (pow(w0, 2)) * m[0]
+    dy15 = -2 * dumpingFactor * w0 * y[14] - (pow(w0, 2)) * y[1] + (pow(w0, 2)) * m[1]
+    dy16 = -2 * dumpingFactor * w0 * y[15] - (pow(w0, 2)) * y[2] + (pow(w0, 2)) * m[2]
+    dy17 = -2 * dumpingFactor * w0 * y[16] - (pow(w0, 2)) * y[3] + (pow(w0, 2)) * m[3]
+    dy18 = -2 * dumpingFactor * w0 * y[17] - (pow(w0, 2)) * y[4] + (pow(w0, 2)) * m[4]
+    dy19 = -2 * dumpingFactor * w0 * y[18] - (pow(w0, 2)) * y[5] + (pow(w0, 2)) * m[5]
+    dy20 = -2 * dumpingFactor * w0 * y[19] - (pow(w0, 2)) * y[6] + (pow(w0, 2)) * m[6]
+    dy21 = -2 * dumpingFactor * w0 * y[20] - (pow(w0, 2)) * y[7] + (pow(w0, 2)) * m[7]
+    dy22 = -2 * dumpingFactor * w0 * y[21] - (pow(w0, 2)) * y[8] + (pow(w0, 2)) * m[8]
+    dy23 = -2 * dumpingFactor * w0 * y[22] - (pow(w0, 2)) * y[9] + (pow(w0, 2)) * m[9]
+    dy24 = -2 * dumpingFactor * w0 * y[23] - (pow(w0, 2)) * y[10] + (pow(w0, 2)) * m[10]
+    dy25 = -2 * dumpingFactor * w0 * y[24] - (pow(w0, 2)) * y[11] + (pow(w0, 2)) * m[11]
+    dy26 = -2 * dumpingFactor * w0 * y[25] - (pow(w0, 2)) * y[12] + (pow(w0, 2)) * m[12]
+
+    return [dy1, dy2, dy3, dy4, dy5, dy6, dy7, dy8, dy9, dy10, dy11, dy12, dy13, dy14, dy15, dy16, dy17, dy18, dy19,
+            dy20, dy21, dy22, dy23, dy24, dy25, dy26]
+
 
 class Diva2016a(DivaProprio2015a):
     def __init__(self):
@@ -101,7 +136,7 @@ class Diva2016a(DivaProprio2015a):
         for index in range(nPerceptionSamples):
             # print(index)
             if (self.artStates[index + 43, 11] > 0) and (self.artStates[index + 43, 12] > 0) and (
-                minaf[index + 43] > 0):
+                        minaf[index + 43] > 0):
                 self.auditoryResult[3] = self.auditoryResult[3] + auditoryStates[index + 43, 1]
                 self.auditoryResult[4] = self.auditoryResult[4] + auditoryStates[index + 43, 2]
                 self.auditoryResult[5] = self.auditoryResult[5] + 1.0
@@ -370,10 +405,11 @@ class Diva2016a(DivaProprio2015a):
         self.btn_execute_m = tk.Button(self.motor_frame, text="Execute", command=self.execute_callback)
         self.btn_execute_m.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
 
+
 class Instructor(Diva2016a):
     def __init__(self):
         import os
-        from ..DataManager.SimulationData import loadSimulationData_h5
+        from ..DataManager.SimulationData import load_sim_h5
         # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
         #     for s in ss:
         #         system.set_action(infer_motor(0, s))
@@ -382,8 +418,8 @@ class Instructor(Diva2016a):
         Diva2016a.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
         self.intructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
-        self.data = loadSimulationData_h5(self.intructor_file)
-        self.n_units = len(self.data.sensor_data.data.index)
+        self.data = load_sim_h5(self.intructor_file)
+        self.n_units = len(self.data.sensor.data.index)
         self.unit_threshold = 0.1
 
     def interaction(self, sensor):
@@ -391,50 +427,16 @@ class Instructor(Diva2016a):
         min_idx = np.argmin(dist)
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold:
-            self.set_action(self.data.motor_data.data.iloc[min_idx])
+            self.set_action(self.data.motor.data.iloc[min_idx])
             self.executeMotorCommand()
-            return True
-        return False
+            return 1, self.sensor_out   #Analize implications of return the object itself
+        return 0, np.zeros((self.n_sensor,))
 
     def get_distances(self, sensor):
         dist = []
-        s_data = self.data.sensor_data.data.as_matrix()
+        s_data = self.data.sensor.data.as_matrix()
         for i in range(self.n_units):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist
 
 
-def motorDynamics(y, t, self, m):
-    dumpingFactor = 1.01
-    w0 = 2 * math.pi / 0.01
-
-    dy1 = y[13]
-    dy2 = y[14]
-    dy3 = y[15]
-    dy4 = y[16]
-    dy5 = y[17]
-    dy6 = y[18]
-    dy7 = y[19]
-    dy8 = y[20]
-    dy9 = y[21]
-    dy10 = y[22]
-    dy11 = y[23]
-    dy12 = y[24]
-    dy13 = y[25]
-
-    dy14 = -2 * dumpingFactor * w0 * y[13] - (pow(w0, 2)) * y[0] + (pow(w0, 2)) * m[0]
-    dy15 = -2 * dumpingFactor * w0 * y[14] - (pow(w0, 2)) * y[1] + (pow(w0, 2)) * m[1]
-    dy16 = -2 * dumpingFactor * w0 * y[15] - (pow(w0, 2)) * y[2] + (pow(w0, 2)) * m[2]
-    dy17 = -2 * dumpingFactor * w0 * y[16] - (pow(w0, 2)) * y[3] + (pow(w0, 2)) * m[3]
-    dy18 = -2 * dumpingFactor * w0 * y[17] - (pow(w0, 2)) * y[4] + (pow(w0, 2)) * m[4]
-    dy19 = -2 * dumpingFactor * w0 * y[18] - (pow(w0, 2)) * y[5] + (pow(w0, 2)) * m[5]
-    dy20 = -2 * dumpingFactor * w0 * y[19] - (pow(w0, 2)) * y[6] + (pow(w0, 2)) * m[6]
-    dy21 = -2 * dumpingFactor * w0 * y[20] - (pow(w0, 2)) * y[7] + (pow(w0, 2)) * m[7]
-    dy22 = -2 * dumpingFactor * w0 * y[21] - (pow(w0, 2)) * y[8] + (pow(w0, 2)) * m[8]
-    dy23 = -2 * dumpingFactor * w0 * y[22] - (pow(w0, 2)) * y[9] + (pow(w0, 2)) * m[9]
-    dy24 = -2 * dumpingFactor * w0 * y[23] - (pow(w0, 2)) * y[10] + (pow(w0, 2)) * m[10]
-    dy25 = -2 * dumpingFactor * w0 * y[24] - (pow(w0, 2)) * y[11] + (pow(w0, 2)) * m[11]
-    dy26 = -2 * dumpingFactor * w0 * y[25] - (pow(w0, 2)) * y[12] + (pow(w0, 2)) * m[12]
-
-    return [dy1, dy2, dy3, dy4, dy5, dy6, dy7, dy8, dy9, dy10, dy11, dy12, dy13, dy14, dy15, dy16, dy17, dy18, dy19,
-            dy20, dy21, dy22, dy23, dy24, dy25, dy26]

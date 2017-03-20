@@ -8,25 +8,19 @@ Created on Feb 20, 2017
 # from Algorithm.utils.CompetenceFunctions import comp_Baraglia2015 as get_competence
 # ===============================================================================
 import numpy as np
+import random
 from numpy import linalg
 import datetime  # copy.deepcopy
 from ..DataManager.SimulationData import SimulationData
 from ..Algorithm.utils.functions import get_random_motor_set
 from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
 from ..Algorithm.utils.logging import write_config_log
-from ..Algorithm.utils.data_storage_funcs import ndarray_to_h5
-# import logging
-# logging.basicConfig(filename='cylinder.log', level=logging.DEBUG,\
-#         format="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-# logging.info("Volume of a Cylinder with radius {} and height {} is {}".format(args.radius, args.height, volume))
 
 now = datetime.datetime.now().strftime("Alg2017a_%Y_%m_%d_%H_%M_")
-
 
 class OBJECT(object):
     def __init__(self):
         pass
-
 
 class InteractionAlgorithm(object):
     """
@@ -47,8 +41,11 @@ class InteractionAlgorithm(object):
                  eval_step=-1,
                  file_prefix=now):
 
+        random.seed(random_seed)
+        np.random.seed(random_seed)
+
         self.name = 'InteractionAlgorithm2017a'
-        self.type = 'Simple'
+        self.type = 'simple'
         self.params = OBJECT()
         self.params.sm_all_samples = None
         self.params.n_initialization_experiments = n_initialization_experiments
@@ -73,7 +70,7 @@ class InteractionAlgorithm(object):
         self.mode = 'autonomous'
         if instructor is not None:
             self.instructor = instructor
-            self.imitation = []
+            # self.imitation = []
             self.mode = 'social'
 
         self.data = SimulationData(learner)
@@ -90,7 +87,7 @@ class InteractionAlgorithm(object):
 
     def run(self, proprio=True):
         if proprio:
-            self.type = 'Proprio'
+            self.type = 'proprio'
         if self.params.n_save_data is not np.nan:
             write_config_log(self, self.data.file_prefix + 'conf.txt')
         self.run_()
@@ -148,30 +145,50 @@ class InteractionAlgorithm(object):
 
         i = 0
         while i < n_experiments:
-            if self.type is 'Proprio':
+            if self.type is 'proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
                                                                          self.models.f_sm,
                                                                          self.models.f_ss)
+                self.models.f_sm.get_action(self.learner)
+                self.learner.executeMotorCommand()
+                self.get_competence(self.learner)
+                if self.learner.somato_out > self.learner.somato_threshold:
+                    self.learner.competence_result = 0.7 * self.learner.competence_result
             else:
                 self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
+                self.models.f_sm.get_action(self.learner)
+                self.learner.executeMotorCommand()
+                self.get_competence(self.learner)
 
-            self.models.f_sm.get_action(self.learner)
-            self.learner.executeMotorCommand()
-            self.get_competence(self.learner)
             self.data.appendData(self.learner)
             i += 1
 
             if self.instructor is not None:
-                reinforce = self.instructor.interaction(self.learner.sensor_out)
-                if reinforce:
-                    self.imitation += [i, self.instructor.min_idx]
+                reinforce, self.learner.sensor_instructor = self.instructor.interaction(self.learner.sensor_out)
+                if reinforce is 1:
+                    #self.imitation += [i, self.instructor.min_idx]
                     if self.mode is 'social':
-                        self.learner.sensor_goal = self.instructor.sensor_out
-                        self.models.f_sm.get_action(self.learner)
-                        self.learner.executeMotorCommand()
-                        self.get_competence(self.learner)
-                        self.data.appendData(self.learner)
-                        i += 1
+                        if self.type is 'proprio':
+                            tmp_goal = self.learner.sensor_instructor
+                            tmp_motor = self.models.f_sm.get_action(self.learner, sensor_goal=tmp_goal)
+                            tmp_somato = self.models.f_ss.predict_somato(self.learner, motor_command=tmp_motor)
+                            if tmp_somato < self.learner.somato_threshold:
+                                self.learner.sensor_goal = tmp_goal
+                                self.learner.set_action(tmp_motor)
+                                self.learner.executeMotorCommand()
+                                self.get_competence(self.learner)
+                                if self.learner.somato_out > self.learner.somato_threshold:
+                                    self.learner.competence_result = 0.7 * self.learner.competence_result
+
+                                self.data.appendData(self.learner)
+                                i += 1
+                        else:
+                            self.learner.sensor_goal = self.learner.sensor_instructor
+                            self.models.f_sm.get_action(self.learner)
+                            self.learner.executeMotorCommand()
+                            self.get_competence(self.learner)
+                            self.data.appendData(self.learner)
+                            i += 1
 
             self.do_training(i, up_=['sm', 'ss', 'im'])
             self.do_evaluation(i)
@@ -181,7 +198,7 @@ class InteractionAlgorithm(object):
                 print('SM Exploration ({}, {}), Line 4-22: Experiment: Saving data at samples {} of {}'. \
                       format(self.type, self.mode, i + 1, n_experiments))
                 self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-                ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
+                # ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
 
         self.do_training(i, up_=['sm', 'ss', 'im'], force=True)
 
@@ -191,19 +208,25 @@ class InteractionAlgorithm(object):
         if n_save_data is not np.nan:
             print('SM Exploration ({}, {}), Saving data...'.format(self.type, self.mode))
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-            ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
+            # ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
         print('SM Exploration ({}, {}), Experiment was finished.'.format(self.type, self.mode))
 
 
     def get_im_init_data(self, method='all'):  # Non-painful is missing
         if method == 'non-zero':
             print('SM Exploration: IM initialization: Non-null sensory result considered')
-            sensor_goals = self.data.sensor_data.data.as_matrix()
-            return sensor_goals[np.where(linalg.norm(sensor_goals, axis=1) > 0), :]
+            sensor_goals = self.data.sensor.data.as_matrix()
+            return sensor_goals[np.where(linalg.norm(sensor_goals, axis=1) > 0)[0], :]
 
         elif method == 'all':
             print('SM Exploration: IM initialization: All sensory result considered')
-            return self.data.sensor_data.data.as_matrix()
+            return self.data.sensor.data.as_matrix()
+
+        elif method == 'non-painful':
+            print('SM Exploration: IM initialization: Non-painful result considered')
+            somato_results = self.data.somato.data.as_matrix()
+            sensor_goals = self.data.sensor.data.as_matrix()
+            return sensor_goals[np.where(somato_results == 0.)[0], :]
 
     def do_training(self, i, up_=['sm', 'ss', 'im'], force=False):
 
@@ -221,17 +244,17 @@ class InteractionAlgorithm(object):
             if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.ss_step == 0 or force):
                 self.models.f_ss.trainIncrementalLearning(self.data)
 
-    def do_evaluation(self, i):
-        tmp_sigma = self.evaluation.model.get_sigma_explo()
-        self.evaluation.model.set_sigma_explo_ratio(0)
-        if self.evaluate and (i + 1) % self.params.eval_step == 0:
+    def do_evaluation(self, i, force=False, save_data=False):
+        if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:
+            tmp_sigma = self.evaluation.model.get_sigma_explo()
             self.evaluation.model = self.models.f_sm
-            eval_data = self.evaluation.evaluateModel()
-            error_ = np.linalg.norm(eval_data.sensor_goal_data.data.as_matrix() -
-                                    eval_data.sensor_data.data.as_matrix(), axis=1)
+            self.evaluation.model.set_sigma_explo_ratio(0)
+            eval_data = self.evaluation.evaluateModel(saveData=save_data)
+            error_ = np.linalg.norm(eval_data.sensor_goal.data.as_matrix() -
+                                    eval_data.sensor.data.as_matrix(), axis=1)
             self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
             print('Evaluation finished.')
-        self.evaluation.model.set_sigma_explo(tmp_sigma)
+            self.evaluation.model.set_sigma_explo(tmp_sigma)
         #  print(self.evaluation.model.get_sigma_explo())
 
 def get_eval_error(simulation):

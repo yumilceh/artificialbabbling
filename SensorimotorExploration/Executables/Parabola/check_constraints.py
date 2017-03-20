@@ -13,8 +13,8 @@ if __name__ == '__main__':
     sys.path.append("../../")
 
     ## Adding libraries##
-    from SensorimotorSystems.Parabola import ConstrainedParabolicArea as System
-    from Algorithm.InteractiveSimulation import ManualSimulation as Algorithm
+    from SensorimotorExploration.Systems.Parabola_Test import ParabolicRegion as System
+    from SensorimotorExploration.Algorithm.InteractiveSimulation import ManualSimulation as Algorithm
    
     random_seed=1234
     n_experiments=200

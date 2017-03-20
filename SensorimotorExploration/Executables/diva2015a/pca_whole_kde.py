@@ -212,11 +212,11 @@ if __name__ == '__main__':
         # #------------------------- mat = h5py.File(directory + 'PRdata.mat','r')
         # #---------------------------- proprio_data = np.array(mat.get('PRdata'))
         # #----------------------------------- proprio_data = proprio_data[[-1],:]
-        # #------------------------- sensor_data = np.transpose(data[[0,1,3,4],:])
-        # # sensor_data = sensor_data[np.where(proprio_data < proprio_criteria)[1],:]
-        # #------------------------------ sensor_data = pca.transform(sensor_data)
-        # #--------------------- kde_x[directory] = gaussian_kde(sensor_data[:,0])
-        # #--------------------- kde_y[directory] = gaussian_kde(sensor_data[:,1])
+        # #------------------------- sensor = np.transpose(data[[0,1,3,4],:])
+        # # sensor = sensor[np.where(proprio_data < proprio_criteria)[1],:]
+        # #------------------------------ sensor = pca.transform(sensor)
+        # #--------------------- kde_x[directory] = gaussian_kde(sensor[:,0])
+        # #--------------------- kde_y[directory] = gaussian_kde(sensor[:,1])
 # #------------------------------------------------------------------------------
 # #------------------------------------------------------------------------------
 # #------------------------------------------------------------------------------

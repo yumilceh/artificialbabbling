@@ -45,7 +45,7 @@ if __name__ == '__main__':
     plt.plot(*system.sensorOutput,  marker='x', color='red')
         
     fig2,ax2=initializeFigure()
-    simulation_data.plotSimulatedData2D(fig2,ax2,'sensor',0,'sensor',1,'or')
+    simulation_data.plot_2D(fig2, ax2, 'sensor', 0, 'sensor', 1, 'or')
     
     show(block=True)
 

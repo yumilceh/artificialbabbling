@@ -120,8 +120,8 @@ class DivaStatic(object):
         self.matlabSession.run('save test_art_shape.mat artStates')
 
         #self.matlabSession.run('save artStates.mat artStates')
-        self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
-        self.soundWave = self.matlabSession.getvalue('soundWave')
+        self.matlabSession.run('sound_wave = diva_synth(artStates\', \'sound\')')
+        self.soundWave = self.matlabSession.getvalue('sound_wave')
         if(play):
             self.playSoundWave()
         if(save):

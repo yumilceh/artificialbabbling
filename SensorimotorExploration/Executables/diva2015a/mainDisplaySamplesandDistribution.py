@@ -38,8 +38,8 @@ if __name__ == '__main__':
     
     
     #======================================================8=====================
-    # print(simulation_data.motor_data.data)
-    # print(simulation_data.sensor_data.data)
+    # print(simulation_data.motor.data)
+    # print(simulation_data.sensor.data)
     #===========================================================================
     gmm_sm.train(simulation_data)
     

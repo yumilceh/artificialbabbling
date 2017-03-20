@@ -38,8 +38,8 @@ class ExplautoSM(object):
         return  system.motor_command
     
     def train(self, simulation_data):
-        m = simulation_data.motor_data.data.iloc[-1]
-        s = simulation_data.sensor_data.data.iloc[-1]
+        m = simulation_data.motor.data.iloc[-1]
+        s = simulation_data.sensor.data.iloc[-1]
         self.model.update(m,s)
         
     def trainIncrementalLearning(self, simulation_data):

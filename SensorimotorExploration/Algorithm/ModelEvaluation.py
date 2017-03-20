@@ -7,7 +7,7 @@ Created on Jun 30, 2016
 import numpy as np
 import random
 
-from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
+from ..DataManager.SimulationData import SimulationData, load_sim_h5
 from .utils.data_storage_funcs import saveSimulationData, loadSimulationData
 from .utils.functions import get_random_sensor_set
 
@@ -38,14 +38,14 @@ class SM_ModelEvaluation(object):
         self.data = data
         self.comp_func = comp_func
 
-        self.files = PARAMS()
-        self.files.file_prefix = file_prefix
+        
+        self.file_prefix = file_prefix
         self.model = model
         self.ratio_samples_val = ratio_samples_val
 
     def loadEvaluationDataSet(self, file_name):
-        self.data = loadSimulationData_h5(file_name, self.agent)
-        n_samples = len(self.data.sensor_data.data)
+        self.data = load_sim_h5(file_name, self.agent)
+        n_samples = len(self.data.sensor.data)
         self.n_samples_val = n_samples
         self.random_indexes_val = range(n_samples)
 
@@ -55,12 +55,12 @@ class SM_ModelEvaluation(object):
             n_samples = self.data
             rnd_data = get_random_sensor_set(self.agent, n_samples)
             data = SimulationData(self.agent);
-            data.sensor_data.appendData(rnd_data)
+            data.sensor.appendData(rnd_data)
             self.data = data
             self.n_samples_val = n_samples
             self.random_indexes_val = range(n_samples)
         else:
-            n_samples = len(self.data.motor_data.data)
+            n_samples = len(self.data.motor.data)
             self.n_samples = n_samples
             ratio_samples_val = self.ratio_samples_val
             n_samples_val = np.ceil(ratio_samples_val * n_samples).astype(int)
@@ -93,7 +93,7 @@ class SM_ModelEvaluation(object):
             for i in random_indexes_evatrain:
                 #  print('Testing using sample {current} of {total} in the training set'.format(current=progress,
                 #                         total=n_samples_evatrain)) #  Slow
-                y_ = self.data.sensor_data.data.iloc[i].as_matrix()
+                y_ = self.data.sensor.data.iloc[i].as_matrix()
 
                 self.agent.sensor_goal = y_
                 self.model.get_action(self.agent)
@@ -104,7 +104,7 @@ class SM_ModelEvaluation(object):
                 progress = progress + 1;
 
             if (saveData):
-                validation_trainSet_data.saveData([self.files.file_prefix + 'eval_trainset.h5'])
+                validation_trainSet_data.saveData([self.file_prefix + 'eval_trainset.h5'])
 
         # Validation against Validation set
         validation_valSet_data = SimulationData(self.agent)
@@ -113,7 +113,7 @@ class SM_ModelEvaluation(object):
         for i in self.random_indexes_val:
             #  print('Testing using sample {current} of {total} in the validation set'.format(current=progress,
             #                                                                     total=self.n_samples_val))  #Slow
-            y_ = self.data.sensor_data.data.iloc[i].as_matrix()
+            y_ = self.data.sensor.data.iloc[i].as_matrix()
 
             self.agent.sensor_goal = y_
             self.model.get_action(self.agent)
@@ -124,15 +124,15 @@ class SM_ModelEvaluation(object):
         print('Evaluation has been finished.')
 
         if (saveData):
-            validation_valSet_data.saveData(self.files.file_prefix + 'eva_valset.h5')
+            validation_valSet_data.saveData(self.file_prefix + 'eva_valset.h5')
             if (eva_train_set > 0):
-                # saveSimulationData([self.files.file_prefix + 'validation_trainSet_data.h5',
-                #                     self.files.file_prefix + 'validation_valSet_data.h5'],
-                #                    [self.files.file_prefix + 'validation_results.tar.gz'])
+                # saveSimulationData([self.file_prefix + 'validation_trainSet_data.h5',
+                #                     self.file_prefix + 'validation_valSet_data.h5'],
+                #                    [self.file_prefix + 'validation_results.tar.gz'])
                 return validation_trainSet_data, validation_valSet_data
             else:
-                # saveSimulationData([self.files.file_prefix + 'validation_valSet_data.h5'],
-                #                    self.files.file_prefix + 'validation_results.tar.gz')
+                # saveSimulationData([self.file_prefix + 'validation_valSet_data.h5'],
+                #                    self.file_prefix + 'validation_results.tar.gz')
                 return validation_valSet_data
         else:
             if (eva_train_set > 0):

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     sys.path.append("../../")
 
     #  Adding libraries##
-    from SensorimotorExploration.Systems.Parabola import ParabolicRegion as System
+    from SensorimotorExploration.Systems.Parabola_Test import ParabolicRegion as System
     from SensorimotorExploration.DataManager.PlotTools import *
 
     # Creating system

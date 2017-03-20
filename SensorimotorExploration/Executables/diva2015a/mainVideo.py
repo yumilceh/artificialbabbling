@@ -18,7 +18,7 @@ if __name__ == '__main__':
     
     divaAgent.getSoundWave(play=1,save=0)
     #===========================================================================
-    # data=np.asarray(divaAgent.soundWave)
+    # data=np.asarray(divaAgent.sound_wave)
     #===========================================================================
     
     divaAgent.getVocalizationVideo()

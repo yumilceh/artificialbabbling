@@ -40,14 +40,14 @@ class GMM_IM(object):
     def train(self,simulation_data):
         self.model.initialized=0
         n_training_samples = self.params.n_training_samples
-        data_size=len(simulation_data.sensor_data.data.index)
+        data_size=len(simulation_data.sensor.data.index)
         if data_size > n_training_samples:
-            sensor_data = simulation_data.sensor_data.data[data_size-n_training_samples:-1]
-            sensor_goal_data = simulation_data.sensor_goal_data.data[data_size-n_training_samples:-1]
-            competence_data = simulation_data.competence_data.data[data_size-n_training_samples:-1]
+            sensor_data = simulation_data.sensor.data[data_size-n_training_samples:-1]
+            sensor_goal_data = simulation_data.sensor_goal.data[data_size-n_training_samples:-1]
+            competence_data = simulation_data.competence.data[data_size-n_training_samples:-1]
             train_data_tmp = pd.concat([sensor_goal_data, sensor_data, competence_data],axis=1)
         else:
-            train_data_tmp = pd.concat([simulation_data.sensor_goal_data.data, simulation_data.sensor_data.data, simulation_data.competence_data.data], axis=1)
+            train_data_tmp = pd.concat([simulation_data.sensor_goal.data, simulation_data.sensor.data, simulation_data.competence.data], axis=1)
         train_data_tmp.reindex()
         train_data_tmp = train_data_tmp.reset_index()
         #self.model.train(train_data_tmp.as_matrix(columns=None))

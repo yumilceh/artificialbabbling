@@ -7,8 +7,6 @@ from numpy import linspace
 from numpy import random as np_rnd
 import datetime
 
-now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
-
 if __name__ == '__main__':
     #  Adding the projects folder to the path##
     import os, sys, random
@@ -44,16 +42,16 @@ if __name__ == '__main__':
     """
 
     # To guarantee reproducible experiments
-    random_seed = 1234
+    random_seed = 1234  # 12455   #1234
 
-    n_initialization = 40
+    n_initialization = 100
     n_experiments = 1000
-    n_save_data = np.nan   # np.nan to not save, -1 to save 5 times during exploration
+    n_save_data = np.nan  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 100
+    eval_step = 200
 
-    random.seed(random_seed)
-    np_rnd.seed(random_seed)
+    # random.seed(random_seed)
+    # np_rnd.seed(random_seed)
 
     # Creating Agent ##
     system = System()
@@ -69,25 +67,29 @@ if __name__ == '__main__':
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_validation_data_set_2.h5')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_1.h5')
 
-    proprio = True
+    proprio = False
+    mode = 'autonomous'
     #  Creating Simulation object, running simulation and plotting experiments##
+    now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
     file_prefix = 'Parabola_Sim_' + now
     simulation = Algorithm(system,
                            models,
                            n_experiments,
                            comp_func,
-                           instructor = instructor,
+                           instructor=instructor,
                            n_initialization_experiments=n_initialization,
-                           random_seed=1234,
+                           random_seed=random_seed,
                            g_im_initialization_method='all',
                            n_save_data=n_save_data,
                            evaluation=evaluation_sim,
                            eval_step=eval_step,
                            sm_all_samples=False)
 
-    simulation.mode = 'autonomous' # social or autonomous
+    simulation.mode = mode  # social or autonomous
+
+    # del(models)
 
     simulation.f_sm_key = f_sm_key
     simulation.f_ss_key = f_ss_key
@@ -98,9 +100,10 @@ if __name__ == '__main__':
     sim_data = simulation.data
 
     evaluation_sim.model.set_sigma_explo_ratio(0.)
+    evaluation_sim.model.mode = 'exploit'
     val_data = evaluation_sim.evaluateModel(saveData=False)
-    error_ = np.linalg.norm(val_data.sensor_goal_data.data.as_matrix() -
-                            val_data.sensor_data.data.as_matrix(), axis=1)
+    error_ = np.linalg.norm(val_data.sensor_goal.data.as_matrix() -
+                            val_data.sensor.data.as_matrix(), axis=1)
     print("Mean evaluation error is {} (max: {}, min: {})".format(np.mean(error_),
                                                                   np.max(error_),
                                                                   np.min(error_)))
@@ -137,3 +140,50 @@ if __name__ == '__main__':
     from plot_results import show_results
 
     show_results(system, simulation, val_data, proprio_val)
+
+
+def show_results(system, simulation, val_data, proprio_val):
+    fig1, ax1 = initializeFigure()
+    fig1.suptitle('All Sensory Results')
+    fig1, ax1 = simulation.data.plot_2D(fig1, ax1, 'sensor', 0, 'sensor', 1, ".b")
+    ax1.relim()
+    ax1.autoscale_view()
+
+    fig2, ax2 = initializeFigure()
+    fig2.suptitle('Evaluation Error Evolution')
+    plt.plot(simulation.evaluation_error[1:], 'b')
+    plt.hold(True)
+    plt.xlabel('Evaluation training step')
+    plt.ylabel('Mean error')
+
+    fig3, ax3 = initializeFigure()
+    fig3.suptitle('Validation: S1 vs S2')
+    fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor_goal', 0, 'sensor_goal', 1, "xr")
+    plt.hold(True)
+    fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor', 0, 'sensor', 1, ".b")
+    ax3.legend(['Goal', 'Result'])
+
+    fig4, ax4 = initializeFigure()
+    fig4.suptitle('Proprioceptive Prediction Evaluation')
+    fig4, ax4 = system.drawSystem(fig4, ax4)
+
+    for x in proprio_val:
+        plt.plot(x[0], x[1], x[2])
+
+    fig5, ax5 = initializeFigure()
+    fig5.suptitle('Competence during Exploration')
+    fig5, ax5 = simulation.data.plot_time_series(fig5, ax5, 'competence', 0, 'b', moving_average=0)
+    plt.hold(True)
+    fig5, ax5 = simulation.data.plot_time_series(fig5, ax5, 'competence', 0, 'r', moving_average=100)
+    ax5.legend(['Competence', 'Competence (win=20)'])
+
+    fig6, ax6 = initializeFigure()
+    fig6.suptitle('All Sensory Goal Results')
+    fig6, ax6 = simulation.data.plot_2D(fig6, ax6, 'sensor_goal', 0, 'sensor_goal', 1, ".b")
+    ax6.relim()
+    ax6.autoscale_view()
+
+    plt.draw()
+    plt.pause(0.001)
+
+    plt.show(block=True)

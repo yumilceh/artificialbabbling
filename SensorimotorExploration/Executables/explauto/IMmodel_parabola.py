@@ -31,7 +31,7 @@ if __name__ == '__main__':
     
     evaluation = SM_ModelEvaluation(system,
                                     sm_model)
-    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_dataset_2.h5')
     
     simulation_data = SimulationData(system)
     
@@ -80,20 +80,20 @@ if __name__ == '__main__':
         #evaluate
     evaluation = SM_ModelEvaluation(system,
                                     sm_model)
-    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_dataset_2.h5')
 
     from SensorimotorExploration.DataManager.PlotTools import *
     from matplotlib.pyplot import show
     
         
     fig2,ax2=initializeFigure()
-    simulation_data.plotSimulatedData2D(fig2,ax2,'sensor',0,'sensor',1,'or')
-    simulation_data.plotSimulatedData2D(fig2,ax2,'sensor_goal',0,'sensor_goal',1,'xk')
+    simulation_data.plot_2D(fig2, ax2, 'sensor', 0, 'sensor', 1, 'or')
+    simulation_data.plot_2D(fig2, ax2, 'sensor_goal', 0, 'sensor_goal', 1, 'xk')
     
      
     fig3,ax3=initializeFigure()
-    simulation_data.plotTemporalSimulatedData(fig3,ax3,'competence',0,'b',moving_average=0)
-    simulation_data.plotTemporalSimulatedData(fig3,ax3,'competence',0,'r',moving_average=10)
+    simulation_data.plot_time_series(fig3, ax3, 'competence', 0, 'b', moving_average=0)
+    simulation_data.plot_time_series(fig3, ax3, 'competence', 0, 'r', moving_average=10)
     t_evaluation = np.asmatrix(np.array(evaluation_samples)) + 20.
     plt.plot(t_evaluation.tolist()[0], evaluation_error, 'k')
 
@@ -101,21 +101,21 @@ if __name__ == '__main__':
     evaluation = SM_ModelEvaluation(system,
                                     sm_model)
 
-    evaluation.loadEvaluationDataSet('../Parabola/parabola_validation_data_set_2.h5')
+    evaluation.loadEvaluationDataSet('../Parabola/parabola_dataset_2.h5')
 
     validation_valSet_data = evaluation.evaluateModel(saveData=True)
 
     fig4, ax4 = initializeFigure()
     fig4.suptitle('All Sensory Results')
-    fig4, ax4 = validation_valSet_data.plotSimulatedData2D(fig4, ax4, 'sensor_goal', 0, 'sensor_goal', 1, "ob")
+    fig4, ax4 = validation_valSet_data.plot_2D(fig4, ax4, 'sensor_goal', 0, 'sensor_goal', 1, "ob")
     ax4.relim()
     ax4.autoscale_view()
 
     fig10, ax10 = initializeFigure()
     fig10.suptitle('Competence and Error during validation')
-    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10, ax10, 'competence', 0, "--b",
-                                                                   moving_average=10)
-    fig10, ax10 = validation_valSet_data.plotTemporalSimulatedData(fig10, ax10, 'error', 0, "r", moving_average=10)
+    fig10, ax10 = validation_valSet_data.plot_time_series(fig10, ax10, 'competence', 0, "--b",
+                                                          moving_average=10)
+    fig10, ax10 = validation_valSet_data.plot_time_series(fig10, ax10, 'error', 0, "r", moving_average=10)
 
     plt.draw()
     plt.show()

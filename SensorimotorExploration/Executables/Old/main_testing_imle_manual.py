@@ -71,7 +71,7 @@ if __name__ == '__main__':
     #--------------------------------------------------------------- progress=1;
     #-------------------------------------------- for i in random_samples_train:
         # print('Testing using sample {current} of {total} in the training set'.format(current=progress, total=n_samples_train))
-        #------------- y_ = simulation_data.sensor_data.data.iloc[i].as_matrix()
+        #------------- y_ = simulation_data.sensor.data.iloc[i].as_matrix()
 #------------------------------------------------------------------------------ 
         # set_motor_command(agent, fa_SM.infer(fa_SM.out_dims,fa_SM.in_dims,y_.astype(float)))
         #---------------------------------------------- agent.getMotorDynamics()
@@ -100,9 +100,9 @@ if __name__ == '__main__':
     validation_valSet_data.saveData('validation_valSet_data.h5')
         
     #---------------------------------------------- fig1,ax1=initializeFigure();
-    # fig1,ax1=validation_trainSet_data.plotTemporalSimulatedData(fig1,ax1,'competence', 0,"r",moving_average=5000)
+    # fig1,ax1=validation_trainSet_data.plot_time_series(fig1,ax1,'competence', 0,"r",moving_average=5000)
 #------------------------------------------------------------------------------ 
     fig2,ax2=initializeFigure();
-    fig2,ax2=validation_valSet_data.plotTemporalSimulatedData(fig2,ax2,'competence', 0,"r",moving_average=5000)
+    fig2,ax2=validation_valSet_data.plot_time_series(fig2, ax2, 'competence', 0, "r", moving_average=5000)
     
     plt.show();

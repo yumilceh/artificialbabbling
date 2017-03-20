@@ -44,7 +44,7 @@ if __name__ == '__main__':
     gmm_sm.train(simulation_data)
 
     f,ax=initializeFigure();
-    f,ax=simulation_data.plotSimulatedData2D(f,ax,'sensor', 0, 'sensor', 3,"ob")
+    f,ax=simulation_data.plot_2D(f, ax, 'sensor', 0, 'sensor', 3, "ob")
     
     
     n_random_examples=50
@@ -53,9 +53,9 @@ if __name__ == '__main__':
     sensor_goals=simulation_data.sensor_data.data.as_matrix()
     sensor_goals=sensor_goals[random_indexes,:]
     
-    # simulation_data.sensor_data.data.drop(simulation_data.sensor_data.data.index[:])
-    # simulation_data.motor_data.data.drop(simulation_data.motor_data.data.index[:])
-    # simulation_data.somato_data.data.drop(simulation_data.somato_data.data.index[:])
+    # simulation_data.sensor.data.drop(simulation_data.sensor.data.index[:])
+    # simulation_data.motor.data.drop(simulation_data.motor.data.index[:])
+    # simulation_data.somato.data.drop(simulation_data.somato.data.index[:])
     simulation_data=SimulationData(diva_agent);
 
     #----------------------------------------------------- print(random_indexes)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     
     g,ax2=initializeFigure();
-    g,ax2=simulation_data.plotSimulatedData2D(g,ax2,'sensor', 0, 'sensor', 3,"or")
+    g,ax2=simulation_data.plot_2D(g, ax2, 'sensor', 0, 'sensor', 3, "or")
         
     gmm_im.train(simulation_data)
     n_chosen_experiments=50
@@ -91,10 +91,10 @@ if __name__ == '__main__':
         #--------------------------------------- print(diva_agent.motor_command)
          
     h,ax3=initializeFigure();
-    h,ax3=simulation_data.plotSimulatedData2D(h,ax3,'sensor', 0, 'sensor', 3,"or")
+    h,ax3=simulation_data.plot_2D(h, ax3, 'sensor', 0, 'sensor', 3, "or")
     
     j,ax4=initializeFigure();
-    j,ax4=simulation_data.plotTemporalSimulatedData(j,ax4,'competence', 0,"r")
+    j,ax4=simulation_data.plot_time_series(j, ax4, 'competence', 0, "r")
     
     plt.show();
     

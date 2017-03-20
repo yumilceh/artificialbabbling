@@ -11,7 +11,7 @@ from SensorimotorExploration.Models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_S
 
 from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
-#
+
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
 
@@ -49,8 +49,8 @@ models_params_dict = {'gmm_sm': {'sm_step': 50,
                       'gmm_ss': {'ss_step': 50,
                                  'alpha': 0.5},
                       'igmm_sm': {'min_components': 3,
-                                  'max_step_components': 5,
-                                  'max_components': 10,
+                                  'max_step_components': 5, #5
+                                  'max_components': 20, #10
                                   'sm_step': 50,
                                   'forgetting_factor': 0.2, #OK: 0.2, 0.05
                                   'sigma_explo_ratio': 0.},
@@ -62,8 +62,8 @@ models_params_dict = {'gmm_sm': {'sm_step': 50,
                       'gmm_im': {'im_step': 30,
                                  'im_samples': 800},
                       'explauto_sm': {'model_type': 'non_parametric', 'model_conf': {'fwd': 'WNN', 'inv': 'WNN',
-                                                                                     'k':3, 'sigma':1.,
-                                                                                     'sigma_explo_ratio':0.2}},
+                                                                                     'k':5, 'sigma':1.,
+                                                                                     'sigma_explo_ratio':0.4}},
                       'explauto_ss': {'model_type': 'non_parametric', 'model_conf': {'fwd': 'WNN', 'inv': 'WNN',
                                                                                      'k':3, 'sigma':1.,
                                                                                      'sigma_explo_ratio':0.1}},

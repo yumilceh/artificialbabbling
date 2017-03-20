@@ -8,8 +8,7 @@ import numpy as np
 import datetime 
 import pandas as pd
 
-
-from ..DataManager.SimulationData import SimulationData, loadSimulationData_h5
+from ..DataManager.SimulationData import SimulationData, load_sim_h5
 from ..Algorithm.utils.functions import get_random_motor_set
 
 now = datetime.datetime.now().strftime("DSG_%Y_%m_%d_%H_%M_")
@@ -81,29 +80,26 @@ def reduce_file_dataset(self, system, min_dist, file_name=None):
     if type(None) == type(file_name):
         file_name = self.data.file_prefix +'data.h5'
     
-    data_tmp = loadSimulationData_h5(file_name, system)
+    data_tmp = load_sim_h5(file_name, system)
     data_tmp = reduce_(data_tmp, min_dist, system)
     return data_tmp    
         
 def reduce_(data, min_distance, system):
     change = True
-    sensor_data_as_matrix = data.sensor_data.data.as_matrix()
-    motor_data_as_matrix = data.motor_data.data.as_matrix()
-    
-    while change: #Not optimal
-        change = False
-        for i in range(sensor_data_as_matrix.shape[0]):
-            if change == True:
-                break
-            for j in range(i+1,sensor_data_as_matrix.shape[0]):
-                distance_ij = np.linalg.norm(sensor_data_as_matrix[i,:]-sensor_data_as_matrix[j,:])
-                if distance_ij < min_distance:
-                    sensor_data_as_matrix = np.delete(sensor_data_as_matrix, j, 0)
-                    motor_data_as_matrix = np.delete(motor_data_as_matrix, j, 0)
-                    change = True
-                    break
+    sensor_data_as_matrix = data.sensor.data.as_matrix()
+    motor_data_as_matrix = data.motor.data.as_matrix()
+
+    for i in range(sensor_data_as_matrix.shape[0]):
+        print(i)
+        if sensor_data_as_matrix.shape[0]<i:
+            break
+        for j in reversed(range(i+1,sensor_data_as_matrix.shape[0])):
+            distance_ij = np.linalg.norm(sensor_data_as_matrix[i,:]-sensor_data_as_matrix[j,:])
+            if distance_ij < min_distance:
+                sensor_data_as_matrix = np.delete(sensor_data_as_matrix, j, 0)
+                motor_data_as_matrix = np.delete(motor_data_as_matrix, j, 0)
                     
     dataset = SimulationData(system)
-    dataset.sensor_data.data = pd.DataFrame(sensor_data_as_matrix)
-    dataset.motor_data.data = pd.DataFrame(motor_data_as_matrix)
+    dataset.sensor.data = pd.DataFrame(sensor_data_as_matrix)
+    dataset.motor.data = pd.DataFrame(motor_data_as_matrix)
     return dataset

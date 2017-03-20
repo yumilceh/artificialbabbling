@@ -52,9 +52,9 @@ if __name__ == '__main__':
     sensor_goals=simulation_data.sensor_data.data.as_matrix()
     sensor_goals=sensor_goals[random_indexes,:]
     
-     # simulation_data.sensor_data.data.drop(simulation_data.sensor_data.data.index[:])
-     # simulation_data.motor_data.data.drop(simulation_data.motor_data.data.index[:])
-     # simulation_data.somato_data.data.drop(simulation_data.somato_data.data.index[:])
+     # simulation_data.sensor.data.drop(simulation_data.sensor.data.index[:])
+     # simulation_data.motor.data.drop(simulation_data.motor.data.index[:])
+     # simulation_data.somato.data.drop(simulation_data.somato.data.index[:])
     simulation_data=SimulationData(diva_agent);
 
     #----------------------------------------------------- print(random_indexes)

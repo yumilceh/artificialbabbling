@@ -51,7 +51,7 @@ hull_volumes = {key: None for key in directories}
 for i in range(n_directories):    
     mat = h5py.File(directories[i] + 'SMdata.mat','r')
     data = np.array(mat.get('SMdata'))
-    #motor_data = data[6:,:]
+    #motor = data[6:,:]
     sensor_data = data[[0,1,3,4],:]
     
     
@@ -76,7 +76,7 @@ for i in range(n_directories):
         sensor_data = sensor_data[:,np.where(proprio_data == 0)[1]]
         hull = ConvexHull(np.transpose(sensor_data))
         hull_volumes[directories[i]][2]=hull.volume
-        #print(sensor_data)
+        #print(sensor)
     
         mat = h5py.File(directories[i] + 'IMdata.mat','r')
         data = np.array(mat.get('IMdata'))

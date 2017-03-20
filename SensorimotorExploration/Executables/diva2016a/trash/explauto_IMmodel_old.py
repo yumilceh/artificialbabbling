@@ -86,12 +86,12 @@ if __name__ == '__main__':
     from matplotlib.pyplot import show
 
     fig2, ax2 = initializeFigure()
-    simulation_data.plotSimulatedData2D(fig2, ax2, 'sensor', 0, 'sensor', 1, 'or')
-    simulation_data.plotSimulatedData2D(fig2, ax2, 'sensor_goal', 0, 'sensor_goal', 1, 'xk')
+    simulation_data.plot_2D(fig2, ax2, 'sensor', 0, 'sensor', 1, 'or')
+    simulation_data.plot_2D(fig2, ax2, 'sensor_goal', 0, 'sensor_goal', 1, 'xk')
 
     fig3, ax3 = initializeFigure()
-    simulation_data.plotTemporalSimulatedData(fig3, ax3, 'competence', 0, 'b', moving_average=0)
-    simulation_data.plotTemporalSimulatedData(fig3, ax3, 'competence', 0, 'r', moving_average=10)
+    simulation_data.plot_time_series(fig3, ax3, 'competence', 0, 'b', moving_average=0)
+    simulation_data.plot_time_series(fig3, ax3, 'competence', 0, 'r', moving_average=10)
     t_evaluation = np.asmatrix(np.array(evaluation_samples)) + 20.
     plt.plot(t_evaluation.tolist()[0], evaluation_error, 'k')
 

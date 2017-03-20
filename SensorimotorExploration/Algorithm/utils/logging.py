@@ -28,3 +28,13 @@ def write_config_log(alg, file_name):
 def add_log_line(line, file_name):
     with open(file_name, "a") as log_file:
         log_file.write(line)
+
+
+def read_config_log(file_name):
+    conf = {}
+    with open(file_name) as f:
+        for line in f:
+            line = line.replace('\n','')
+            (key, val) = line.split(': ')
+            conf[key] = val
+    return conf

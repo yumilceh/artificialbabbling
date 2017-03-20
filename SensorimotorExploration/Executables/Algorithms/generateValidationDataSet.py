@@ -17,7 +17,7 @@ if __name__ == '__main__':
     ## Simulation Parameters ##
     system=System()
     
-    file_name = 'parabola_validation_data_set_2.h5'
+    file_name = 'parabola_dataset_2.h5'
     data = loadSimulationData_h5(file_name, system)
     
     ## Coverting data to Matrix form ##
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     fig1.canvas.draw()
     
     #===========================================================================
-    # fig1,ax1=simulation_data.plotSimulatedData2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
+    # fig1,ax1=simulation_data.plot_2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
     # fig1, ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
     #===========================================================================
     
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     from DataManager.SimulationData import SimulationData
     validation_data_set = SimulationData(simulation1.agent)
     validation_data_set.sensor_data.data = pd.DataFrame(data_as_matrix)
-    validation_data_set.saveData('parabola_validation_data_set_2.h5')
+    validation_data_set.saveData('parabola_dataset_2.h5')
     
     try:
         str_opt = raw_input("Press [enter] to continue or press 'Y' to keep plots...   ")

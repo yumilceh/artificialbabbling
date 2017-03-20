@@ -44,10 +44,10 @@ if __name__ == '__main__':
     validation_trainSet_data, validation_valSet_data = model_eval.evaluateModel(saveData, eva_train_set)    
     
     fig1,ax1=initializeFigure();
-    fig1,ax1=validation_trainSet_data.plotTemporalSimulatedData(fig1,ax1,'competence', 0,"r",moving_average=2000)
+    fig1,ax1=validation_trainSet_data.plot_time_series(fig1, ax1, 'competence', 0, "r", moving_average=2000)
     
     
     fig2,ax2=initializeFigure();
-    fig2,ax2=validation_valSet_data.plotTemporalSimulatedData(fig2,ax2,'competence', 0,"r",moving_average=2000)
+    fig2,ax2=validation_valSet_data.plot_time_series(fig2, ax2, 'competence', 0, "r", moving_average=2000)
     
     plt.show();

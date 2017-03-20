@@ -272,12 +272,12 @@ class Algorithm_2015(object):
     def get_im_init_data(self, method='all'): # Non-painful is missing
         if method == 'non-zero':
             print('SM Exploration: IM initialization: Non-null sensory result considered')
-            sensor_goals = self.data.sensor_data.data.as_matrix()
+            sensor_goals = self.data.sensor.data.as_matrix()
             return sensor_goals[np.where(linalg.norm(sensor_goals, axis=1) > 0), :]
 
         elif method == 'all':
             print('SM Exploration: IM initialization: All sensory result considered')
-            return self.data.sensor_data.data.as_matrix()
+            return self.data.sensor.data.as_matrix()
 
     def do_training(self, i, up_=['sm', 'ss', 'im'], force=False):
 

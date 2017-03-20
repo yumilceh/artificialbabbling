@@ -42,15 +42,15 @@ class IMLE_SM(): #Incremental Local Online
         sm_step=self.params.sm_step
         print('Training IMLE_SM...')
         if (sm_step==1):
-            x_ = simulation_data.motor_data.data.iloc[-1].as_matrix()
-            y_ = simulation_data.sensor_data.data.iloc[-1].as_matrix()
+            x_ = simulation_data.motor.data.iloc[-1].as_matrix()
+            y_ = simulation_data.sensor.data.iloc[-1].as_matrix()
             self.model.update(x_.astype(float),y_.astype(float))
             
         else:
-            motor_data_size = len(simulation_data.motor_data.data.index)
-            motor_data = simulation_data.motor_data.data[motor_data_size-sm_step:]
-            sensor_data_size = len(simulation_data.sensor_data.data.index)
-            sensor_data = simulation_data.sensor_data.data[sensor_data_size-sm_step:]
+            motor_data_size = len(simulation_data.motor.data.index)
+            motor_data = simulation_data.motor.data[motor_data_size-sm_step:]
+            sensor_data_size = len(simulation_data.sensor.data.index)
+            sensor_data = simulation_data.sensor.data[sensor_data_size-sm_step:]
             for i in range(sm_step):
                 x_ = motor_data.iloc[i].as_matrix()
                 y_ = sensor_data.iloc[i].as_matrix()

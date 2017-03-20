@@ -261,8 +261,8 @@ class DivaProprio2015a:
 
     def get_sound_wave(self, art_states, play=0, save=0, file_name='vt'):  # based on explauto
         self.matlabSession.putvalue('artStates', art_states)
-        self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
-        self.soundWave = self.matlabSession.getvalue('soundWave')
+        self.matlabSession.run('sound_wave = diva_synth(artStates\', \'sound\')')
+        self.soundWave = self.matlabSession.getvalue('sound_wave')
         if (play):
             self.playSoundWave()
         if (save):
@@ -277,8 +277,8 @@ class DivaProprio2015a:
         # print(self.artStates.shape)
         self.matlabSession.putvalue('artStates', soundArtStates[:, 0:13])
         # self.matlabSession.run('save artStates.mat artStates')
-        self.matlabSession.run('soundWave = diva_synth(artStates\', \'sound\')')
-        self.soundWave = self.matlabSession.getvalue('soundWave')
+        self.matlabSession.run('sound_wave = diva_synth(artStates\', \'sound\')')
+        self.soundWave = self.matlabSession.getvalue('sound_wave')
         if (play):
             self.playSoundWave()
         if (save):

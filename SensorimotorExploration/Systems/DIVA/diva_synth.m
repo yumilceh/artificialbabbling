@@ -28,7 +28,7 @@ switch(lower(option))
                  mlaf=max(laf);
                  af=cellfun(@(x)x(min(numel(x),1:mlaf)),af,'UniformOutput',false);
                  af=cat(2,af{:});
-                 display(af);
+                 %display(af);
              end
         else
             if nargout>3
@@ -85,7 +85,7 @@ s=zeros(ceil((ndata+1)*dt*synth.fs),1);
 while time<(ndata+1)*dt;
     % sample articulatory parameters
     t0=floor(time/dt);
-    display(t0)
+    %display(t0)
     t1=(time-t0*dt)/dt;
     [nill,nill,nill,af1,d]=diva_synth_sample(Art(:,min(ndata,1+t0)));
     [nill,nill,nill,af2,d]=diva_synth_sample(Art(:,min(ndata,2+t0)));
@@ -181,9 +181,9 @@ while time<(ndata+1)*dt;
         end
     else v=[]; end
     
-    display(time)
-    display(size(v0))
-    display(size(v))
+    %display(time)
+    %display(size(v0))
+    %display(size(v))
     v=cat(1,v0,v);
     v=v+.000*randn(size(v));
     v=(1-exp(-v))./(1+exp(-v));

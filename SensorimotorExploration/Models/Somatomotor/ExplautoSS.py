@@ -39,8 +39,9 @@ class ExplautoSS(object):
         return  system.somato_prediction
 
     def train(self, simulation_data):
-        m = simulation_data.motor_data.data.iloc[-1]
-        s = simulation_data.somato_data.data.iloc[-1]
+        m = simulation_data.motor.data.iloc[-1]
+        s = simulation_data.somato.data.iloc[-1]
+        # print('Trainign with m {} and som {}'.format(m,s))
         self.model.update(m,s)
         
     def trainIncrementalLearning(self, simulation_data):

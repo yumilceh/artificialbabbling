@@ -43,9 +43,9 @@ class ParabolicRegion:
         min_sensor_values = np.array([0.0, 0.0])
         max_sensor_values = np.array([b * 2.0, b ** 2])
 
-        min_somato_values = np.array([0])
-        max_somato_values = np.array([1])
-        somato_threshold = np.array([0.6])
+        min_somato_values = np.array([0.])
+        max_somato_values = np.array([1.])
+        somato_threshold = np.array([0.5])
 
         name = 'ParabolicRegion'
         self.name = name
@@ -80,6 +80,7 @@ class ParabolicRegion:
         self.sensor_goal = np.array([0.0] * n_sensor)
         self.somato_out = np.array([0.0] * n_somato)
         self.competence_result = 0.0
+        self.interaction_result = 0.
 
     def set_action(self, motor_command):
         self.motor_command = self.boundMotorCommand(motor_command)
@@ -292,10 +293,11 @@ class ParabolicRegion:
         plt.plot(x_p, y_p, "b")
         return fig, axes
 
+
 class Instructor(ParabolicRegion):
     def __init__(self):
         import os
-        from ..DataManager.SimulationData import loadSimulationData_h5
+        from ..DataManager.SimulationData import load_sim_h5
         # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
         #     for s in ss:
         #         system.set_action(infer_motor(0, s))
@@ -304,31 +306,30 @@ class Instructor(ParabolicRegion):
         ParabolicRegion.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
         self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
-        self.data = loadSimulationData_h5(self.intructor_file)
-        self.n_units = len(self.data.sensor_data.data.index)
-        self.unit_threshold = 0.3
+        self.data = load_sim_h5(self.intructor_file)
+        self.n_units = len(self.data.sensor.data.index)
+        self.unit_threshold = 0.15  # 0.3
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
         min_idx = np.argmin(dist)
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold:
-            self.set_action(self.data.motor_data.data.iloc[min_idx])
+            self.set_action(self.data.motor.data.iloc[min_idx])
             self.executeMotorCommand()
-            return True
-        return False
-
+            return 1, self.sensor_out.copy()
+        return 0, np.zeros((self.n_sensor,))
 
     def get_distances(self, sensor):
         dist = []
-        s_data = self.data.sensor_data.data.as_matrix()
+        s_data = self.data.sensor.data.as_matrix()
         for i in range(self.n_units):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist
 
     def infer_motor(self, sensor_goal):
         m1 = sensor_goal[0]
-        m2 = np.sqrt(sensor_goal[1])+3
+        m2 = np.sqrt(sensor_goal[1]) + 3
         return np.array([m1, m2])
 
 

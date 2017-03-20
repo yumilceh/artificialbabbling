@@ -67,15 +67,15 @@ class explauto_IM(object):
         self.params.n_training_samples = 1  # only ok with non-parametric
 
     def train(self,simulation_data):  
-        m = simulation_data.motor_data.data.iloc[-1]
-        s = simulation_data.sensor_data.data.iloc[-1]  
-        s_g =  simulation_data.sensor_goal_data.data.iloc[-1]
+        m = simulation_data.motor.data.iloc[-1]
+        s = simulation_data.sensor.data.iloc[-1]  
+        s_g =  simulation_data.sensor_goal.data.iloc[-1]
         self.model.update(np.hstack((m, s_g)) , np.hstack((m, s)))  
             
     def get_goal(self, system):
         return self.model.sample()
 
-    def get_goal_proprio(self, system, sm_model, ss_model, n_attempts = 10):
+    def get_goal_proprio(self, system, sm_model, ss_model, n_attempts = 10): #n_attempts = 30 worse behavior
         tmp_goal = self.get_goal(system)
         tmp_motor = sm_model.get_action(system, sensor_goal=tmp_goal)
         tmp_somato = ss_model.predict_somato(system, motor_command=tmp_motor)
