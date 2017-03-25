@@ -68,7 +68,7 @@ def sim_agent(ops,idx):
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.loadEvaluationDataSet('german_dataset_2.h5')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/german_dataset_2.h5')
 
     simulation = Algorithm(system,
                           models,
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     max_processes = 8
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
-        idx2 = idx+24
+        idx2 = idx+0
         # Creating Agent ##
 
         processes += [Process(target=sim_agent, args=(ops,idx2))]
