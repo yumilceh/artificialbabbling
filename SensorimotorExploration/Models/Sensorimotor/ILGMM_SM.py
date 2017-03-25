@@ -53,26 +53,47 @@ class GMM_SM(object):
                        forgetting_factor = forgetting_factor, 
                        plot = plot, plot_dims=plot_dims)
 
-        
-    def train(self,simulation_data):
-        train_data_tmp=pd.concat([simulation_data.motor.data,
-                                  simulation_data.sensor.data], axis=1)
+    def train(self, simulation_data):
+        train_data_tmp = pd.concat([simulation_data.motor.get_all(),
+                                    simulation_data.sensor.get_all()], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
-        
-    def trainIncrementalLearning(self,simulation_data):
-        #=======================================================================
-        # sm_step=self.params.sm_step
-        # alpha=self.params.alpha
-        # motor_data_size=len(simulation_data.motor.data.index)
-        # motor=simulation_data.motor.data[motor_data_size-sm_step:-1]
-        # sensor_data_size=len(simulation_data.sensor.data.index)
-        # sensor=simulation_data.sensor.data[sensor_data_size-sm_step:-1]
-        # new_data=pd.concat([motor,sensor],axis=1)
-        # self.model.trainIncrementalLearning(new_data, alpha)
-        #=======================================================================
-        train_data_tmp=pd.concat([simulation_data.motor.data,
-                                  simulation_data.sensor.data], axis=1)
-        self.model.train(train_data_tmp.as_matrix(columns=None))
+
+    def trainIncrementalLearning(self, simulation_data, all=True):
+        if all:
+            data = np.zeros((simulation_data.motor.current_idx,
+                             self.params.n_motor+self.params.n_sensor))
+            data_m = simulation_data.motor.get_all().as_matrix()
+            data_s = simulation_data.sensor.get_all().as_matrix()
+            data[:,:self.params.n_motor] = data_m
+            data[:, self.params.n_motor:] = data_s
+        else:
+            data = np.zeros((self.params.sm_step,
+                             self.params.n_motor+self.params.n_sensor))
+            data_m = simulation_data.motor.get_last(self.params.sm_step).as_matrix()
+            data_s = simulation_data.sensor.get_last(self.params.sm_step).as_matrix()
+            data[:,:self.params.n_motor] = data_m
+            data[:, self.params.n_motor:] = data_s
+        self.model.train(data)
+
+    # def train_old(self,simulation_data):
+    #     train_data_tmp=pd.concat([simulation_data.motor.data,
+    #                               simulation_data.sensor.data], axis=1)
+    #     self.model.train(train_data_tmp.as_matrix(columns=None))
+    #
+    # def trainIncrementalLearning_old(self,simulation_data):
+    #     #=======================================================================
+    #     # sm_step=self.params.sm_step
+    #     # alpha=self.params.alpha
+    #     # motor_data_size=len(simulation_data.motor.data.index)
+    #     # motor=simulation_data.motor.data[motor_data_size-sm_step:-1]
+    #     # sensor_data_size=len(simulation_data.sensor.data.index)
+    #     # sensor=simulation_data.sensor.data[sensor_data_size-sm_step:-1]
+    #     # new_data=pd.concat([motor,sensor],axis=1)
+    #     # self.model.trainIncrementalLearning(new_data, alpha)
+    #     #=======================================================================
+    #     train_data_tmp=pd.concat([simulation_data.motor.data,
+    #                               simulation_data.sensor.data], axis=1)
+    #     self.model.train(train_data_tmp.as_matrix(columns=None))
          
     
     def get_action(self, system, sensor_goal=None):

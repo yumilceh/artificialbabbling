@@ -6,9 +6,8 @@ Created on Mar 17, 2017
 from multiprocessing import Process
 import time
 import itertools
-from numpy import random as np_rnd
 import datetime
-import os, sys, random
+import os
 
 
 #  Adding libraries##
@@ -21,7 +20,7 @@ from SensorimotorExploration.DataManager.PlotTools import *
 
 from model_configurations import model_, comp_func
 
-directory = 'experiment_1'
+directory = 'experiment_2'
 #
 
 # Models
@@ -41,8 +40,8 @@ f_im_key = 'explauto_im'
    'random':  RdnM
 """
 
-def sim_agent(ops):
-    # print('new_thread')
+def sim_agent(ops,idx):
+    # print('new_process')
     # for i in range(10):
     #     print(i)
     #     time.sleep(1)
@@ -63,13 +62,13 @@ def sim_agent(ops):
     # tree/DP Interest Model
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_")
 
-    file_prefix = directory + '/Vowels_Tree_' + now
+    file_prefix = directory + '/Vowels_Tree_' + str(idx) + '_'+ now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_1.h5')
+    evaluation_sim.loadEvaluationDataSet('german_dataset_2.h5')
 
     simulation = Algorithm(system,
                           models,
@@ -104,27 +103,29 @@ if __name__ == '__main__':
     n_experiments = 20000
     n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = np.nan
+    eval_step = 2000 #np.nan to not evaluate
 
-    random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455] # 8975, 91324, 752324, 1264183,
+    #, ,1234, 1321,
+    random_seeds = [1457, 283]#, 2469, 147831, 234096, 2453, 2340554, 12455]
 
     proprio_ops = [True, False]
     mode_ops = ['autonomous', 'social']
 
-    threads = []
-    max_threads = 4
+    processes = []
+    max_processes = 8
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
+        idx2 = idx+24
         # Creating Agent ##
 
-        threads += [Process(target=sim_agent, args=(ops,))]
-        # threads[-1].daemon = True
-        threads[-1].start()
-        # threads[-1].join()
-        time.sleep(5)
-        while len(threads) >= max_threads:
-            for i, t in enumerate(threads):
+        processes += [Process(target=sim_agent, args=(ops,idx2))]
+        # processes[-1].daemon = True
+        processes[-1].start()
+        # processes[-1].join()
+        while len(processes) >= max_processes:
+            time.sleep(5)
+            for i, t in enumerate(processes):
                 if not t.is_alive():
-                    del threads[i]  # pop
+                    del processes[i]  # pop
 
 

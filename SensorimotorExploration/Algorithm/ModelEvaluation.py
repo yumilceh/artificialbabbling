@@ -88,7 +88,7 @@ class SM_ModelEvaluation(object):
         if (eva_train_set > 0):
             n_samples_evatrain = np.ceil(eva_train_set * self.n_samples_train).astype(int)
             random_indexes_evatrain = random.sample(self.random_indexes_train, n_samples_evatrain)
-            validation_trainSet_data = SimulationData(self.agent)
+            validation_trainSet_data = SimulationData(self.agent,prelocated_samples=n_samples_evatrain+1)
             progress = 1;
             for i in random_indexes_evatrain:
                 #  print('Testing using sample {current} of {total} in the training set'.format(current=progress,

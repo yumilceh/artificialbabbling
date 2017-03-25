@@ -39,6 +39,12 @@ class ExplautoSS(object):
         return  system.somato_prediction
 
     def train(self, simulation_data):
+        m = simulation_data.motor.get_last(1).iloc[-1]
+        s = simulation_data.somato.get_last(1).iloc[-1]
+        # print('Trainign with m {} and som {}'.format(m,s))
+        self.model.update(m,s)
+
+    def train_old(self, simulation_data):
         m = simulation_data.motor.data.iloc[-1]
         s = simulation_data.somato.data.iloc[-1]
         # print('Trainign with m {} and som {}'.format(m,s))

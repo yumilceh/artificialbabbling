@@ -42,7 +42,7 @@ if __name__ == '__main__':
     """
 
     # To guarantee reproducible experiments
-    random_seed = 1234  # 12455   #1234
+    random_seed = 12455  # 12455   #1234
 
     n_initialization = 100
     n_experiments = 1000
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_1.h5')
 
-    proprio = False
+    proprio = True
     mode = 'autonomous'
     #  Creating Simulation object, running simulation and plotting experiments##
     now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
@@ -137,53 +137,14 @@ if __name__ == '__main__':
         if somato_pred < somato_th <= somato_res:
             proprio_val += [[system.sensor_out[0], system.sensor_out[1], 'xk']]
 
+    evaluation_sim = SM_ModelEvaluation(system,
+                                        simulation.models.f_sm,
+                                        comp_func=comp_func,
+                                        file_prefix=file_prefix + 'social_')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/instructor_parabola_1.h5')
+    val_data = evaluation_sim.evaluateModel(saveData=False)
+    val_data.cut_final_data()
+
+
     from plot_results import show_results
-
     show_results(system, simulation, val_data, proprio_val)
-
-
-def show_results(system, simulation, val_data, proprio_val):
-    fig1, ax1 = initializeFigure()
-    fig1.suptitle('All Sensory Results')
-    fig1, ax1 = simulation.data.plot_2D(fig1, ax1, 'sensor', 0, 'sensor', 1, ".b")
-    ax1.relim()
-    ax1.autoscale_view()
-
-    fig2, ax2 = initializeFigure()
-    fig2.suptitle('Evaluation Error Evolution')
-    plt.plot(simulation.evaluation_error[1:], 'b')
-    plt.hold(True)
-    plt.xlabel('Evaluation training step')
-    plt.ylabel('Mean error')
-
-    fig3, ax3 = initializeFigure()
-    fig3.suptitle('Validation: S1 vs S2')
-    fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor_goal', 0, 'sensor_goal', 1, "xr")
-    plt.hold(True)
-    fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor', 0, 'sensor', 1, ".b")
-    ax3.legend(['Goal', 'Result'])
-
-    fig4, ax4 = initializeFigure()
-    fig4.suptitle('Proprioceptive Prediction Evaluation')
-    fig4, ax4 = system.drawSystem(fig4, ax4)
-
-    for x in proprio_val:
-        plt.plot(x[0], x[1], x[2])
-
-    fig5, ax5 = initializeFigure()
-    fig5.suptitle('Competence during Exploration')
-    fig5, ax5 = simulation.data.plot_time_series(fig5, ax5, 'competence', 0, 'b', moving_average=0)
-    plt.hold(True)
-    fig5, ax5 = simulation.data.plot_time_series(fig5, ax5, 'competence', 0, 'r', moving_average=100)
-    ax5.legend(['Competence', 'Competence (win=20)'])
-
-    fig6, ax6 = initializeFigure()
-    fig6.suptitle('All Sensory Goal Results')
-    fig6, ax6 = simulation.data.plot_2D(fig6, ax6, 'sensor_goal', 0, 'sensor_goal', 1, ".b")
-    ax6.relim()
-    ax6.autoscale_view()
-
-    plt.draw()
-    plt.pause(0.001)
-
-    plt.show(block=True)

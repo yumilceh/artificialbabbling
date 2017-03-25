@@ -66,6 +66,8 @@ class DivaProprio2015a:
         self.somato_out = [0.0] * n_somato
         self.somato_threshold = 0.6
         self.competence_result = 0.0
+        self.sensor_instructor = np.empty((self.n_sensor,))
+        self.sensor_instructor.fill(np.nan)
         self.matlabSession = ml.session_factory()
         abs_path = os.path.dirname(os.path.abspath(__file__))
         self.matlabSession.run('cd ' + abs_path + '/DIVA/')  # Path to DIVA functions
@@ -220,6 +222,7 @@ class DivaProprio2015a:
         command = ["ffmpeg",
                    '-i', file_name + '.wav',
                    '-i', file_name + '.mp4',
+                   '-strict', '-2',
                    '-c:v', "libx264", file_name + '_audio.mp4']
         sp.call(command)
         if keep_audio == 0:
@@ -258,6 +261,8 @@ class DivaProprio2015a:
             sp.call(command)
         if (show):
             figVocalTract.show()
+        else:
+            del figVocalTract
 
     def get_sound_wave(self, art_states, play=0, save=0, file_name='vt'):  # based on explauto
         self.matlabSession.putvalue('artStates', art_states)

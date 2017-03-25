@@ -15,8 +15,8 @@ if __name__ == '__main__':
     # sys.path.append("../../")
 
     #  Adding libraries##
-    from SensorimotorExploration.Systems.Parabola_Test import ParabolicRegion as System
-    from SensorimotorExploration.Systems.Parabola_Test import Instructor
+    from SensorimotorExploration.Systems.Parabola import ParabolicRegion as System
+    from SensorimotorExploration.Systems.Parabola import Instructor
     from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
     from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
@@ -44,25 +44,25 @@ if __name__ == '__main__':
     # To guarantee reproducible experiments
     n_initialization = 100
     n_experiments = 2000
-    n_save_data = 1000   # np.nan to not save, -1 to save 5 times during exploration
+    n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 100
+    eval_step = 400
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'experiment_10'
+    directory = 'experiment_4'
     os.mkdir(directory)
 
 
-    # Creating Agent ##
-    system = System()
-    instructor = Instructor()
-
-    random_seeds = [1234, 1321, 1457,283, 2469, 147831, 234096, 2453, 2340554, 12455, 8975, 91324,752324,1264183, 82376, 92835, 823975, 2376324]
+    random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455, 8975, 91324,752324,1264183, 82376, 92835, 823975, 2376324]
     proprio_ops = [True, False]
     mode_ops = ['autonomous','social']
 
     for idx,ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
+        # Creating Agent ##
+        system = System()
+        instructor = Instructor()
+
         random_seed = ops[0]
         proprio = ops[1]
         mode_ = ops[2]
@@ -78,6 +78,10 @@ if __name__ == '__main__':
         file_prefix = directory + '/Parabola_Pool_' + str(idx) + '_' + now
 
         #  Creating Simulation object, running simulation and plotting experiments##
+        evaluation_sim = SM_ModelEvaluation(system,
+                                            models.f_sm, comp_func=comp_func)
+
+        evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_1.h5')
 
         simulation = Algorithm(system,
                                models,
@@ -86,7 +90,9 @@ if __name__ == '__main__':
                                instructor = instructor,
                                n_initialization_experiments=n_initialization,
                                random_seed=random_seed,
-                               g_im_initialization_method='non-painful', #'all'
+                               evaluation=evaluation_sim,
+                               eval_step=eval_step,
+                               g_im_initialization_method='all', #'all'
                                n_save_data=n_save_data,
                                sm_all_samples=False,
                                file_prefix=file_prefix)
@@ -107,7 +113,7 @@ if __name__ == '__main__':
         evaluation_sim.model.set_sigma_explo_ratio(0.)
         evaluation_sim.model.mode = 'exploit'
 
-        evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_f1_1.h5')
+        evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_1.h5')
         evaluation_sim.model.set_sigma_explo_ratio(0.)
         val_data = evaluation_sim.evaluateModel(saveData=True)
         del(evaluation_sim)
@@ -116,7 +122,7 @@ if __name__ == '__main__':
                                             simulation.models.f_sm,
                                             comp_func=comp_func,
                                             file_prefix=file_prefix + 'social_')
-        evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/instructor_parabola_f1_1.h5')
+        evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/instructor_parabola_1.h5')
         val_data = evaluation_sim.evaluateModel(saveData=True)
 
         del simulation

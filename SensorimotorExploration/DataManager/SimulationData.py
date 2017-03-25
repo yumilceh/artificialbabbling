@@ -21,12 +21,12 @@ class SimulationData(object):
     classdocs
     """
 
-    def __init__(self, system):
-        self.motor = TabularData(system.motor_names)
-        self.sensor = TabularData(system.sensor_names)
-        self.sensor_goal = TabularData(system.sensor_names)
-        self.somato = TabularData(system.somato_names)
-        self.competence = TabularData(['competence'])
+    def __init__(self, system, prelocated_samples = 100000):
+        self.motor = TabularData(system.motor_names, prelocated_samples = prelocated_samples)
+        self.sensor = TabularData(system.sensor_names, prelocated_samples = prelocated_samples)
+        self.sensor_goal = TabularData(system.sensor_names, prelocated_samples = prelocated_samples)
+        self.somato = TabularData(system.somato_names, prelocated_samples = prelocated_samples)
+        self.competence = TabularData(['competence'], prelocated_samples = prelocated_samples)
 
     def appendData(self, system):
         self.motor.appendData(system.motor_command.flatten())
@@ -46,9 +46,17 @@ class SimulationData(object):
         simulationdata_tmp = SimulationData(system)
         simulationdata_tmp.motor.data = self.motor.data.iloc[start:stop]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[start:stop]
+        simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[start:stop]
         simulationdata_tmp.somato.data = self.somato.data.iloc[start:stop]
         simulationdata_tmp.competence.data = self.competence.data.iloc[start:stop]
         return simulationdata_tmp
+
+    def cut_final_data(self):
+        self.motor.data = self.motor.get_all()
+        self.sensor.data = self.sensor.get_all()
+        self.sensor_goal.data = self.sensor_goal.get_all()
+        self.somato.data = self.somato.get_all()
+        self.competence.data = self.competence.get_all()
 
     def mixDataSets(self, system, sim_2):
         sim_1 = SimulationData(system)
@@ -76,13 +84,13 @@ class SimulationData(object):
 
 
 class SimulationDataSocial(SimulationData):
-    def __init__(self, system):
-        SimulationData.__init__(self)
-        self.social = TabularData['social']
+    def __init__(self, system, prelocated_samples= 100000):
+        SimulationData.__init__(self, system, prelocated_samples=prelocated_samples)
+        self.social = TabularData(system.sensor_names, prelocated_samples=prelocated_samples)
 
     def appendData(self, system):
         SimulationData.appendData(self, system)
-        self.social.appendData(system.interaction_result.flatten())
+        self.social.appendData(system.sensor_instructor.flatten())
 
     def saveData(self, file_name):
         SimulationData.saveData(self, file_name)
@@ -92,6 +100,7 @@ class SimulationDataSocial(SimulationData):
         simulationdata_tmp = SimulationDataSocial(system)
         simulationdata_tmp.motor.data = self.motor.data.iloc[start:stop]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[start:stop]
+        simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[start:stop]
         simulationdata_tmp.somato.data = self.somato.data.iloc[start:stop]
         simulationdata_tmp.competence.data = self.competence.data.iloc[start:stop]
         simulationdata_tmp.social.data = self.social.data.iloc[start:stop]
@@ -112,7 +121,7 @@ def load_sim_h5(file_name, system=None):
     somato = pd.read_hdf(file_name, 'somato' + suff)
     competence = pd.read_hdf(file_name, 'competence' + suff)
     try:
-        social = pd.read_hdf(file_name, 'social' + suff)
+        social_ = pd.read_hdf(file_name, 'social' + suff)
         social = True
     except KeyError:
         social = False
@@ -124,10 +133,10 @@ def load_sim_h5(file_name, system=None):
         system.somato_names = ['Som' + str(x) for x in range(somato.shape[0])]
 
     if social:
-        tmp = SimulationDataSocial(system)
-        tmp.social.data = social
+        tmp = SimulationDataSocial(system,prelocated_samples=1)
+        tmp.social.data = social_
     else:
-        tmp = SimulationData(system)
+        tmp = SimulationData(system,prelocated_samples=1)
 
     tmp.motor.data = motor
     tmp.sensor.data = sensor

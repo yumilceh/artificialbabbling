@@ -406,7 +406,7 @@ class Diva2016a(DivaProprio2015a):
         self.btn_execute_m.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
 
 
-class Instructor(Diva2016a):
+class Instructor_(Diva2016a):
     def __init__(self):
         import os
         from ..DataManager.SimulationData import load_sim_h5
@@ -417,8 +417,10 @@ class Instructor(Diva2016a):
         #         data.appendData(system)
         Diva2016a.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.intructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
-        self.data = load_sim_h5(self.intructor_file)
+        # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
+        self.instructor_file = abs_path + '/datasets/german_dataset_1.h5'
+
+        self.data = load_sim_h5(self.instructor_file)
         self.n_units = len(self.data.sensor.data.index)
         self.unit_threshold = 0.1
 
@@ -430,7 +432,9 @@ class Instructor(Diva2016a):
             self.set_action(self.data.motor.data.iloc[min_idx])
             self.executeMotorCommand()
             return 1, self.sensor_out   #Analize implications of return the object itself
-        return 0, np.zeros((self.n_sensor,))
+        tmp_rtn = np.empty((self.n_sensor,))
+        tmp_rtn.fill(np.nan)
+        return 0, tmp_rtn
 
     def get_distances(self, sensor):
         dist = []
@@ -439,4 +443,58 @@ class Instructor(Diva2016a):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist
 
+    def change_dataset(self, file):
+        import os
+        from ..DataManager.SimulationData import load_sim_h5
 
+        self.instructor_file = file
+
+        self.data = load_sim_h5(self.instructor_file)
+        self.n_units = len(self.data.sensor.data.index)
+
+class Instructor(object):
+    def __init__(self):
+        import os
+        from ..DataManager.SimulationData import load_sim_h5
+        # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
+        #     for s in ss:
+        #         system.set_action(infer_motor(0, s))
+        #         system.executeMotorCommand()
+        #         data.appendData(system)
+        abs_path = os.path.dirname(os.path.abspath(__file__))
+        # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
+        self.instructor_file = abs_path + '/datasets/german_dataset_1.h5'
+
+        self.name = 'diva2017a-Nomatlab'
+        self.data = load_sim_h5(self.instructor_file)
+        self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
+        self.n_sensor = len(self.sensor_out)
+        self.n_units = len(self.data.sensor.data.index)
+        self.unit_threshold = 0.1
+
+    def interaction(self, sensor):
+        dist = np.array(self.get_distances(sensor))
+        min_idx = np.argmin(dist)
+        self.min_idx = min_idx
+        if dist[min_idx] <= self.unit_threshold:
+            self.sensor_out = self.data.sensor.data.iloc[min_idx].as_matrix()
+            return 1, self.sensor_out  # Analize implications of return the object itself
+        tmp_rtn = np.empty((self.n_sensor,))
+        tmp_rtn.fill(np.nan)
+        return 0, tmp_rtn
+
+    def get_distances(self, sensor):
+        dist = []
+        s_data = self.data.sensor.data.as_matrix()
+        for i in range(self.n_units):
+            dist += [np.linalg.norm(sensor - s_data[i, :])]
+        return dist
+
+    def change_dataset(self, file):
+        import os
+        from ..DataManager.SimulationData import load_sim_h5
+        
+        self.instructor_file = file
+
+        self.data = load_sim_h5(self.instructor_file)
+        self.n_units = len(self.data.sensor.data.index)

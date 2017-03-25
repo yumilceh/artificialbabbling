@@ -67,10 +67,10 @@ class explauto_IM(object):
         self.params.n_training_samples = 1  # only ok with non-parametric
 
     def train(self,simulation_data):  
-        m = simulation_data.motor.data.iloc[-1]
-        s = simulation_data.sensor.data.iloc[-1]  
-        s_g =  simulation_data.sensor_goal.data.iloc[-1]
-        self.model.update(np.hstack((m, s_g)) , np.hstack((m, s)))  
+        m = simulation_data.motor.get_last(1).as_matrix()
+        s = simulation_data.sensor.get_last(1).as_matrix()
+        s_g =  simulation_data.sensor_goal.get_last(1).as_matrix()
+        self.model.update(np.hstack((m, s_g))[0], np.hstack((m, s))[0])
             
     def get_goal(self, system):
         return self.model.sample()

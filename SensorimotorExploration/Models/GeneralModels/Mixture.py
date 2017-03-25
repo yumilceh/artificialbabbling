@@ -136,7 +136,7 @@ class GMM(object):
     def getBIC(self,data):
         return self.model.bic(data)        
         
-    def predict(self, x_dims, y_dims, y):
+    def predict(self, x_dims, y_dims, y):   #This method has been imporved in IGMM and will be substituted soon
         """
             This method returns the value of x that maximaze the probability P(x|y)
         """

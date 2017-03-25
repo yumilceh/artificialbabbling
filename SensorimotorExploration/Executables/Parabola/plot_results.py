@@ -22,6 +22,8 @@ def show_results(system, simulation, val_data, proprio_val):
 
     fig3, ax3 = initializeFigure()
     fig3.suptitle('Validation: S1 vs S2')
+    fig3, ax3 = system.drawSystem(fig3, ax3)
+    plt.hold(True)
     fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor_goal', 0, 'sensor_goal', 1, "xr")
     plt.hold(True)
     fig3, ax3 = val_data.plot_2D(fig3, ax3, 'sensor', 0, 'sensor', 1, ".b")

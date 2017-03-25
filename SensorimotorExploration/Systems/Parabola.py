@@ -80,7 +80,8 @@ class ParabolicRegion:
         self.sensor_goal = np.array([0.0] * n_sensor)
         self.somato_out = np.array([0.0] * n_somato)
         self.competence_result = 0.0
-        self.interaction_result = 0.
+        self.sensor_instructor = np.empty((self.n_sensor,))
+        self.sensor_instructor.fill(np.nan)
 
     def set_action(self, motor_command):
         self.motor_command = self.boundMotorCommand(motor_command)
@@ -318,7 +319,9 @@ class Instructor(ParabolicRegion):
             self.set_action(self.data.motor.data.iloc[min_idx])
             self.executeMotorCommand()
             return 1, self.sensor_out.copy()
-        return 0, np.zeros((self.n_sensor,))
+        tmp_rtn = np.empty((self.n_sensor,))
+        tmp_rtn.fill(np.nan)
+        return 0, tmp_rtn
 
     def get_distances(self, sensor):
         dist = []

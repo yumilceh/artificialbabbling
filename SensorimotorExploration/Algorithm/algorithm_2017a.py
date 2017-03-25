@@ -3,17 +3,12 @@ Created on Feb 20, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
-# ===============================================================================
-# from ..Algorithm.utils.CompetenceFunctions import get_competence_Moulin2013 as get_competence
-# from Algorithm.utils.CompetenceFunctions import comp_Baraglia2015 as get_competence
-# ===============================================================================
 import numpy as np
 import random
 from numpy import linalg
-import datetime  # copy.deepcopy
-from ..DataManager.SimulationData import SimulationData
+import datetime
+from ..DataManager.SimulationData import SimulationDataSocial as SimulationData
 from ..Algorithm.utils.functions import get_random_motor_set
-from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
 from ..Algorithm.utils.logging import write_config_log
 
 now = datetime.datetime.now().strftime("Alg2017a_%Y_%m_%d_%H_%M_")
@@ -24,8 +19,8 @@ class OBJECT(object):
 
 class InteractionAlgorithm(object):
     """
-    Approach to social learning of vowel like sounds
-    """
+    Approach to social learning
+     """
 
     def __init__(self, learner,
                  models,
@@ -73,13 +68,13 @@ class InteractionAlgorithm(object):
             # self.imitation = []
             self.mode = 'social'
 
-        self.data = SimulationData(learner)
+        self.data = SimulationData(learner, prelocated_samples=n_experiments+2*n_initialization_experiments+1)
         self.data.file_prefix = file_prefix
 
         self.evaluation = evaluation
         self.evaluate = False
         if evaluation is not None:
-            self.evaluation_error = [np.infty]
+            self.evaluation_error = []
             self.evaluate = True
             if eval_step == -1:
                 eval_step = np.floor(n_experiments / 5)
@@ -110,7 +105,7 @@ class InteractionAlgorithm(object):
             self.data.appendData(self.learner)
             self.do_training(i, up_=['sm'])
 
-        self.do_training(i, up_=['sm','ss'], force=True)
+        self.do_training(i, up_=['sm','ss'], force=True, all=True)
 
         print('G_SM initialized')
 
@@ -132,7 +127,7 @@ class InteractionAlgorithm(object):
         print('G_IM initialized')
         if n_save_data is not np.nan:
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-        self.do_training(i, up_=['sm', 'ss', 'im'], force=True)
+        self.do_training(i, up_=['sm', 'ss', 'im'], force=True, all=True)
 
         print('SM Exploration ({}, {}), First evaluation of G_SM'.format(self.type, self.mode))
         self.do_evaluation(-1)
@@ -188,8 +183,9 @@ class InteractionAlgorithm(object):
                             self.learner.executeMotorCommand()
                             self.get_competence(self.learner)
                             self.data.appendData(self.learner)
-                            i += 1
+                            i += 1#
 
+            self.learner.sensor_instructor.fill(np.nan)
             self.do_training(i, up_=['sm', 'ss', 'im'])
             self.do_evaluation(i)
 
@@ -204,6 +200,7 @@ class InteractionAlgorithm(object):
 
         self.models.f_sm.set_sigma_explo_ratio(0.)
         self.do_evaluation(-1)
+        self.data.cut_final_data()
 
         if n_save_data is not np.nan:
             print('SM Exploration ({}, {}), Saving data...'.format(self.type, self.mode))
@@ -215,20 +212,20 @@ class InteractionAlgorithm(object):
     def get_im_init_data(self, method='all'):  # Non-painful is missing
         if method == 'non-zero':
             print('SM Exploration: IM initialization: Non-null sensory result considered')
-            sensor_goals = self.data.sensor.data.as_matrix()
+            sensor_goals = self.data.sensor.get_all().as_matrix()
             return sensor_goals[np.where(linalg.norm(sensor_goals, axis=1) > 0)[0], :]
 
         elif method == 'all':
             print('SM Exploration: IM initialization: All sensory result considered')
-            return self.data.sensor.data.as_matrix()
+            return self.data.sensor.get_all().as_matrix()
 
         elif method == 'non-painful':
             print('SM Exploration: IM initialization: Non-painful result considered')
-            somato_results = self.data.somato.data.as_matrix()
-            sensor_goals = self.data.sensor.data.as_matrix()
+            somato_results = self.data.somato.get_all().as_matrix()
+            sensor_goals = self.data.sensor.get_all().as_matrix()
             return sensor_goals[np.where(somato_results == 0.)[0], :]
 
-    def do_training(self, i, up_=['sm', 'ss', 'im'], force=False):
+    def do_training(self, i, up_=['sm', 'ss', 'im'], force=False, all=False):
 
         """ Train Interest Model"""
         if 'im' in up_ and ((i + 1) % self.models.f_im.params.im_step == 0 or force):
@@ -238,7 +235,7 @@ class InteractionAlgorithm(object):
         """Train Sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
-            self.models.f_sm.trainIncrementalLearning(self.data)
+            self.models.f_sm.trainIncrementalLearning(self.data, all = all)
 
         if hasattr(self.models, 'f_ss'):
             if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.ss_step == 0 or force):
@@ -250,14 +247,12 @@ class InteractionAlgorithm(object):
             self.evaluation.model = self.models.f_sm
             self.evaluation.model.set_sigma_explo_ratio(0)
             eval_data = self.evaluation.evaluateModel(saveData=save_data)
-            error_ = np.linalg.norm(eval_data.sensor_goal.data.as_matrix() -
-                                    eval_data.sensor.data.as_matrix(), axis=1)
-            self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
+            error_ = np.linalg.norm(eval_data.sensor_goal.get_all().as_matrix() -
+                                    eval_data.sensor.get_all().as_matrix(), axis=1)
+            self.evaluation_error += [i, np.mean(error_)]
+            if self.params.n_save_data is not np.nan:
+                with open(self.data.file_prefix + 'eval_error.txt', "a") as log_file:
+                    log_file.write('{}: {}\n'.format(i, np.mean(error_)))
             print('Evaluation finished.')
             self.evaluation.model.set_sigma_explo(tmp_sigma)
         #  print(self.evaluation.model.get_sigma_explo())
-
-def get_eval_error(simulation):
-    evaluation = SM_ModelEvaluation(simulation.system,
-                                    10,
-                                    simulation.models.f_sm)
