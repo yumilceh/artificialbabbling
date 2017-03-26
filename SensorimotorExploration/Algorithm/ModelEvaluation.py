@@ -107,7 +107,7 @@ class SM_ModelEvaluation(object):
                 validation_trainSet_data.saveData([self.file_prefix + 'eval_trainset.h5'])
 
         # Validation against Validation set
-        validation_valSet_data = SimulationData(self.agent)
+        validation_valSet_data = SimulationData(self.agent, prelocated_samples=self.n_samples_val+1)
         progress = 1;
         print('Evaluating model with validation data set of {} samples...'.format(self.n_samples_val))
         for i in self.random_indexes_val:
@@ -122,6 +122,9 @@ class SM_ModelEvaluation(object):
             validation_valSet_data.appendData(self.agent)
             progress = progress + 1;
         print('Evaluation has been finished.')
+
+        # validation_trainSet_data.cut_final_data()
+        validation_valSet_data.cut_final_data()
 
         if (saveData):
             validation_valSet_data.saveData(self.file_prefix + 'eva_valset.h5')

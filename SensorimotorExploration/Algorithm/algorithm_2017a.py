@@ -157,6 +157,9 @@ class InteractionAlgorithm(object):
 
             self.data.appendData(self.learner)
             i += 1
+            self.learner.sensor_instructor.fill(np.nan)
+            self.do_training(i, up_=['sm', 'ss', 'im'])
+            self.do_evaluation(i)
 
             if self.instructor is not None:
                 reinforce, self.learner.sensor_instructor = self.instructor.interaction(self.learner.sensor_out)
@@ -177,6 +180,10 @@ class InteractionAlgorithm(object):
 
                                 self.data.appendData(self.learner)
                                 i += 1
+                                self.learner.sensor_instructor.fill(np.nan)
+                                self.do_training(i, up_=['sm', 'ss', 'im'])
+                                self.do_evaluation(i)
+
                         else:
                             self.learner.sensor_goal = self.learner.sensor_instructor
                             self.models.f_sm.get_action(self.learner)
@@ -184,10 +191,9 @@ class InteractionAlgorithm(object):
                             self.get_competence(self.learner)
                             self.data.appendData(self.learner)
                             i += 1#
-
-            self.learner.sensor_instructor.fill(np.nan)
-            self.do_training(i, up_=['sm', 'ss', 'im'])
-            self.do_evaluation(i)
+                            self.learner.sensor_instructor.fill(np.nan)
+                            self.do_training(i, up_=['sm', 'ss', 'im'])
+                            self.do_evaluation(i)
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
             if (i + 1) % n_save_data == 0:
