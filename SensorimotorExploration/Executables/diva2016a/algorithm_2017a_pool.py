@@ -100,7 +100,7 @@ if __name__ == '__main__':
         print('WARNING. Directory already exists.')
 
     n_initialization = 100
-    n_experiments = 100000
+    n_experiments = 20000
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 5000 #np.nan to not evaluate
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     mode_ops = ['autonomous', 'social']
 
     processes = []
-    max_processes = 6
+    max_processes = 1
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
         idx2 = idx+8

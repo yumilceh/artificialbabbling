@@ -60,8 +60,14 @@ class InteractionAlgorithm(object):
         self.models = models
         self.get_competence = competence_func
 
-        self.init_motor_commands = get_random_motor_set(learner,
-                                                        n_initialization_experiments)
+        try:
+            self.init_motor_commands = get_random_motor_set(learner,
+                                                            n_initialization_experiments,
+                                                            min_values = learner.self.min_motor_values_init,
+                                                            max_values = learner.self.max_motor_values_init)
+        except AttributeError:
+            self.init_motor_commands = get_random_motor_set(learner,
+                                                            n_initialization_experiments)
         self.mode = 'autonomous'
         if instructor is not None:
             self.instructor = instructor
