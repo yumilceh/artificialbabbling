@@ -20,7 +20,7 @@ from SensorimotorExploration.DataManager.PlotTools import *
 
 from model_configurations import model_, comp_func
 
-directory = 'experiment_2'
+directory = 'experiment_3'
 #
 
 # Models
@@ -100,22 +100,21 @@ if __name__ == '__main__':
         print('WARNING. Directory already exists.')
 
     n_initialization = 100
-    n_experiments = 20000
-    n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
+    n_experiments = 100000
+    n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 2000 #np.nan to not evaluate
+    eval_step = 5000 #np.nan to not evaluate
 
-    #, ,1234, 1321,
-    random_seeds = [1457, 283]#, 2469, 147831, 234096, 2453, 2340554, 12455]
+    random_seeds = [2469, 147831, 1234]#, 1321,1457, 283,]
 
     proprio_ops = [True, False]
     mode_ops = ['autonomous', 'social']
 
     processes = []
-    max_processes = 8
+    max_processes = 6
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
-        idx2 = idx+0
+        idx2 = idx+8
         # Creating Agent ##
 
         processes += [Process(target=sim_agent, args=(ops,idx2))]
@@ -128,4 +127,10 @@ if __name__ == '__main__':
                 if not t.is_alive():
                     del processes[i]  # pop
 
+    while len(processes) > 0:
+        time.sleep(5)
+        for i, t in enumerate(processes):
+            if not t.is_alive():
+                del processes[i]
 
+    print('The work  is done!!')

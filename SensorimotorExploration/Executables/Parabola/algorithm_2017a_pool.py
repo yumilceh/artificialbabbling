@@ -46,11 +46,11 @@ if __name__ == '__main__':
     n_experiments = 2000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 400
+    eval_step = 200
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'experiment_4'
+    directory = 'experiment_9_1'
     os.mkdir(directory)
 
 

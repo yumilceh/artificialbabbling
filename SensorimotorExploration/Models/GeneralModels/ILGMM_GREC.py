@@ -238,7 +238,7 @@ class ILGMM(GMMmix):
 
         y = np.mat(y)
         n_dimensions = np.amax(len(x_dims)) + np.amax(len(y_dims))
-        gmm = self.model
+        # gmm = self.model
         likely_x = np.mat(np.zeros((len(x_dims), knn)))
         sm = np.mat(np.zeros((len(x_dims) + len(y_dims), knn)))
         p_xy = np.mat(np.zeros((knn, 1)))
@@ -531,7 +531,7 @@ def split_gaussian(gauss, a):  # Supervise that all the values here are real
     weight = weight / 2.0
     mean1 = np.matrix(mean + Delta_v)
     mean2 = np.matrix(mean - Delta_v)
-    covar = covar - np.transpose(Delta_v) * Delta_v
+    covar -= np.transpose(Delta_v) * Delta_v
 
     return {'covariance': covar, 'mean': mean1, 'weight': weight}, {'covariance': covar, 'mean': mean2,
                                                                     'weight': weight}

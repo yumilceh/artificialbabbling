@@ -10,12 +10,19 @@ import itertools
 from SensorimotorExploration.DataManager.SimulationData import load_sim_h5
 from SensorimotorExploration.DataManager.PlotTools import *
 
+
 def create_dict(groups_k):
-    return {k[0] + '_' + k[1]: {'social': [],
-                         'whole': []} for k in groups_k}
+    return {k[0] + '_' + k[1]: [] for k in groups_k}
+
+
+def incremental_mean(arr_):
+    n_samples = len(arr_)
+    return [sum(arr_[:x]) / (x + 1) for x in range(n_samples)]
+
+
 if __name__ == '__main__':
 
-    directory = 'experiment_3/'
+    directory = 'experiment_9_ins015/'
     data_files = os.listdir(directory)
 
     # Group by:
@@ -23,11 +30,24 @@ if __name__ == '__main__':
     mode_ops = ['autonomous', 'social']
 
     groups_k = list(itertools.product(type_ops, mode_ops))
-    means = create_dict(groups_k)
-    means_av = create_dict(groups_k)
-    p_const_v = create_dict(groups_k)
-    p_const_v_av = create_dict(groups_k)
 
+    means_s = create_dict(groups_k)
+    means_av_s = create_dict(groups_k)
+
+    means_w = create_dict(groups_k)
+    means_av_w = create_dict(groups_k)
+
+    coll_s = create_dict(groups_k)
+    coll_av_s = create_dict(groups_k)
+
+    coll_w = create_dict(groups_k)
+    coll_av_w = create_dict(groups_k)
+
+    inter = create_dict(groups_k)
+    inter_av = create_dict(groups_k)
+
+    error_ev = create_dict(groups_k)
+    error_ev_av = create_dict(groups_k)
 
     for data_file in (d_f for d_f in data_files if 'sim_data.h5' in d_f):
         data_file = directory + data_file
@@ -42,38 +62,48 @@ if __name__ == '__main__':
         try:
             data = load_sim_h5(data_file)
             interaction_data = data.social.data.as_matrix(columns=None)
-
-            # datita[~np.isnan(datita[:, 0]), :]
+            interactions = np.zeros((interaction_data.shape[0],))
+            interactions[~np.isnan(interaction_data[:, 0])] = 1
 
             social_data = load_sim_h5(data_file.replace('sim_data.h5', 'social_eva_valset.h5'))
             whole_data = load_sim_h5(data_file.replace('sim_data.h5', 'whole_eva_valset.h5'))
 
-            s_error_ = np.linalg.norm(social_data.sensor_goal.data.as_matrix()[:9, :] -
-                                      social_data.sensor.data.as_matrix()[:9, :], axis=1)
+            s_error_ = np.linalg.norm(social_data.sensor_goal.data.as_matrix() -
+                                      social_data.sensor.data.as_matrix(), axis=1)
 
-            s_p_con_v = sum(social_data.somato.data.as_matrix()[:9]) / 9.
+            s_con_v = social_data.somato.data.as_matrix()
 
-            w_error_ = np.linalg.norm(whole_data.sensor_goal.data.as_matrix()[:2100, :] -
-                                      whole_data.sensor.data.as_matrix()[:2100, :], axis=1)
+            w_error_ = np.linalg.norm(whole_data.sensor_goal.data.as_matrix() -
+                                      whole_data.sensor.data.as_matrix(), axis=1)
 
-            w_p_con_v = sum(whole_data.somato.data.as_matrix()[:2100]) / 2100.
+            w_con_v = whole_data.somato.data.as_matrix()
 
-            means[conf['type'] + '_' + conf['mode']]['social'] += [np.mean(s_error_)]
-            means[conf['type'] + '_' + conf['mode']]['whole'] += [np.mean(w_error_)]
+            eva_errors = []
+            with open(data_file.replace('sim_data.h5', 'eval_error.txt'), 'r') as f:
+                for line in f:
+                    line.replace('\n', '')
+                    eva_errors_str = line.split(': ')
+                    eva_errors += [float(eva_errors_str[1])]
 
-            p_const_v[conf['type'] + '_' + conf['mode']]['social'] += [np.mean(s_p_con_v)]
-            p_const_v[conf['type'] + '_' + conf['mode']]['whole'] += [np.mean(w_p_con_v)]
+            means_s[conf['type'] + '_' + conf['mode']] += [np.mean(s_error_)]
+            means_w[conf['type'] + '_' + conf['mode']] += [np.mean(w_error_)]
 
+            coll_s[conf['type'] + '_' + conf['mode']] += [s_con_v]
+            coll_w[conf['type'] + '_' + conf['mode']] += [w_con_v]
+
+            inter[conf['type'] + '_' + conf['mode']] += [interactions]
+
+            error_ev[conf['type'] + '_' + conf['mode']] += [eva_errors]
 
         except IOError:
             pass
 
-    color = ['or', 'ob', 'ok', 'og']
-    fig1, axarr1 = plt.subplots(1, 2)
-    fig1.suptitle('Mean evaluation error')
-
-    fig2, axarr2 = plt.subplots(1, 2)
-    fig2.suptitle('Percentage of constraints violations')
+    # color = ['or', 'ob', 'ok', 'og']
+    # fig1, axarr1 = plt.subplots(1, 2)
+    # fig1.suptitle('Mean evaluation error')
+    #
+    # fig2, axarr2 = plt.subplots(1, 2)
+    # fig2.suptitle('Percentage of constraints violations')
 
     # f, axarr
 
@@ -82,33 +112,45 @@ if __name__ == '__main__':
         group = k[0] + '_' + k[1]
         legend += [group]
 
-        means_av[group]['social'] = np.mean(np.array(means[group]['social']))
-        means_av[group]['whole'] = np.mean(np.array(means[group]['whole']))
+        means_av_s[group] = np.mean(np.array(means_s[group]))
+        means_av_w[group] = np.mean(np.array(means_w[group]))
 
-        p_const_v_av[group]['social'] = np.mean(np.array(p_const_v[group]['social']))
-        p_const_v_av[group]['whole'] = np.mean(np.array(p_const_v[group]['whole']))
+        coll_av_s[group] = np.mean(np.array(coll_s[group]), axis=0)
+        coll_av_w[group] = np.mean(np.array(coll_w[group]), axis=0)
 
-        axarr1[0].plot(means[group]['whole'], color[i])
-        plt.hold(True)
-        axarr1[0].set_title('Whole dataset')
-        plt.legend(legend)
+        inter_av[group] = np.mean(np.array(inter[group]), axis=0)
 
-        axarr1[1].plot(means[group]['social'], color[i])
-        plt.hold(True)
-        axarr1[1].set_title('Social dataset')
-        plt.legend(legend)
+        error_ev_av[group] = np.mean(np.array(error_ev[group]), axis=0)
 
-        axarr2[0].plot(p_const_v[group]['whole'], color[i])
-        plt.hold(True)
-        axarr2[0].set_title('Whole dataset')
-        plt.legend(legend)
+    plt.figure()
+    plt.plot(incremental_mean(coll_av_s['proprio_social']), linestyle='-', marker='o', color='b')
+    plt.hold(True)
+    plt.plot(incremental_mean(coll_av_s['proprio_autonomous']), linestyle='-', marker='o', color='r')
+    plt.plot(incremental_mean(coll_av_s['simple_social']), linestyle='-', marker='o', color='g')
+    plt.plot(incremental_mean(coll_av_s['simple_autonomous']), linestyle='-', marker='o', color='k')
 
-        axarr2[1].plot(p_const_v[group]['social'], color[i])
-        plt.hold(True)
-        axarr2[1].set_title('Social dataset')
-        plt.legend(legend)
+    plt.figure()
+    plt.plot(incremental_mean(coll_av_w['proprio_social']), linestyle='-', marker='o', color='b')
+    plt.hold(True)
+    plt.plot(incremental_mean(coll_av_w['proprio_autonomous']), linestyle='-', marker='o', color='r')
+    plt.plot(incremental_mean(coll_av_w['simple_social']), linestyle='-', marker='o', color='g')
+    plt.plot(incremental_mean(coll_av_w['simple_autonomous']), linestyle='-', marker='o', color='k')
 
-    plt.show(block=True)
+    plt.figure()
+    plt.plot(incremental_mean(inter_av['proprio_social']), linestyle='-', marker='o', color='b')
+    plt.hold(True)
+    plt.plot(incremental_mean(inter_av['proprio_autonomous']), linestyle='-', marker='o', color='r')
+    plt.plot(incremental_mean(inter_av['simple_social']), linestyle='-', marker='o', color='g')
+    plt.plot(incremental_mean(inter_av['simple_autonomous']), linestyle='-', marker='o', color='k')
+
+    plt.figure()
+    plt.plot(error_ev_av['proprio_social'], linestyle='-', marker='o', color='b')
+    plt.hold(True)
+    plt.plot(error_ev_av['proprio_autonomous'], linestyle='-', marker='o', color='r')
+    plt.plot(error_ev_av['simple_social'], linestyle='-', marker='o', color='g')
+    plt.plot(error_ev_av['simple_autonomous'], linestyle='-', marker='o', color='k')
+
+    # plt.show(block=True)
 
     #  Plot min max and mins
     """
@@ -233,4 +275,109 @@ if __name__ == '__main__':
         plt.legend(legend)
 
     plt.draw()
+
+    """
+
+    # OLD VERSION 2
+    """
+    def create_dict(groups_k):
+        return {k[0] + '_' + k[1]: {'social': [],
+                                    'whole': []} for k in groups_k}
+
+
+    if __name__ == '__main__':
+
+        directory = 'experiment_4/'
+        data_files = os.listdir(directory)
+
+        # Group by:
+        type_ops = ['proprio', 'simple']
+        mode_ops = ['autonomous', 'social']
+
+        groups_k = list(itertools.product(type_ops, mode_ops))
+        means = create_dict(groups_k)
+        means_av = create_dict(groups_k)
+        p_const_v = create_dict(groups_k)
+        p_const_v_av = create_dict(groups_k)
+
+        for data_file in (d_f for d_f in data_files if 'sim_data.h5' in d_f):
+            data_file = directory + data_file
+            conf_file = data_file.replace('sim_data.h5', 'conf.txt')
+            conf = {}
+            with open(conf_file) as f:
+                for line in f:
+                    line = line.replace('\n', '')
+                    (key, val) = line.split(': ')
+                    conf[key] = val
+
+            try:
+                data = load_sim_h5(data_file)
+                interaction_data = data.social.data.as_matrix(columns=None)
+
+                # datita[~np.isnan(datita[:, 0]), :]
+
+                social_data = load_sim_h5(data_file.replace('sim_data.h5', 'social_eva_valset.h5'))
+                whole_data = load_sim_h5(data_file.replace('sim_data.h5', 'whole_eva_valset.h5'))
+
+                s_error_ = np.linalg.norm(social_data.sensor_goal.data.as_matrix()[:9, :] -
+                                          social_data.sensor.data.as_matrix()[:9, :], axis=1)
+
+                s_p_con_v = sum(social_data.somato.data.as_matrix()[:9]) / 9.
+
+                w_error_ = np.linalg.norm(whole_data.sensor_goal.data.as_matrix()[:2100, :] -
+                                          whole_data.sensor.data.as_matrix()[:2100, :], axis=1)
+
+                w_p_con_v = sum(whole_data.somato.data.as_matrix()[:2100]) / 2100.
+
+                means[conf['type'] + '_' + conf['mode']]['social'] += [np.mean(s_error_)]
+                means[conf['type'] + '_' + conf['mode']]['whole'] += [np.mean(w_error_)]
+
+                p_const_v[conf['type'] + '_' + conf['mode']]['social'] += [np.mean(s_p_con_v)]
+                p_const_v[conf['type'] + '_' + conf['mode']]['whole'] += [np.mean(w_p_con_v)]
+
+
+            except IOError:
+                pass
+
+        color = ['or', 'ob', 'ok', 'og']
+        fig1, axarr1 = plt.subplots(1, 2)
+        fig1.suptitle('Mean evaluation error')
+
+        fig2, axarr2 = plt.subplots(1, 2)
+        fig2.suptitle('Percentage of constraints violations')
+
+        # f, axarr
+
+        legend = []
+        for i, k in enumerate(groups_k):
+            group = k[0] + '_' + k[1]
+            legend += [group]
+
+            means_av[group]['social'] = np.mean(np.array(means[group]['social']))
+            means_av[group]['whole'] = np.mean(np.array(means[group]['whole']))
+
+            p_const_v_av[group]['social'] = np.mean(np.array(p_const_v[group]['social']))
+            p_const_v_av[group]['whole'] = np.mean(np.array(p_const_v[group]['whole']))
+
+            axarr1[0].plot(means[group]['whole'], color[i])
+            plt.hold(True)
+            axarr1[0].set_title('Whole dataset')
+            plt.legend(legend)
+
+            axarr1[1].plot(means[group]['social'], color[i])
+            plt.hold(True)
+            axarr1[1].set_title('Social dataset')
+            plt.legend(legend)
+
+            axarr2[0].plot(p_const_v[group]['whole'], color[i])
+            plt.hold(True)
+            axarr2[0].set_title('Whole dataset')
+            plt.legend(legend)
+
+            axarr2[1].plot(p_const_v[group]['social'], color[i])
+            plt.hold(True)
+            axarr2[1].set_title('Social dataset')
+            plt.legend(legend)
+
+        plt.show(block=True)
     """
