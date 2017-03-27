@@ -309,7 +309,7 @@ class Instructor(ParabolicRegion):
         self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
         self.data = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.2  # 0.3
+        self.unit_threshold = 0.4  # 0.3
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))

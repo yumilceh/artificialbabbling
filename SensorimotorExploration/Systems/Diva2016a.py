@@ -470,7 +470,7 @@ class Instructor(object):
         self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.3
+        self.unit_threshold = 0.5
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
