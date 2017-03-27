@@ -31,8 +31,27 @@ if __name__ == '__main__':
         data.appendData(system)
         vowel_order += k[0] + '-' + k[1] + '\n'
 
-    data.saveData('../../Systems/datasets/german_dataset_2.h5')
-    with open('../../Systems/datasets/german_dataset_2.txt', "w") as text_file:
+    for k in keys:
+        m1 = f[k][:].flatten()
+        m2 = f[k][:].flatten() * 0.
+        m = np.concatenate([m1,m2])
+        system.set_action(m)
+        system.executeMotorCommand()
+        data.appendData(system)
+        vowel_order += k + '-' + '\n'
+
+    for k in keys:
+        m1 = f[k][:].flatten() * 0.
+        m2 = f[k][:].flatten()
+        m = np.concatenate([m1, m2])
+        system.set_action(m)
+        system.executeMotorCommand()
+        data.appendData(system)
+        vowel_order += '-' + k + '\n'
+
+    data.cut_final_data()
+    data.saveData('../../Systems/datasets/german_dataset_3.h5')
+    with open('../../Systems/datasets/german_dataset_3.txt', "w") as text_file:
         text_file.write(vowel_order)
 
 

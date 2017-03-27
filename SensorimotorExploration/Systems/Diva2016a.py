@@ -463,14 +463,14 @@ class Instructor(object):
         #         data.appendData(system)
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
-        self.instructor_file = abs_path + '/datasets/german_dataset_1.h5'
+        self.instructor_file = abs_path + '/datasets/german_dataset_3.h5'
 
         self.name = 'diva2017a-Nomatlab'
         self.data = load_sim_h5(self.instructor_file)
         self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.3
+        self.unit_threshold = 1.
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
