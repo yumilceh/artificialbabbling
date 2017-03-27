@@ -22,7 +22,7 @@ def incremental_mean(arr_):
 
 if __name__ == '__main__':
 
-    directory = 'experiment_9_ins015/'
+    directory = 'experiment_9_ins03/'
     data_files = os.listdir(directory)
 
     # Group by:
@@ -123,33 +123,48 @@ if __name__ == '__main__':
         error_ev_av[group] = np.mean(np.array(error_ev[group]), axis=0)
 
     plt.figure()
+    plt.suptitle('Mean percentage of collisions in the social test')
     plt.plot(incremental_mean(coll_av_s['proprio_social']), linestyle='-', marker='o', color='b')
     plt.hold(True)
     plt.plot(incremental_mean(coll_av_s['proprio_autonomous']), linestyle='-', marker='o', color='r')
     plt.plot(incremental_mean(coll_av_s['simple_social']), linestyle='-', marker='o', color='g')
     plt.plot(incremental_mean(coll_av_s['simple_autonomous']), linestyle='-', marker='o', color='k')
+    plt.xlabel('Experiment [k]')
+    plt.ylabel('Mean percentage of collisions')
+    plt.legend(['(Proprio, Social)', '(Proprio, Auto)', '(Simple, Social)', '(Simple, Auto)'])
 
     plt.figure()
-    plt.plot(incremental_mean(coll_av_w['proprio_social']), linestyle='-', marker='o', color='b')
+    plt.suptitle('Mean percentage of collisions in the complete test')
+    plt.plot(incremental_mean(coll_av_w['proprio_social']), linestyle='-', marker='', color='b')
     plt.hold(True)
-    plt.plot(incremental_mean(coll_av_w['proprio_autonomous']), linestyle='-', marker='o', color='r')
-    plt.plot(incremental_mean(coll_av_w['simple_social']), linestyle='-', marker='o', color='g')
-    plt.plot(incremental_mean(coll_av_w['simple_autonomous']), linestyle='-', marker='o', color='k')
+    plt.plot(incremental_mean(coll_av_w['proprio_autonomous']), linestyle='-', marker='', color='r')
+    plt.plot(incremental_mean(coll_av_w['simple_social']), linestyle='-', marker='', color='g')
+    plt.plot(incremental_mean(coll_av_w['simple_autonomous']), linestyle='-', marker='', color='k')
+    plt.xlabel('Experiment [k]')
+    plt.ylabel('Mean percentage of collisions')
+    plt.legend(['(Proprio, Social)', '(Proprio, Auto)', '(Simple, Social)', '(Simple, Auto)'])
 
     plt.figure()
-    plt.plot(incremental_mean(inter_av['proprio_social']), linestyle='-', marker='o', color='b')
+    plt.suptitle('Mean percentage of interactions during exploration')
+    plt.plot(incremental_mean(inter_av['proprio_social']), linestyle='-', marker='', color='b')
     plt.hold(True)
-    plt.plot(incremental_mean(inter_av['proprio_autonomous']), linestyle='-', marker='o', color='r')
-    plt.plot(incremental_mean(inter_av['simple_social']), linestyle='-', marker='o', color='g')
-    plt.plot(incremental_mean(inter_av['simple_autonomous']), linestyle='-', marker='o', color='k')
+    plt.plot(incremental_mean(inter_av['proprio_autonomous']), linestyle='-', marker='', color='r')
+    plt.plot(incremental_mean(inter_av['simple_social']), linestyle='-', marker='', color='g')
+    plt.plot(incremental_mean(inter_av['simple_autonomous']), linestyle='-', marker='', color='k')
+    plt.xlabel('Experiment [k]')
+    plt.ylabel('Mean percentage of interactions')
+    plt.legend(['(Proprio, Social)', '(Proprio, Auto)', '(Simple, Social)', '(Simple, Auto)'])
 
     plt.figure()
+    plt.suptitle('Average evaluation error during exploration (complete test)')
     plt.plot(error_ev_av['proprio_social'], linestyle='-', marker='o', color='b')
     plt.hold(True)
     plt.plot(error_ev_av['proprio_autonomous'], linestyle='-', marker='o', color='r')
     plt.plot(error_ev_av['simple_social'], linestyle='-', marker='o', color='g')
     plt.plot(error_ev_av['simple_autonomous'], linestyle='-', marker='o', color='k')
-
+    plt.xlabel('Experiment [k]')
+    plt.ylabel('Average evaluation error')
+    plt.legend(['(Proprio, Social)', '(Proprio, Auto)', '(Simple, Social)', '(Simple, Auto)'])
     # plt.show(block=True)
 
     #  Plot min max and mins

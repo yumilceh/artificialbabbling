@@ -20,7 +20,7 @@ from SensorimotorExploration.DataManager.PlotTools import *
 
 from model_configurations import model_, comp_func
 
-directory = 'experiment_3'
+directory = 'experiment_5'
 #
 
 # Models
@@ -68,7 +68,7 @@ def sim_agent(ops,idx):
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/german_dataset_2.h5')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/german_dataset_3.h5')
 
     simulation = Algorithm(system,
                           models,
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     n_experiments = 20000
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 5000 #np.nan to not evaluate
+    eval_step = 2000 #np.nan to not evaluate
 
     random_seeds = [2469, 147831, 1234]#, 1321,1457, 283,]
 
@@ -111,10 +111,10 @@ if __name__ == '__main__':
     mode_ops = ['autonomous', 'social']
 
     processes = []
-    max_processes = 1
+    max_processes = 4
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
-        idx2 = idx+8
+        idx2 = idx
         # Creating Agent ##
 
         processes += [Process(target=sim_agent, args=(ops,idx2))]

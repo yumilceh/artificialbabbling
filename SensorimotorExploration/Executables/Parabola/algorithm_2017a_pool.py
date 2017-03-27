@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'experiment_9_1'
+    directory = 'experiment_9_ins035'
     os.mkdir(directory)
 
 
@@ -128,3 +128,5 @@ if __name__ == '__main__':
         del simulation
         del models
         del evaluation_sim
+
+    print('FINITO')
