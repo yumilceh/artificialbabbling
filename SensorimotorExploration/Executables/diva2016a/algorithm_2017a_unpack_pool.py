@@ -17,7 +17,7 @@ def create_dict(groups_k):
 
 if __name__ == '__main__':
 
-    directory = 'experiment_3/'
+    directory = 'experiment_5/'
     data_files = os.listdir(directory)
 
     # Group by:

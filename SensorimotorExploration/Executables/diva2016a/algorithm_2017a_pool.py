@@ -20,7 +20,7 @@ from SensorimotorExploration.DataManager.PlotTools import *
 
 from model_configurations import model_, comp_func
 
-directory = 'experiment_5'
+directory = 'experiment_6'
 #
 
 # Models
