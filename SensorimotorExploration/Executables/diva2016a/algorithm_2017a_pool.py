@@ -20,7 +20,7 @@ from SensorimotorExploration.DataManager.PlotTools import *
 
 from model_configurations import model_, comp_func
 
-directory = 'experiment_5'
+directory = 'experiment_1'
 #
 
 # Models
@@ -104,14 +104,13 @@ if __name__ == '__main__':
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 2000 #np.nan to not evaluate
-
-    random_seeds = [2469, 147831, 1234]#, 1321,1457, 283,]
-
+    # 2469, 147831, 1234
+    random_seeds = [1321,1457, 283]
     proprio_ops = [True, False]
-    mode_ops = ['autonomous', 'social']
+    mode_ops = ['autonomous','social']
 
     processes = []
-    max_processes = 4
+    max_processes = 6
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
         idx2 = idx

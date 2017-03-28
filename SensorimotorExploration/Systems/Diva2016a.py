@@ -470,15 +470,16 @@ class Instructor(object):
         self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 1.
+        self.unit_threshold = 0.5
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
         min_idx = np.argmin(dist)
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold:
-            self.sensor_out = self.data.sensor.data.iloc[min_idx].as_matrix()
-            return 1, self.sensor_out  # Analize implications of return the object itself
+            out_tmp = self.data.sensor.data.iloc[min_idx].as_matrix()
+            out = out_tmp.copy()
+            return 1, out  # Analize implications of return the object itself
         tmp_rtn = np.empty((self.n_sensor,))
         tmp_rtn.fill(np.nan)
         return 0, tmp_rtn
