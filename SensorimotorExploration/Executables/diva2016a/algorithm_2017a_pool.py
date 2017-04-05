@@ -106,12 +106,12 @@ if __name__ == '__main__':
 
     eval_step = 2000 #np.nan to not evaluate
     # 2469, 147831, 1234
-    random_seeds = [1321,1457, 283]
+    random_seeds = [2469, 147831]
     proprio_ops = [True, False]
     mode_ops = ['autonomous','social']
 
     processes = []
-    max_processes = 6
+    max_processes = 8
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
         idx2 = idx

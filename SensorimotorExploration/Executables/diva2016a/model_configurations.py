@@ -9,10 +9,10 @@ from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 from SensorimotorExploration.Models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
 
-from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
-from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
-
-
+# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
+# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
+from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
+from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
 
 from SensorimotorExploration.Models.Interest.ExplautoIM import explauto_IM as ea_IM
 from SensorimotorExploration.Models.Random import Random
