@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM as GMM
+from SensorimotorExploration.Models.GeneralModels.IGMMpy import IGMM as GMM
 import numpy as np
 import pandas as pd
 import copy 
