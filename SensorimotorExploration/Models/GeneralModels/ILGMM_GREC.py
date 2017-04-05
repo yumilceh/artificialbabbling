@@ -460,7 +460,13 @@ class ILGMM(GMMmix):
 
 
 def get_KL_divergence(gauss1, gauss2):
-    detC1 = LA.det(gauss1['covariance'])
+    try:
+        detC1 = LA.det(gauss1['covariance'])
+    except ValueError:
+        x = raw_input("Broken")
+        pass
+        pass
+
     detC2 = LA.det(gauss2['covariance'])
     logC2C1 = np.log(detC2 / detC1)
 
