@@ -75,16 +75,16 @@ class Algorithm_Random(object):
             self.agent.executeMotorCommand()
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
-                self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_sm.train_incremental(self.data.simulation_data)
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
-                self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_ss.train_incremental(self.data.simulation_data)
                 print('Random motor babbling (Non-proprioceptive): Experiment: Training Models')
             print('Random motor babbling (Non-proprioceptive): Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
         
-        self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
-        self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)                        
+        self.models.f_sm.train_incremental(self.data.simulation_data)
+        self.models.f_ss.train_incremental(self.data.simulation_data)
         self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'simulation_data.h5'],'simulation_data.tar.gz')
         
@@ -101,17 +101,17 @@ class Algorithm_Random(object):
             self.agent.executeMotorCommand()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
-                self.models.f_sm.trainIncrementalLearning(self.data.initialization_data_sm_ss)
+                self.models.f_sm.train_incremental(self.data.initialization_data_sm_ss)
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
-                self.models.f_ss.trainIncrementalLearning(self.data.initialization_data_sm_ss)
+                self.models.f_ss.train_incremental(self.data.initialization_data_sm_ss)
                 print('Random sensor babbling (Initialization-NP): Experiment: Training Models')
             print('Random sensor babbling (Initialization-NP): Experiment: {} of {}'.format(i+1,n_motor_initialization))
             if (np.mod(i,n_save_data) == 0):
                 self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data.h5')
                         
         self.data.initialization_data_sm_ss.saveData(self.data.file_prefix +'initialization_data.h5')
-        self.models.f_sm.trainIncrementalLearning(self.data.initialization_data_sm_ss)
-        self.models.f_ss.trainIncrementalLearning(self.data.initialization_data_sm_ss)
+        self.models.f_sm.train_incremental(self.data.initialization_data_sm_ss)
+        self.models.f_ss.train_incremental(self.data.initialization_data_sm_ss)
         
         for i in range(n_experiments):
             self.agent.sensor_goal = sensor_goals[i,:]
@@ -120,16 +120,16 @@ class Algorithm_Random(object):
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
-                self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_sm.train_incremental(self.data.simulation_data)
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
-                self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
+                self.models.f_ss.train_incremental(self.data.simulation_data)
                 print('Random sensor babbling (Non-proprioceptive): Experiment: Training Models')
             print('Random sensor babbling (Non-proprioceptive): Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix + 'simulation_data.h5')
                 
-        self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
-        self.models.f_ss.trainIncrementalLearning(self.data.simulation_data)
+        self.models.f_sm.train_incremental(self.data.simulation_data)
+        self.models.f_ss.train_incremental(self.data.simulation_data)
         self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
         saveSimulationData([self.data.file_prefix + 'initialization_data.h5', self.data.file_prefix + 'simulation_data.h5'],'simulation_data.tar.gz')
         

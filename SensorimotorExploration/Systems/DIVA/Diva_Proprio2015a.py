@@ -56,7 +56,7 @@ class Diva_Proprio2015a:
         self.somatoOutput=[0.0] * n_somato
         self.competence_result=0.0;
         self.matlabSession=ml.session_factory()        
-        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/Systems/DIVA/') #Path to DIVA functions
+        self.matlabSession.run('cd /home/yumilceh/eclipse_ws/Early_Development/SensorimotorExploration/Systems/DivaMatlab/') #Path to DivaMatlab functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
     def setMotorCommand(self,motor_command):
@@ -228,7 +228,7 @@ class Diva_Proprio2015a:
         plt.plot(self.soundWave)
         plt.show();
     
-    def playSoundWave(self): #keep in mind that DIVA works with ts=0.005
+    def playSoundWave(self): #keep in mind that DivaMatlab works with ts=0.005
         import pyaudio 
         self.pa = pyaudio.PyAudio() #If pa and stream are not elements of the self object then sound does not play
         self.stream = self.pa.open(format=pyaudio.paFloat32,

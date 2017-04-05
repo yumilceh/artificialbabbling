@@ -93,7 +93,7 @@ if __name__ == '__main__':
     #===========================================================================
     fig1,ax1 = simulation_data.plot_2D(fig1, ax1, 'sensor', 0, 'sensor', 1, "or")
     fig1, ax1 = validation_valSet_data.plot_2D(fig1, ax1, 'sensor', 0, 'sensor', 1, "ob")
-    fig1, ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
+    fig1, ax1 = simulation1.models.f_sm.model.plot_gmm_projection(fig1, ax1, 2, 3)
     ax1.relim()
     ax1.autoscale_view()
     
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     fig2.suptitle('Motor Commands: M1 vs M2')
     fig2,ax2=simulation_data.plot_2D(fig2, ax2, 'motor', 0, 'motor', 1, "or")
     fig2, ax2 = validation_valSet_data.plot_2D(fig2, ax2, 'motor', 0, 'motor', 1, "ob")
-    fig2, ax2 = simulation1.models.f_sm.model.plotGMMProjection(fig2,ax2,0, 1)
+    fig2, ax2 = simulation1.models.f_sm.model.plot_gmm_projection(fig2, ax2, 0, 1)
     ax2.relim()
     ax2.autoscale_view()
     
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     fig3.suptitle('RESULTS: M1 vs S1')
     fig3,ax3=simulation_data.plot_2D(fig3, ax3, 'motor', 0, 'sensor', 0, "or")
     fig3, ax3 = validation_valSet_data.plot_2D(fig3, ax3, 'motor', 0, 'sensor', 0, "ob")
-    fig3, ax3 = simulation1.models.f_sm.model.plotGMMProjection(fig3,ax3,0, 2)
+    fig3, ax3 = simulation1.models.f_sm.model.plot_gmm_projection(fig3, ax3, 0, 2)
     ax3.relim()
     ax3.autoscale_view()
     
@@ -118,14 +118,14 @@ if __name__ == '__main__':
     fig4.suptitle('RESULTS: M2 vs S2')
     fig4,ax4=simulation_data.plot_2D(fig4, ax4, 'motor', 1, 'sensor', 1, "or")
     fig4, ax4 = validation_valSet_data.plot_2D(fig4, ax4, 'motor', 1, 'sensor', 1, "ob")
-    fig4, ax4 = simulation1.models.f_sm.model.plotGMMProjection(fig4,ax4,1, 3)
+    fig4, ax4 = simulation1.models.f_sm.model.plot_gmm_projection(fig4, ax4, 1, 3)
     ax4.relim()
     ax4.autoscale_view()
     
     fig5,ax5=initializeFigure()
     fig5.suptitle('Initialization data: S1 vs S2')
     fig5,ax5=initialization_data_sm_ss.plot_2D(fig5, ax5, 'sensor', 0, 'sensor', 1, "or")
-    fig5, ax5 = simulation1.models.f_sm.model.plotGMMProjection(fig5,ax5,2, 3)
+    fig5, ax5 = simulation1.models.f_sm.model.plot_gmm_projection(fig5, ax5, 2, 3)
     ax5.relim()
     ax5.autoscale_view()
     
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # fig6, ax6=initialization_data_im.plot_2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"ob")
     # plt.hold(True)
     # fig6, ax6=simulation_data.plot_2D(fig6,ax6,'sensor_goal', 0, 'sensor_goal', 1,"or")
-    # fig6, ax = simulation1.models.f_im.model.plotGMMProjection(fig6,ax6,1, 2)
+    # fig6, ax = simulation1.models.f_im.model.plot_gmm_projection(fig6,ax6,1, 2)
     # ax6.relim()
     # ax6.autoscale_view()    
     #===========================================================================

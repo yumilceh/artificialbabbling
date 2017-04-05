@@ -247,11 +247,11 @@ class InteractionAlgorithm(object):
         """Train Sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
-            self.models.f_sm.trainIncrementalLearning(self.data, all = all)
+            self.models.f_sm.train_incremental(self.data, all = all)
 
         if hasattr(self.models, 'f_ss'):
             if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.ss_step == 0 or force):
-                self.models.f_ss.trainIncrementalLearning(self.data)
+                self.models.f_ss.train_incremental(self.data)
 
     def do_evaluation(self, i, force=False, save_data=False):
         if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:

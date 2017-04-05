@@ -52,7 +52,7 @@ if __name__ == '__main__':
     
     f,ax=simulation_data.plotSimulatedData(f,ax,'sensor', 0, 'sensor', 3)
     
-    f,ax=gmm_sm.GMM.plotGMMProjection(f,ax,0, 3)
+    f,ax=gmm_sm.GMM.plot_gmm_projection(f, ax, 0, 3)
     
     plt.show();          
     #===========================================================================

@@ -89,7 +89,7 @@ if __name__ == '__main__':
     
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor', 0, "ob")
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor_goal', 0, "ok")
-    fig1,ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,0, 1)
+    fig1,ax1 = simulation1.models.f_sm.model.plot_gmm_projection(fig1, ax1, 0, 1)
     ax1.relim()
     ax1.autoscale_view()
     

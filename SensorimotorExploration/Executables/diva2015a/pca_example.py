@@ -179,12 +179,12 @@ if __name__ == '__main__':
     fig5, ax5 = initializeFigure()
     ax5.set_xlim(-1.0, 1.5)
     ax5.set_ylim(-1.0, 1.5)
-    fig5, ax5 = model1.plotGMMProjection(fig5,ax5,0,1)
+    fig5, ax5 = model1.plot_gmm_projection(fig5, ax5, 0, 1)
     
     fig6, ax6 = initializeFigure()
     ax6.set_xlim(-1.0, 1.5)
     ax6.set_ylim(-1.0, 1.5)
-    fig6, ax6 = model2.plotGMMProjection(fig6,ax6,0,1)
+    fig6, ax6 = model2.plot_gmm_projection(fig6, ax6, 0, 1)
     plt.show()
     
     kl_unscented(model1.model, model1.model)

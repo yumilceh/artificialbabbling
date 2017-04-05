@@ -44,7 +44,7 @@ class GMM_SM(object):
 
     def trainIncrementalLearning(self, simulation_data):
         alpha = self.params.alpha
-        self.model.trainIncrementalLearning(self.returnTrainData(simulation_data), alpha)
+        self.model.train_incremental(self.returnTrainData(simulation_data), alpha)
 
     def returnTrainData(self, simulation_data):
         sm_step = self.params.sm_step
