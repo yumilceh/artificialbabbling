@@ -80,7 +80,7 @@ class SM_ModelEvaluation(object):
         for i in range(len(steps) - 1):
             data_tmp = self.data.cutData(self.agent, steps[i], steps[i + 1])
             print('Training with block {current} of {total}'.format(current=progress, total=len(steps)))
-            self.model.trainIncrementalLearning(data_tmp)
+            self.model.train_incremental(data_tmp)
             progress = progress + 1;
 
     def evaluateModel(self, saveData=False, eva_train_set=0):

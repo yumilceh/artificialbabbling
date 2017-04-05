@@ -41,7 +41,7 @@ class GMM_SS(object):
         somato_data_size=len(simulation_data.somato.data.index)
         somato_data=simulation_data.somato.data[somato_data_size-ss_step:-1]
         new_data=pd.concat([motor_data,somato_data],axis=1)
-        self.model.trainIncrementalLearning(new_data, alpha)
+        self.model.train_incremental(new_data, alpha)
         
     def predictProprioceptiveEffect(self,Agent,motor_command = None):
         n_motor=Agent.n_motor;

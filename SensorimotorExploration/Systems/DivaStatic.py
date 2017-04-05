@@ -67,10 +67,10 @@ class DivaStatic(object):
 
         abs_path = os.path.dirname(os.path.abspath(__file__))
         
-        command_ = 'cd ' + abs_path + '/DIVA/'
+        command_ = 'cd ' + abs_path + '/DivaMatlab/'
         self.matlabSession.run('x=3')    
 
-        self.matlabSession.run(command_) #Path to DIVA functions
+        self.matlabSession.run(command_) #Path to DivaMatlab functions
         self.matlabSession.putvalue('outputScale', outputScale)
         
     def setMotorCommand(self,motor_command):
@@ -78,8 +78,8 @@ class DivaStatic(object):
           
     def vocalize(self):
         self.matlabSession.putvalue('art',self.motor_command)
-        self.matlabSession.run('[Aud, Som, outline, af] = diva_synth(art)')
-        s_ml = self.matlabSession.getvalue('Aud').flatten()
+        self.matlabSession.run('[aud, Som, outline, af] = diva_synth(art)')
+        s_ml = self.matlabSession.getvalue('aud').flatten()
         af = self.matlabSession.getvalue('af').flatten()
         
         self.vt_shape = self.matlabSession.getvalue('outline').flatten()
@@ -140,7 +140,7 @@ class DivaStatic(object):
         
         
     
-    def playSoundWave(self): #keep in mind that DIVA works with ts=0.005
+    def playSoundWave(self): #keep in mind that DivaMatlab works with ts=0.005
         import pyaudio 
         self.pa = pyaudio.PyAudio() #If pa and stream are not elements of the self object then sound does not play
         self.stream = self.pa.open(format=pyaudio.paFloat32,

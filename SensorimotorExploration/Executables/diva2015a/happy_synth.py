@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     diva_system = Diva()
     abs_path = os.path.dirname(os.path.abspath(__file__))
-    arts_file = abs_path + '/../../Systems/DIVA/hello.mat'
+    arts_file = abs_path + '/../../Systems/DivaMatlab/hello.mat'
     file_name = 'vt_happy'
 
     arts = loadmat(arts_file)['arts']
@@ -28,10 +28,10 @@ if __name__ == '__main__':
 
     # abs_path = os.path.dirname(os.path.abspath(__file__))
     #
-    # self.diva_synth_vt_file = abs_path + '/DIVA/vt_py.mat'
-    # self.diva_synth_fmfit_file = abs_path + '/DIVA/fmfit_py.mat'
+    # self.diva_synth_vt_file = abs_path + '/DivaMatlab/vt_py.mat'
+    # self.diva_synth_fmfit_file = abs_path + '/DivaMatlab/fmfit_py.mat'
     #
-    # self.diva_hanning_file = abs_path + '/DIVA/hanning.mat'
+    # self.diva_hanning_file = abs_path + '/DivaMatlab/hanning.mat'
     # self.hanning = loadmat(self.diva_hanning_file)['h']
     #
     # vt = loadmat(self.diva_synth_vt_file)

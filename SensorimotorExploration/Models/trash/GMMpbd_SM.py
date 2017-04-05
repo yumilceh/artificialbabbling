@@ -46,7 +46,7 @@ class GMM_SM(object):
         sensor_data=simulation_data.sensor.data[sensor_data_size-sm_step:]
         new_data=pd.concat([motor_data,sensor_data],axis=1)
         #-------------------------------------------- print(len(new_data.index))
-        self.model.trainIncrementalLearning(new_data, alpha)
+        self.model.train_incremental(new_data, alpha)
          
     
     def getMotorCommand(self, Agent, sensor_goal = None):

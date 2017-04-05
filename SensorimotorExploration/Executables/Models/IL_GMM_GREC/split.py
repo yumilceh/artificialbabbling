@@ -29,20 +29,20 @@ if __name__ == '__main__':
     
     #Model computed with three Gaussians
     fig1, ax1 = initializeFigure()
-    fig1, ax1 = model.plotGMMProjection(fig1,ax1,0,1)
+    fig1, ax1 = model.plot_gmm_projection(fig1, ax1, 0, 1)
     
     model.splitGaussian(1)
     
     #Model merging similar Gaussians
     fig2, ax2 = initializeFigure()
-    fig2, ax2 = model.plotGMMProjection(fig2, ax2, 0, 1)
+    fig2, ax2 = model.plot_gmm_projection(fig2, ax2, 0, 1)
     
     #===========================================================================
     # #Model computed with two Gaussians
     # model = ILGMM(min_components=2)
     # model.train(X)
     # fig3, ax3 = initializeFigure()
-    # fig3, ax3 = model.plotGMMProjection(fig3, ax3, 0, 1)
+    # fig3, ax3 = model.plot_gmm_projection(fig3, ax3, 0, 1)
     #===========================================================================
     
     ax1.relim()

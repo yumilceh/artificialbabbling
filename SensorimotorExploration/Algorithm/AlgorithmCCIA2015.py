@@ -87,8 +87,8 @@ class Algorithm_CCIA2015(object):
             print('Algorithm 1 (Non-proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i,n_init))
         self.models.f_sm.train(self.data.initialization_data_sm_ss)
         self.models.f_ss.train(self.data.initialization_data_sm_ss)
-        self.initialization_models.f_sm = self.models.f_sm.model.returnCopy()
-        self.initialization_models.f_ss = self.models.f_ss.model.returnCopy()
+        self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
+        self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
         
         if not self.evaluation == None:
             self.evaluation.model = self.models.f_sm
@@ -141,7 +141,7 @@ class Algorithm_CCIA2015(object):
         # self.models.f_im.model.interactiveModel(self.models.f_im.get_train_data(self.data.initialization_data_im))
         #=======================================================================
         
-        self.initialization_models.f_im = self.models.f_im.model.returnCopy()
+        self.initialization_models.f_im = self.models.f_im.model.return_copy()
         
         
         
@@ -167,12 +167,12 @@ class Algorithm_CCIA2015(object):
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
-                    self.models.f_sm.trainIncrementalLearning(
+                    self.models.f_sm.train_incremental(
                                         self.data.simulation_data.mixDataSets(self.agent,
                                             self.data.initialization_data_im.mixDataSets(self.agent,
                                                 self.data.initialization_data_sm_ss)))
                 else:
-                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                    self.models.f_sm.train_incremental(self.data.simulation_data)
                 if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
                     eval_data = self.evaluation.evaluateModel()
@@ -183,12 +183,12 @@ class Algorithm_CCIA2015(object):
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:   
                 print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SS')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
-                    self.models.f_ss.trainIncrementalLearning(
+                    self.models.f_ss.train_incremental(
                                         self.data.simulation_data.mixDataSets(self.agent,
                                             self.data.initialization_data_im.mixDataSets(self.agent,
                                                 self.data.initialization_data_sm_ss)))
                 else:
-                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                    self.models.f_sm.train_incremental(self.data.simulation_data)
                 
             print('Algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
@@ -211,8 +211,8 @@ class Algorithm_CCIA2015(object):
             print('Algorithm 1 (Proprioceptive), Line 1: Initialize G_SM and G_SS, experiment: {} of {}'.format(i+1,n_init))
         self.models.f_sm.train(self.data.initialization_data_sm_ss)
         self.models.f_ss.train(self.data.initialization_data_sm_ss)
-        self.initialization_models.f_sm = self.models.f_sm.model.returnCopy()
-        self.initialization_models.f_ss = self.models.f_ss.model.returnCopy()
+        self.initialization_models.f_sm = self.models.f_sm.model.return_copy()
+        self.initialization_models.f_ss = self.models.f_ss.model.return_copy()
         
         if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
@@ -261,7 +261,7 @@ class Algorithm_CCIA2015(object):
                 print('Algorithm 1 (Proprioceptive), Line 2: Initialize G_IM, All sensory result considered ')
         self.data.initialization_data_im.saveData(self.data.file_prefix +'initialization_data_im.h5')
         self.models.f_im.train(self.data.initialization_data_im)
-        self.initialization_models.f_im = self.models.f_im.model.returnCopy()
+        self.initialization_models.f_im = self.models.f_im.model.return_copy()
         
         n_save_data = self.params.n_save_data;
         n_experiments = self.params.n_experiments
@@ -286,12 +286,12 @@ class Algorithm_CCIA2015(object):
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
-                    self.models.f_sm.trainIncrementalLearning(
+                    self.models.f_sm.train_incremental(
                                         self.data.simulation_data.mixDataSets(self.agent,
                                             self.data.initialization_data_im.mixDataSets(self.agent,
                                                 self.data.initialization_data_sm_ss)))
                 else:
-                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                    self.models.f_sm.train_incremental(self.data.simulation_data)
                 if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
                     eval_data = self.evaluation.evaluateModel()
@@ -302,12 +302,12 @@ class Algorithm_CCIA2015(object):
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
                 print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SS')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
-                    self.models.f_ss.trainIncrementalLearning(
+                    self.models.f_ss.train_incremental(
                                         self.data.simulation_data.mixDataSets(self.agent,
                                             self.data.initialization_data_im.mixDataSets(self.agent,
                                                 self.data.initialization_data_sm_ss)))
                 else:
-                    self.models.f_sm.trainIncrementalLearning(self.data.simulation_data)
+                    self.models.f_sm.train_incremental(self.data.simulation_data)
                 
                 
             print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: {} of {}'.format(i+1,n_experiments))

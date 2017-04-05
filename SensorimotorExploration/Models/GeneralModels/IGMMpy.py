@@ -1,107 +1,62 @@
-'''
-Created on Sep, 2016
+"""
+Created on April, 2017
 
 @author: Juan Manuel Acevedo Valle
-'''
+"""
+
 from .Mixture import GMM as GMMmix
 from ...DataManager.PlotTools import initializeFigure
 
-import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from scipy import linalg as LA
-from numpy import linalg
-from multiprocessing.pool import ThreadPool
-import pandas as  pd
-from functools import partial
-
-class Sample(object):
-    def __init__(self, n_dims):
-        self.point = np.zeros((n_dims,))
-        self.prob = 0.
-
-    def update(self, point, prob):
-        self.point = point
-        self.prob = prob
 
 
-def gauss_inference(y,
-                    y_dims,
-                    x_dims,
-                    Sigma_Mu_sample):
-    Sigma = Sigma_Mu_sample[0]
-    Mu = Sigma_Mu_sample[1]
-    sample = Sigma_Mu_sample[2]
-    n_dimensions = np.amax(len(x_dims)) + np.amax(len(y_dims))
 
-    Mu = np.transpose(Mu)
-
-    # ----------------------------------------------- Sigma=np.mat(Sigma)
-    Sigma_yy = Sigma[:, y_dims]
-    Sigma_yy = Sigma_yy[y_dims, :]
-
-    Sigma_xy = Sigma[x_dims, :]
-    Sigma_xy = Sigma_xy[:, y_dims]
-    tmp1 = linalg.inv(Sigma_yy) * np.transpose(y - Mu[y_dims])
-    tmp2 = np.transpose(Sigma_xy * tmp1)
-    likely_x = np.transpose(Mu[x_dims] + tmp2)
-
-    # ----------- sm[:,k]=np.concatenate((likely_x[:,k],np.transpose(y)))
-    likely_x_tmp = pd.DataFrame(likely_x, index=x_dims)
-    y_tmp = pd.DataFrame(np.transpose(y), index=y_dims)
-    tmp3 = pd.concat([y_tmp, likely_x_tmp])
-    tmp3 = tmp3.sort_index()
-
-    sm = tmp3.as_matrix()
-
-    tmp4 = np.matrix(1 / (np.sqrt(((2.0 * np.pi) ** n_dimensions) * np.abs(linalg.det(Sigma)))))
-    tmp5 = np.matrix(np.transpose(sm) - (Mu))
-    tmp6 = np.matrix(linalg.inv(Sigma))
-    tmp7 = np.exp((-1.0 / 2.0) * (tmp5 * tmp6 * np.transpose(tmp5)))  # Multiply time GMM.Priors????
-    p_xy = np.reshape(tmp4 * tmp7, (1))
-
-    sample.update(np.array(likely_x).flatten(), p_xy)
-    # - print('Warning: Priors are not be considering to compute P(x,y)')
-
-
-class ILGMM(GMMmix):
-    '''
+"""
+,
+                 plot=True,
+                 plot_dims=[0, 1]
+                'plot': plot,
+                'plot_dims': plot_dims,
+                 
+                 
+"""
+class IGMM(GMMmix):
+    """
     classdocs
-    '''
+    """
 
-    def __init__(self, min_components=3,
+    def __init__(self,
+                 min_components=3,
                  max_step_components=30,
                  max_components=60,
                  a_split=0.8,
-                 forgetting_factor=0.05,
-                 plot=True, plot_dims=[0, 1]):
+                 forgetting_factor=0.05):
 
         self.params = {'init_components': min_components,
                        'max_step_components': max_step_components,
                        'max_components': max_components,
                        'a_split': a_split,
-                       'plot': plot,
-                       'plot_dims': plot_dims,
                        'forgetting_factor': forgetting_factor}
 
         GMMmix.__init__(self, min_components)
 
-        if self.params['plot']:
-            self.fig_old, self.ax_old = initializeFigure(subplots=[1, 3], hold=False)
-            self.fig_old.suptitle("Incremental Learning of GMM")
-            self.ax_old[0].set_title('Old Model')
-            self.ax_old[1].set_title('Short Term Model')
-            self.ax_old[2].set_title('Current Term Model')
-            self.fig_old.show()
+
+    def plot_train(self, plot_dims=[0, 1]):
+        self.params.update({'plot': True, 'plot_dims':plot_dims})
+        self.fig_old, self.ax_old = initializeFigure(subplots=[1, 3], hold=False)
+        self.fig_old.suptitle("Incremental Learning of GMM")
+        self.ax_old[0].set_title('Old Model')
+        self.ax_old[1].set_title('Short Term Model')
+        self.ax_old[2].set_title('Current Term Model')
+        self.fig_old.show()
 
     def train(self, data):
         if self.initialized:
             if self.params['plot']:
-                # ===============================================================
                 self.ax_old[0].clear()
                 self.ax_old[0].set_title('Old Model')
-
-                # ===============================================================
                 self.fig_old, self.ax_old[0] = self.plot_gmm_projection(self.fig_old, self.ax_old[0],
                                                                         self.params['plot_dims'][0],
                                                                         self.params['plot_dims'][1])
@@ -109,15 +64,16 @@ class ILGMM(GMMmix):
 
             self.short_term_model = GMMmix(self.params['init_components'])
             self.short_term_model.get_best_gmm(data,
-                                               lims=[self.params['init_components'], self.params['max_step_components']])
+                                               lims=[self.params['init_components'],
+                                                     self.params['max_step_components']])
             weights_st = self.short_term_model.model.weights_
             weights_st = self.params['forgetting_factor'] * weights_st
             self.short_term_model.model.weights_ = weights_st
 
             weights_lt = self.model.weights_
-            weights_lt = (self.model.weights_.sum() - self.params[
-                'forgetting_factor']) * weights_lt  # Regularization to keep sum(w)=1.0
-            self.model.weights_ = weights_lt
+            weights_lt = (1 - self.params[
+                'forgetting_factor']) * weights_lt
+            self.model.weights_ = weights_lt/np.sum(weights_lt) # Regularization to keep sum(w)=1.0
 
             gmm_new = copy.deepcopy(self.short_term_model.model)
 
@@ -159,124 +115,6 @@ class ILGMM(GMMmix):
                                                                         self.params['plot_dims'][1])
                 self.ax_old[2].autoscale_view()
                 self.fig_old.canvas.draw()
-
-    def predict_(self, x_dims, y_dims, y):  # New implementation with multiprocessing
-        """
-            This method returns the value of x that maximaze the probability P(x|y)
-        """
-        y_tmp = np.array(y)
-        dist = []
-        knn = 5
-        for mu in self.model.means_:
-            dist += [linalg.norm(y_tmp - mu[y_dims])]
-        dist = np.array(dist).flatten()
-        voters_idx = dist.argsort()[:knn]
-
-        gmm = self.model
-        Mu_tmp = gmm.means_[voters_idx]
-        Sigma_tmp = gmm._get_covars()[voters_idx]
-
-        y = np.mat(y)
-        likely_x = []
-        p_xy = []
-
-        inference_pool = ThreadPool(6)
-        x = [Sample(len(x_dims)) for i in range(knn)]
-
-        func_partial = partial(gauss_inference, y, y_dims, x_dims)
-
-        args_ = zip(Sigma_tmp, Mu_tmp, x)
-        inference_pool.map(func_partial, args_)
-
-        inference_pool.close()
-        inference_pool.join()
-
-        # # max_process = 100
-        # for k, (Mu, Sigma) in enumerate(zip(Mu_tmp, Sigma_tmp)):
-        #     p = Thread(target=gauss_inference, args=(y,
-        #                                              y_dims,
-        #                                              x_dims,
-        #                                              Sigma,
-        #                                              Mu,
-        #                                              out_q))
-        #     p.setDaemon(True)
-        #
-        #     processes += [p]
-        #     processes[-1].start()
-        #     alive = 0
-        #     # while alive == max_process:
-        #     #     # time.sleep(5)
-        #     #     alive = len([x for x in processes if x.is_alive()])
-        #     #         # if not t.is_alive():
-        #     #         #     del processes[i]  # pop
-
-        for k in range(knn):
-            res_ = x[i]
-            p_xy += [res_.prob]
-            likely_x += [res_.point]
-
-        k_ok = np.argmax(p_xy)
-        x = likely_x[k_ok]
-
-        return np.array(x).flatten()
-
-    def predict(self, x_dims, y_dims, y):
-        """
-            This method returns the value of x that maximaze the probability P(x|y)
-        """
-        y_tmp = np.array(y)
-        dist = []
-        knn = 5
-        for mu in self.model.means_:
-            dist += [linalg.norm(y_tmp - mu[y_dims])]
-        dist = np.array(dist).flatten()
-        voters_idx = dist.argsort()[:knn]
-
-        gmm = self.model
-        Mu_tmp = gmm.means_[voters_idx]
-        Sigma_tmp = gmm._get_covars()[voters_idx]
-
-        y = np.mat(y)
-        n_dimensions = np.amax(len(x_dims)) + np.amax(len(y_dims))
-        # gmm = self.model
-        likely_x = np.mat(np.zeros((len(x_dims), knn)))
-        sm = np.mat(np.zeros((len(x_dims) + len(y_dims), knn)))
-        p_xy = np.mat(np.zeros((knn, 1)))
-
-        for k, (Mu, Sigma) in enumerate(zip(Mu_tmp, Sigma_tmp)):
-            Mu = np.transpose(Mu)
-            # ----------------------------------------------- Sigma=np.mat(Sigma)
-            Sigma_yy = Sigma[:, y_dims]
-            Sigma_yy = Sigma_yy[y_dims, :]
-
-            Sigma_xy = Sigma[x_dims, :]
-            Sigma_xy = Sigma_xy[:, y_dims]
-            tmp1 = linalg.inv(Sigma_yy) * np.transpose(y - Mu[y_dims])
-            tmp2 = np.transpose(Sigma_xy * tmp1)
-            likely_x[:, k] = np.transpose(Mu[x_dims] + tmp2)
-
-            # ----------- sm[:,k]=np.concatenate((likely_x[:,k],np.transpose(y)))
-            # likely_x_tmp = pd.DataFrame(likely_x[:, k], index=x_dims)
-            # y_tmp = pd.DataFrame(np.transpose(y), index=y_dims)
-            # tmp3 = pd.concat([y_tmp, likely_x_tmp])
-            # tmp3 = tmp3.sort_index()
-            #
-            # sm[:, k] = tmp3.as_matrix()
-
-            sm[x_dims, k] = likely_x[:, k].flatten()
-            sm[y_dims, k] = y.flatten()
-
-            tmp4 = 1 / (np.sqrt(((2.0 * np.pi) ** n_dimensions) * np.abs(linalg.det(Sigma))))
-            tmp5 = np.transpose(sm[:, k]) - (Mu)
-            tmp6 = linalg.inv(Sigma)
-            tmp7 = np.exp((-1.0 / 2.0) * (tmp5 * tmp6 * np.transpose(tmp5)))  # Multiply time GMM.Priors????
-            p_xy[k, :] = np.reshape(tmp4 * tmp7, (1))
-            # - print('Warning: Priors are not be considering to compute P(x,y)')
-
-        k_ok = np.argmax(p_xy)
-        x = likely_x[:, k_ok]
-
-        return np.array(x.transpose())[0]
 
     def merge_similar_gaussians_in_gmm_full(self, gmm2):
         # Selecting high related Gaussians to be mixtured
@@ -338,7 +176,7 @@ class ILGMM(GMMmix):
             return gmm2
 
     def returnCopy(self):
-        copy_tmp = ILGMM(min_components=self.params['init_components'],
+        copy_tmp = IGMM(min_components=self.params['init_components'],
                          max_step_components=self.params['max_step_components'],
                          max_components=self.params['max_components'],
                          a_split=self.params['a_split'],
@@ -460,13 +298,7 @@ class ILGMM(GMMmix):
 
 
 def get_KL_divergence(gauss1, gauss2):
-    try:
-        detC1 = LA.det(gauss1['covariance'])
-    except ValueError:
-        x = raw_input("Broken")
-        pass
-        pass
-
+    detC1 = LA.det(gauss1['covariance'])
     detC2 = LA.det(gauss2['covariance'])
     logC2C1 = np.log(detC2 / detC1)
 

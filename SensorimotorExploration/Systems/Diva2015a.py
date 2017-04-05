@@ -75,7 +75,7 @@ class DivaProprio2015a:
         self.sensor_instructor.fill(np.nan)
         self.matlabSession = ml.session_factory()
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.matlabSession.run('cd ' + abs_path + '/DIVA/')  # Path to DIVA functions
+        self.matlabSession.run('cd ' + abs_path + '/DivaMatlab/')  # Path to DivaMatlab functions
         self.matlabSession.putvalue('outputScale', outputScale)
 
     def set_action(self, motor_command):
@@ -300,7 +300,7 @@ class DivaProprio2015a:
     def plotSoundWave(self, ax):
         ax.plot(np.float128(xrange(0, len(self.soundWave))) * self.ts, self.soundWave)
 
-    def playSoundWave(self):  # keep in mind that DIVA works with ts=0.005
+    def playSoundWave(self):  # keep in mind that DivaMatlab works with ts=0.005
         import pyaudio
         self.pa = pyaudio.PyAudio()  # If pa and stream are not elements of the self object then sound does not play
         self.stream = self.pa.open(format=pyaudio.paFloat32,

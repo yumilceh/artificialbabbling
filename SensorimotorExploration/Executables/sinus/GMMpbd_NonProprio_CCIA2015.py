@@ -97,23 +97,23 @@ if __name__ == '__main__':
     
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor', 0, "ob")
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor_goal', 0, "ok")
-    fig1,ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,0, 1)
+    fig1,ax1 = simulation1.models.f_sm.model.plot_gmm_projection(fig1, ax1, 0, 1)
     ax1.relim()
     ax1.autoscale_view()
     
     fig3,ax3=initializeFigure();
-    fig3,ax3 = simulation1.models.f_im.model.plotGMMProjection(fig3,ax3,0, 3)
+    fig3,ax3 = simulation1.models.f_im.model.plot_gmm_projection(fig3, ax3, 0, 3)
     ax3.relim()
     ax3.autoscale_view()
  
     fig3a,ax3a = initializeFigure();
-    fig3a,ax3a = simulation1.models.f_im.model.plotGMMProjection(fig3a,ax3a,1, 2)
+    fig3a,ax3a = simulation1.models.f_im.model.plot_gmm_projection(fig3a, ax3a, 1, 2)
     ax3a.relim()
     ax3a.autoscale_view()
      
     ## NOT WORKING WELL YET ##
     fig3b,ax3b=initializeFigure3D();
-    fig3b,ax3b = simulation1.models.f_im.model.plotGMM3DProjection(fig3b,ax3b,2, 3, 0)
+    fig3b,ax3b = simulation1.models.f_im.model.plot_gmm_3d_projection(fig3b, ax3b, 2, 3, 0)
     ax3b.relim()
     ax3b.autoscale_view()
      

@@ -41,7 +41,7 @@ class GMM_IM(object):
         self.model.Active=np.array([1]*n_gauss_components)
         
     def train(self,simulation_data):       
-        self.model.getBestGMM(self.get_train_data(simulation_data), lims=[1,self.params.n_components])
+        self.model.get_best_gmm(self.get_train_data(simulation_data), lims=[1, self.params.n_components])
         self.model.initialized=True
         
     def get_train_data(self, simulation_data):

@@ -12,9 +12,7 @@ import matplotlib as mpl
 import pandas as pd
 
 import Tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from matplotlib.backend_bases import key_press_handler
-from distutils import command
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class GMM(object):
     '''
@@ -43,19 +41,19 @@ class GMM(object):
         else:
             print('The EM-algorithm did not converged...')
             
-    def train_bestGMM(self,data):  #WRITE THIS FUNCTION
+    def train_bestGMM(self,data):
         self.model.fit(data)
         if self.model.converged_:
             self.initialized=True
         else:
             print('The EM-algorithm did not converged...')
      
-    def getBestGMM(self, data, lims=[1,10]):         
+    def get_best_gmm(self, data, lims=[1, 10]):
         lowest_bic = np.infty
         bic = []
         aic= []
-        minim = False
-        minim_flag = 2
+        # minim = False
+        # minim_flag = 2
         
         n_components_range = range(lims[0],lims[1]+1,1)
         for n_components in n_components_range:
@@ -107,7 +105,7 @@ class GMM(object):
         self.model.means_ = gmm.means_
         self.model.n_components = gmm.n_components
          
-    def returnCopy(self):
+    def return_copy(self):
         '''If any trouble be sure that assignation of 
             means and weights is done copying through assignation        
         '''
@@ -119,7 +117,7 @@ class GMM(object):
         
         return copy_tmp
         
-    def trainIncrementalLearning(self,new_data,alpha):
+    def train_incremental(self, new_data, alpha):
         if self.initialized:
             self.model.init_params=''
             n_new_samples = np.size(new_data,0)
@@ -133,141 +131,78 @@ class GMM(object):
             self.train(new_data)
     
     
-    def getBIC(self,data):
+    def get_bic(self, data):
         return self.model.bic(data)        
         
-    def predict(self, x_dims, y_dims, y):   #This method has been imporved in IGMM and will be substituted soon
+    def predict(self, x_dims, y_dims, y, knn = 5):
         """
-            This method returns the value of x that maximaze the probability P(x|y)
+            This method returns the value of x that maximaze the probability P(x|y) using 
+            the knn gaussians which means are closer to y
         """
-        y=np.mat(y)
-        n_dimensions=np.amax(len(x_dims))+np.amax(len(y_dims))
-        n_components=self.model.n_components
-        gmm=self.model
-        likely_x=np.mat(np.zeros((len(x_dims),n_components)))
-        sm=np.mat(np.zeros((len(x_dims)+len(y_dims),n_components)))
-        p_xy=np.mat(np.zeros((n_components,1)))
-        
-        for k,(Mu, Sigma) in enumerate(zip(gmm.means_, gmm._get_covars())):
-            Mu=np.transpose(Mu)
-            #----------------------------------------------- Sigma=np.mat(Sigma)
-            Sigma_yy=Sigma[:,y_dims]
-            Sigma_yy=Sigma_yy[y_dims,:]
-            
-            Sigma_xy=Sigma[x_dims,:]
-            Sigma_xy=Sigma_xy[:,y_dims]
-            tmp1=linalg.inv(Sigma_yy)*np.transpose(y-Mu[y_dims])
-            tmp2=np.transpose(Sigma_xy*tmp1)
-            likely_x[:,k]=np.transpose(Mu[x_dims]+tmp2)
-            
-            #----------- sm[:,k]=np.concatenate((likely_x[:,k],np.transpose(y)))
-            likely_x_tmp=pd.DataFrame(likely_x[:,k],index=x_dims)
-            y_tmp=pd.DataFrame(np.transpose(y),index=y_dims)
-            tmp3=pd.concat([y_tmp, likely_x_tmp])
-            tmp3=tmp3.sort_index()
-            
-            sm[:,k]=tmp3.as_matrix()
-            
-            tmp4=1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
-            tmp5=np.transpose(sm[:,k])-(Mu)
-            tmp6=linalg.inv(Sigma)
-            tmp7=np.exp((-1.0/2.0)*(tmp5*tmp6*np.transpose(tmp5))) #Multiply time GMM.Priors????
-            p_xy[k,:]=np.reshape(tmp4*tmp7,(1))
-            #- print('Warning: Priors are not be considering to compute P(x,y)')
-            
-        k_ok=np.argmax(p_xy);
-        x=likely_x[:,k_ok];
-        
+        y_tmp = np.array(y)
+        dist = []
+        for mu in self.model.means_:
+            dist += [linalg.norm(y_tmp - mu[y_dims])]
+        dist = np.array(dist).flatten()
+        voters_idx = dist.argsort()[:knn]
+
+        gmm = self.model
+        Mu_tmp = gmm.means_[voters_idx]
+        Sigma_tmp = gmm._get_covars()[voters_idx]
+
+        y = np.mat(y)
+        n_dimensions = np.amax(len(x_dims)) + np.amax(len(y_dims))
+        # gmm = self.model
+        likely_x = np.mat(np.zeros((len(x_dims), knn)))
+        sm = np.mat(np.zeros((len(x_dims) + len(y_dims), knn)))
+        p_xy = np.mat(np.zeros((knn, 1)))
+
+        for k, (Mu, Sigma) in enumerate(zip(Mu_tmp, Sigma_tmp)):
+            Mu = np.transpose(Mu)
+
+            Sigma_yy = Sigma[:, y_dims]
+            Sigma_yy = Sigma_yy[y_dims, :]
+
+            Sigma_xy = Sigma[x_dims, :]
+            Sigma_xy = Sigma_xy[:, y_dims]
+
+            tmp1 = linalg.inv(Sigma_yy) * np.transpose(y - Mu[y_dims])
+            tmp2 = np.transpose(Sigma_xy * tmp1)
+            likely_x[:, k] = np.transpose(Mu[x_dims] + tmp2)
+
+            sm[x_dims, k] = likely_x[:, k].flatten()
+            sm[y_dims, k] = y.flatten()
+
+            tmp4 = 1 / (np.sqrt(((2.0 * np.pi) ** n_dimensions) * np.abs(linalg.det(Sigma))))
+            tmp5 = np.transpose(sm[:, k]) - (Mu)
+            tmp6 = linalg.inv(Sigma)
+            tmp7 = np.exp((-1.0 / 2.0) * (tmp5 * tmp6 * np.transpose(tmp5)))  # Multiply time GMM.Priors????
+            p_xy[k, :] = np.reshape(tmp4 * tmp7, (1))
+            # - print('Warning: Priors are not be considering to compute P(x,y)')
+
+        k_ok = np.argmax(p_xy)
+        x = likely_x[:, k_ok]
+
         return np.array(x.transpose())[0]
     
-    def predict_all_gaussians(self, x_dims, y_dims, y):
-        '''
-            This method returns the value of x that maximaze the probability P(x|y)
-        '''
-        y=np.mat(y)
-        n_dimensions=np.amax(len(x_dims))+np.amax(len(y_dims))
-        n_components=self.model.n_components
-        gmm=self.model
-        likely_x=np.mat(np.zeros((len(x_dims),n_components)))
-        sm=np.mat(np.zeros((len(x_dims)+len(y_dims),n_components)))
-        p_xy=np.array([0.0]*n_components)
+    def predict_weighted(self, x_dims, y_dims, y): #Write this function
+        return self.predict(x_dims, y_dims, y)
+        pass
         
-        x=np.array([0.0] * len(x_dims))
-        
-        for k,(Mu, Sigma, Weight) in enumerate(zip(gmm.means_, gmm._get_covars(), gmm.weights_)):
-            Mu=np.transpose(Mu)
-
-            Sigma_yy = Sigma[:,y_dims]
-            Sigma_yy = Sigma_yy[y_dims,:]
-            
-            Sigma_xy = Sigma[x_dims,:]
-            Sigma_xy = Sigma_xy[:,y_dims]
-            
-            tmp1 = linalg.inv(Sigma_yy) * np.transpose( y - Mu[y_dims] )
-            tmp2 = np.transpose(Sigma_xy * tmp1)
-            
-            likely_x[:,k] = np.transpose( Mu[x_dims] + tmp2 )
-            
-            likely_x_tmp = pd.DataFrame(likely_x[:,k],index=x_dims)
-            
-            y_tmp = pd.DataFrame(np.transpose(y),index=y_dims)
-            
-            tmp3 = pd.concat([y_tmp, likely_x_tmp])
-            
-            tmp3 = tmp3.sort_index()
-            
-            sm[:,k] = tmp3.as_matrix().reshape((len(x_dims)+len(y_dims),1))
-            
-            tmp4 = 1/(np.sqrt(((2.0*np.pi)**n_dimensions)*np.abs(linalg.det(Sigma))))
-            
-            #===================================================================
-            # tmp5=np.transpose(sm[:,k])-(Mu)
-            #===================================================================
-            
-            tmp5 = sm[:,k].reshape(Mu.shape)-(Mu)
-            
-            tmp6 = linalg.inv(Sigma)
-            
-            tmp7 = np.exp((-1.0/2.0) * (tmp5 * tmp6 * np.transpose(tmp5))) #Multiply time GMM.Priors????
-            
-            p_xy[k] = tmp4 * tmp7
-            
-           
-        #------------------------------- h = np.array([0.0] * len(gmm.weights_))
-        #--------------------------- total_tmp = np.multiply(gmm.weights_, p_xy)
-        #------------------------------------------- total_piN = total_tmp.sum()
-#------------------------------------------------------------------------------ 
-#------------------------------------------------------------------------------ 
-        #------------------------------------ for k in range(len(gmm.weights_)):
-            #------------ h[k] = gmm.weights_[k] * p_xy[k]  *  (1.0 / total_piN)
-            #-------------------------- x = x + h[k] * likely_x[:,k].transpose()
-#------------------------------------------------------------------------------ 
-
-        h = np.array([0.0] * len(gmm.weights_))
-        total_tmp = p_xy
-        total_piN = total_tmp.sum()
-         
-        
-        for k in range(len(gmm.weights_)): 
-            h[k] = p_xy[k]  *  (1.0 / total_piN)
-            x = x + gmm.weights_[k] *h[k] * likely_x[:,k].transpose()
-          
-        x.flatten()
-        
-        return np.array(x.transpose())   
-        
-    def plotGMMProjection(self,fig,axes,column1,column2):
+    def plot_gmm_projection(self, column1, column2, axes = None):
         '''
             Display Gaussian distributions with a 95% interval of confidence
         '''
         # Number of samples per component
-        gmm=self.model;
+        gmm=self.model
         color_iter = itertools.cycle(['r', 'g', 'b', 'c', 'm'])
         
         title='GMM'
-        
-        plt.figure(fig.number)
-        plt.sca(axes)        
+
+        if axes is None:
+            f, axes =  plt.subplots(1,1)
+
+        plt.sca(axes)
         
         for i,(mean, covar, color) in enumerate(zip(gmm.means_, gmm._get_covars(), color_iter)):
             covar_plt=np.zeros((2,2))
@@ -295,17 +230,18 @@ class GMM(object):
 
         if axes.get_title() == '':
             axes.set_title(title)
-        return fig,axes
+        return axes
     
-    def plotGMMProjection_k(self,fig,axes,k,column1,column2):
+    def plot_k_gmm_projection(self, k, column1, column2, axes=None):
         '''
             Display Gaussian distributions with a 95% interval of confidence
         '''
         # Number of samples per component
-        gmm=self.model;
+        gmm=self.model
         
         k = np.int(k)
-        plt.figure(fig.number)
+        if axes is None:
+            f, axes =  plt.subplots(1,1)
         plt.sca(axes)        
         covar_plt=np.zeros((2,2))
         
@@ -333,17 +269,18 @@ class GMM(object):
                    
         return axes
     
-    def plotGMM3DProjection(self,fig,axes,column1,column2,column3):
+    def plot_gmm_3d_projection(self, column1, column2, column3, axes = None):
         '''
             Display Gaussian distributions with a 95% interval of confidence
         '''
         # Number of samples per component
-        gmm=self.model;
+        gmm=self.model
         color_iter = itertools.cycle(['r', 'g', 'b', 'c', 'm'])
          
         title='GMM'
-         
-        plt.figure(fig.number)
+
+        if axes is None:
+            f, axes =  plt.subplots(1,1)
         plt.sca(axes)        
          
         for i,(mean, covar, color) in enumerate(zip(gmm.means_, gmm._get_covars(), color_iter)):
@@ -380,13 +317,10 @@ class GMM(object):
             axes.set_xlabel('x')
             axes.set_ylabel('y')
             axes.set_zlabel('z')
-        #=======================================================================
-        # axes.set_xlim(-1, 1)
-        # axes.set_ylim(-1, 1)
-        #=======================================================================
+
         if axes.get_title()=='':
             axes.set_title(title)
-        return fig,axes
+        return axes
      
     def plot_callback(self):
         n_plots = np.int(self.n_proj_str.get())
@@ -403,10 +337,10 @@ class GMM(object):
             dim_y = self.proj_dim[i,1]
             
             self.plots_ax.append(self.plots_fig.add_subplot(subplot_dim_x,subplot_dim_y, i + 1))
-            self.plots_ax[i] = self.plotGMMProjection_k(self.plots_fig,
-                                                        self.plots_ax[i],
-                                                        current_gauss,
-                                                        dim_x, dim_y)
+            self.plots_ax[i] = self.plot_k_gmm_projection(self.plots_fig,
+                                                          self.plots_ax[i],
+                                                          current_gauss,
+                                                          dim_x, dim_y)
             self.plots_ax[i].set_xlim(self.dim_lims[self.proj_dim[i,0], 0],
                                       self.dim_lims[self.proj_dim[i,0], 1])
             self.plots_ax[i].set_ylim(self.dim_lims[self.proj_dim[i,1], 0],
@@ -419,23 +353,11 @@ class GMM(object):
                 
             
         self.plots_canvas.draw()
-        
-        #=======================================================================
-        # self.plots_ax = []
-        # for i in range(self.n_proj):
-        #     self.plots_ax.append(self.plots_fig.add_subplot(self.proj_arrays[n_proj_tmp][0],
-        #                                                   self.proj_arrays[n_proj_tmp][1], i+1))
-        #     self.plots_ax[i].spines['right'].set_visible(False)
-        #     self.plots_ax[i].spines['top'].set_visible(False)
-        #     self.plots_ax[i].spines['left'].set_visible(False)
-        #     self.plots_ax[i].spines['bottom'].set_visible(False)
-        #     self.plots_ax[i].xaxis.set_ticks_position('none')
-        #     self.plots_ax[i].yaxis.set_ticks_position('none')
-        #     self.plots_ax[i].xaxis.set_ticks([])
-        #     self.plots_ax[i].yaxis.set_ticks([])
-        # 
-        # self.plots_canvas.draw()
-        #=======================================================================
+
+    ####################################################################################
+    """  Interactive Visualization of GMM"""
+    ###################################################################################
+
     def plot_array_callback(self):
         n_proj_old = self.n_proj
         n_proj_tmp = self.n_proj_str.get()
@@ -543,12 +465,9 @@ class GMM(object):
             
             self.guiPlotsPanel()
             self.guiControlPanel()
-                
-            
-                
-        
+
             self.plot_callback()
-        #----------------------------------- self.guiMotorPanel_reset_callback() 
+            # self.guiMotorPanel_reset_callback()
             self.root_window.mainloop()
         else:
             print("Interactive mode only can be used when the model has been initialized")    
@@ -703,26 +622,12 @@ class GMM(object):
         self.entry_dim1_max.grid(row=5, column=5, padx=5, pady=2)
         self.entry_dim2_min.grid(row=6, column=4, padx=5, pady=2)
         self.entry_dim2_max.grid(row=6, column=5, padx=5, pady=2)
-        
-        
-        
-         # self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
-        
-        #--------------------------- self.n_proj_lbl.grid(row=0, padx=5, pady=2)
-        #-------------------------------------- self.n_proj_str = tk.StringVar()
-        #---------------------------------------------- self.n_proj_str.set("1")
-        # self.n_proj_str.trace("w", lambda name, index, mode, sv=self.n_proj_str: self.plot_array_callback())
-        #------------------------------------------------------- self.n_proj = 1
-        # self.n_proj_m = tk.OptionMenu(self.control_entries_frame, self.n_proj_str, "1","2","3","4","6","8","9")
-        
-        
-        #---------------------------------------------------------- columnspan=2
-        
+
         if self.model.n_components > 1:
             self.next_gauss_btn.config(state=tk.NORMAL)
             self.entry_gauss.config(state=tk.NORMAL) 
     
-        self.data_indices = [0];
+        self.data_indices = [0]
         self.data_indices_lbl = tk.Label(self.control_entries_frame, text="Data indices:")
         self.data_indices_str = tk.StringVar()
         self.data_indices_str.set(str(self.data_indices[0]))       

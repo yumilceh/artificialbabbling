@@ -71,7 +71,7 @@ if __name__ == '__main__' and explore_vowels:
     from SensorimotorExploration.Algorithm.utils.functions import get_random_motor_set
     from SensorimotorExploration.DataManager.SimulationData import SimulationData
 
-    '''If normalization is needed these are the DIVA scales,
+    '''If normalization is needed these are the DivaMatlab scales,
     important to mention that for DivaStatic format frequencies
     are read UNORMALIZED!!!!'''
 

@@ -92,7 +92,7 @@ if __name__ == '__main__':
     
     #===========================================================================
     # fig1,ax1=simulation_data.plot_2D(fig1,ax1,'sensor', 0, 'sensor', 1,"or")
-    # fig1, ax1 = simulation1.models.f_sm.model.plotGMMProjection(fig1,ax1,2, 3)
+    # fig1, ax1 = simulation1.models.f_sm.model.plot_gmm_projection(fig1,ax1,2, 3)
     #===========================================================================
     
 

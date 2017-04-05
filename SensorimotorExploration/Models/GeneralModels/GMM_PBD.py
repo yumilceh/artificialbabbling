@@ -209,7 +209,7 @@ class GMM(Mixture):
         
     def plotGMMProjection(self,fig,axes,column1,column2):
         self.gmmpbd_to_mix()
-        return Mixture.plotGMMProjection(self, fig, axes, column1, column2)
+        return Mixture.plot_gmm_projection(self, fig, axes, column1, column2)
     
 def loadModel(GMM): 
     Priors = np.loadtxt(GMM.files.Priors)
