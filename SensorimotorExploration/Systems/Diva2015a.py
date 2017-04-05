@@ -75,7 +75,7 @@ class DivaProprio2015a:
         self.sensor_instructor.fill(np.nan)
         self.matlabSession = ml.session_factory()
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.matlabSession.run('cd ' + abs_path + '/DivaMatlab/')  # Path to DivaMatlab functions
+        self.matlabSession.run('cd ' + abs_path + '/DIVA/')  # Path to DivaMatlab functions
         self.matlabSession.putvalue('outputScale', outputScale)
 
     def set_action(self, motor_command):

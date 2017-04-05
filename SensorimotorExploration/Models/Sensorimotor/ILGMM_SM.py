@@ -50,8 +50,7 @@ class GMM_SM(object):
                        max_step_components = max_step_components,
                        max_components = max_components,
                        a_split = a_split,
-                       forgetting_factor = forgetting_factor, 
-                       plot = plot, plot_dims=plot_dims)
+                       forgetting_factor = forgetting_factor)
 
     def train(self, simulation_data):
         train_data_tmp = pd.concat([simulation_data.motor.get_all(),
