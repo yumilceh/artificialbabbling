@@ -50,7 +50,7 @@ class ExplautoSS(object):
         # print('Trainign with m {} and som {}'.format(m,s))
         self.model.update(m,s)
         
-    def trainIncrementalLearning(self, simulation_data):
+    def train_incremental(self, simulation_data):
         self.train(simulation_data)
         
     def set_sigma_explo_ratio(self, new_value):

@@ -57,7 +57,7 @@ class GMM_SM(object):
                                     simulation_data.sensor.get_all()], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
 
-    def trainIncrementalLearning(self, simulation_data, all=True):
+    def train_incremental(self, simulation_data, all=True):
         if all:
             data = np.zeros((simulation_data.motor.current_idx,
                              self.params.n_motor+self.params.n_sensor))
@@ -88,7 +88,7 @@ class GMM_SM(object):
     #     # sensor_data_size=len(simulation_data.sensor.data.index)
     #     # sensor=simulation_data.sensor.data[sensor_data_size-sm_step:-1]
     #     # new_data=pd.concat([motor,sensor],axis=1)
-    #     # self.model.trainIncrementalLearning(new_data, alpha)
+    #     # self.model.train_incremental(new_data, alpha)
     #     #=======================================================================
     #     train_data_tmp=pd.concat([simulation_data.motor.data,
     #                               simulation_data.sensor.data], axis=1)

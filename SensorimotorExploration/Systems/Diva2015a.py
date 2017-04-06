@@ -17,10 +17,6 @@ from scipy import linspace
 from scipy.io.wavfile import write
 
 
-# from matplotlib.pyplot import autoscale
-# from matplotlib.animation import Animation
-# from scipy.interpolate.interpolate_wrapper import block
-
 class DivaProprio2015a:
     def __init__(self):
         motor_names = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15',
@@ -99,16 +95,16 @@ class DivaProprio2015a:
         y0[:13] = y_neutral
         m1 = self.motor_command[:13]
         t1 = linspace(0.0, durationM1, nSamples1)
-        artStates1 = odeint(motorDynamics, y0, t1, args=(self, m1))
+        art_states1 = odeint(motorDynamics, y0, t1, args=(self, m1))
         t2 = linspace(0.0, durationM2, nSamples2)
         m2 = self.motor_command[13:]
-        artStates2 = odeint(motorDynamics, artStates1[-1, :], t2, args=(self, m2))
+        art_states2 = odeint(motorDynamics, art_states1[-1, :], t2, args=(self, m2))
         if sound:
-            return np.concatenate((artStates1, artStates2))
+            return np.concatenate((art_states1, art_states2))
         else:
-            self.artStates = np.zeros((nSamples, 26))
-            self.artStates[:nSamples1, :] = artStates1
-            self.artStates[nSamples1 - 1:, :] = artStates2
+            self.art_states = np.zeros((nSamples, 26))
+            self.art_states[:nSamples1, :] = art_states1
+            self.art_states[nSamples1 - 1:, :] = art_states2
 
     def vocalize(self):
         ts = self.ts 
@@ -117,15 +113,15 @@ class DivaProprio2015a:
         nPerceptionSamples = (len(perceptionTime))
         self.auditoryResult = [0.0] * 6
         proprioceptiveAv = [0.0] * 2
-        self.matlabSession.putvalue('artStates', self.artStates)
-        # self.matlabSession.run('save artStates.mat artStates')
+        self.matlabSession.putvalue('art_states', self.art_states)
+        # self.matlabSession.run('save art_states.mat art_states')
         self.matlabSession.run('mscript_Aud_Proprio')
-        auditoryStates = self.matlabSession.getvalue('auditoryStates')
-        self.auditoryStates = auditoryStates 
+        auditory_states = self.matlabSession.getvalue('auditory_states')
+        self.auditory_states = auditory_states 
         minaf = self.matlabSession.getvalue('minaf')
         self.somato_out = minaf
         '''print('audStates')
-        print(auditoryStates)
+        print(auditory_states)
         print('minaf')
         print(minaf)'''
 
@@ -133,10 +129,10 @@ class DivaProprio2015a:
         for index in range(nPerceptionSamples):
             # print(index)
             # print(nPerceptionSamples)
-            if (self.artStates[index + 26, 11] > 0) and (self.artStates[index + 26, 12] > 0) and (
+            if (self.art_states[index + 26, 11] > 0) and (self.art_states[index + 26, 12] > 0) and (
                 minaf[index + 26] > 0):
-                self.auditoryResult[0] = self.auditoryResult[0] + auditoryStates[index + 26, 1]
-                self.auditoryResult[1] = self.auditoryResult[1] + auditoryStates[index + 26, 2]
+                self.auditoryResult[0] = self.auditoryResult[0] + auditory_states[index + 26, 1]
+                self.auditoryResult[1] = self.auditoryResult[1] + auditory_states[index + 26, 2]
                 self.auditoryResult[2] = self.auditoryResult[2] + 1.0
             proprioceptiveAv[0] = proprioceptiveAv[0] + (minaf[index + 26] / nPerceptionSamples)
         self.auditoryResult[0] = self.auditoryResult[0] / nPerceptionSamples
@@ -146,10 +142,10 @@ class DivaProprio2015a:
         # Second perception time window
         for index in range(nPerceptionSamples):
             # print(index)
-            if (self.artStates[index + 66, 11] > 0) and (self.artStates[index + 66, 12] > 0) and (
+            if (self.art_states[index + 66, 11] > 0) and (self.art_states[index + 66, 12] > 0) and (
                 minaf[index + 66] > 0):
-                self.auditoryResult[3] = self.auditoryResult[3] + auditoryStates[index + 66, 1]
-                self.auditoryResult[4] = self.auditoryResult[4] + auditoryStates[index + 66, 2]
+                self.auditoryResult[3] = self.auditoryResult[3] + auditory_states[index + 66, 1]
+                self.auditoryResult[4] = self.auditoryResult[4] + auditory_states[index + 66, 2]
                 self.auditoryResult[5] = self.auditoryResult[5] + 1.0
             proprioceptiveAv[1] = proprioceptiveAv[1] + (minaf[index + 66] / nPerceptionSamples)
         self.auditoryResult[3] = self.auditoryResult[3] / nPerceptionSamples
@@ -167,13 +163,13 @@ class DivaProprio2015a:
 
     def plotArticulatoryEvolution(self, arts):
         for index in range(len(arts)):
-            plt.plot(self.time, self.artStates[:, arts[index] - 1])
+            plt.plot(self.time, self.art_states[:, arts[index] - 1])
             plt.hold(True)
         plt.show()
 
     def plotAuditoryOutput(self, audOut):
         for index in range(len(audOut)):
-            plt.plot(self.time, self.auditoryStates[:, audOut[index] - 1])
+            plt.plot(self.time, self.auditory_states[:, audOut[index] - 1])
             plt.hold(True)
         plt.show()
 
@@ -181,16 +177,16 @@ class DivaProprio2015a:
         plt.plot(self.time, self.somato_out)
         plt.show 
 
-    def getVocaltractShape(self, artStates, returnShape=0):
-        self.matlabSession.putvalue('artStates', artStates)
-        self.matlabSession.run('[~, ~, outline] = diva_synth(artStates\', \'audsom\')')
+    def getVocaltractShape(self, art_states, returnShape=0):
+        self.matlabSession.putvalue('art_states', art_states)
+        self.matlabSession.run('[~, ~, outline] = diva_synth(art_states\', \'audsom\')')
         if returnShape:
             return self.matlabSession.getvalue('outline')
         else:
             self.vocalTractshape = self.matlabSession.getvalue('outline')
 
     def plotVocalTractShape(self, time, plot=1):
-        self.getVocaltractShape(self.artStates)
+        self.getVocaltractShape(self.art_states)
         ts = self.ts
         index = np.round(time / ts)
         figVocalTract = plt.figure() 
@@ -214,10 +210,10 @@ class DivaProprio2015a:
         writer = Writer(fps=1 / 0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
         figVocalTract = plt.figure()
 
-        artStates = self.getSoundWave(save=1, returnArtStates=1, file_name=file_name)
+        art_states = self.getSoundWave(save=1, returnArtStates=1, file_name=file_name)
 
-        outline = self.getVocaltractShape(artStates, returnShape=1)
-        nSamples = artStates.shape[0]
+        outline = self.getVocaltractShape(art_states, returnShape=1)
+        nSamples = art_states.shape[0]
         print(nSamples)
         sequence = []
         for index in range(nSamples):
@@ -270,8 +266,8 @@ class DivaProprio2015a:
             del figVocalTract
 
     def get_sound_wave(self, art_states, play=0, save=0, file_name='vt'):  # based on explauto
-        self.matlabSession.putvalue('artStates', art_states)
-        self.matlabSession.run('sound_wave = diva_synth(artStates\', \'sound\')')
+        self.matlabSession.putvalue('art_states', art_states)
+        self.matlabSession.run('sound_wave = diva_synth(art_states\', \'sound\')')
         self.soundWave = self.matlabSession.getvalue('sound_wave')
         if (play):
             self.playSoundWave()
@@ -284,10 +280,10 @@ class DivaProprio2015a:
         # print('ts=0.005')
         # print(soundArtStates.shape)
         # print('ts=0.01')
-        # print(self.artStates.shape)
-        self.matlabSession.putvalue('artStates', soundArtStates[:, 0:13])
-        # self.matlabSession.run('save artStates.mat artStates')
-        self.matlabSession.run('sound_wave = diva_synth(artStates\', \'sound\')')
+        # print(self.art_states.shape)
+        self.matlabSession.putvalue('art_states', soundArtStates[:, 0:13])
+        # self.matlabSession.run('save art_states.mat art_states')
+        self.matlabSession.run('sound_wave = diva_synth(art_states\', \'sound\')')
         self.soundWave = self.matlabSession.getvalue('sound_wave')
         if (play):
             self.playSoundWave()

@@ -101,12 +101,12 @@ class Diva_Proprio2015a:
         self.matlabSession.putvalue('artStates',self.artStates)
         #self.matlabSession.run('save artStates.mat artStates')
         self.matlabSession.run('mscript_Aud_Proprio')
-        auditoryStates=self.matlabSession.getvalue('auditoryStates')
+        auditoryStates=self.matlabSession.getvalue('auditory_states')
         self.auditoryStates=auditoryStates;
         minaf=self.matlabSession.getvalue('minaf')
         self.somatoOutput=minaf
         '''print('audStates')
-        print(auditoryStates)
+        print(auditory_states)
         print('minaf')
         print(minaf)'''
         

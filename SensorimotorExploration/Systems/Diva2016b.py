@@ -1,77 +1,89 @@
-'''
-Created on Feb 5, 2016
-This sensorimor system defines the DIVA agent used for the CCIA 2015's paper
+"""
+Created on Abr 6, 2016
+This sensorimor system defines the DIVA agent used for the Epirob 2017's paper
+but using divapy
 @author: Juan Manuel Acevedo Valle
-'''
+"""
 
-# import sys
-# import wave
+from matplotlib import animation
+import subprocess as sp
+from scipy.io.wavfile import write
 import math
 import numpy as np
 from scipy.integrate import odeint
 from scipy import linspace
-from .Diva2015a import DivaProprio2015a
+from divapy import Diva
 import matplotlib.pyplot as plt
-# ------------------------------------------ from matplotlib.figure import Figure
-
-# from matplotlib.animation import Animation
-# from scipy.interpolate.interpolate_wrapper import block
 
 import Tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [532.0, 1656.0, 1.0],
                   'ae': [667.0, 1565.0, 1.0], 'A': [661.0, 1296.0, 1.0], 'a': [680.0, 1193.0, 1.0],
                   'b': [643.0, 1019.0, 1.0], 'c': [480.0, 857.0, 1.0], 'U': [395.0, 1408.0, 1.0],
                   'u': [386.0, 1587.0, 1.0], 'E': [519.0, 1408.0, 1.0]}
 
+# Write down german vowels here
 diva_output_scale = [100.0, 500.0, 1500.0, 3000.0]
 
-def motorDynamics(y, t, self, m):
-    dumpingFactor = 1.01
-    w0 = 2 * math.pi / 0.01
-
-    dy1 = y[13]
-    dy2 = y[14]
-    dy3 = y[15]
-    dy4 = y[16]
-    dy5 = y[17]
-    dy6 = y[18]
-    dy7 = y[19]
-    dy8 = y[20]
-    dy9 = y[21]
-    dy10 = y[22]
-    dy11 = y[23]
-    dy12 = y[24]
-    dy13 = y[25]
-
-    dy14 = -2 * dumpingFactor * w0 * y[13] - (pow(w0, 2)) * y[0] + (pow(w0, 2)) * m[0]
-    dy15 = -2 * dumpingFactor * w0 * y[14] - (pow(w0, 2)) * y[1] + (pow(w0, 2)) * m[1]
-    dy16 = -2 * dumpingFactor * w0 * y[15] - (pow(w0, 2)) * y[2] + (pow(w0, 2)) * m[2]
-    dy17 = -2 * dumpingFactor * w0 * y[16] - (pow(w0, 2)) * y[3] + (pow(w0, 2)) * m[3]
-    dy18 = -2 * dumpingFactor * w0 * y[17] - (pow(w0, 2)) * y[4] + (pow(w0, 2)) * m[4]
-    dy19 = -2 * dumpingFactor * w0 * y[18] - (pow(w0, 2)) * y[5] + (pow(w0, 2)) * m[5]
-    dy20 = -2 * dumpingFactor * w0 * y[19] - (pow(w0, 2)) * y[6] + (pow(w0, 2)) * m[6]
-    dy21 = -2 * dumpingFactor * w0 * y[20] - (pow(w0, 2)) * y[7] + (pow(w0, 2)) * m[7]
-    dy22 = -2 * dumpingFactor * w0 * y[21] - (pow(w0, 2)) * y[8] + (pow(w0, 2)) * m[8]
-    dy23 = -2 * dumpingFactor * w0 * y[22] - (pow(w0, 2)) * y[9] + (pow(w0, 2)) * m[9]
-    dy24 = -2 * dumpingFactor * w0 * y[23] - (pow(w0, 2)) * y[10] + (pow(w0, 2)) * m[10]
-    dy25 = -2 * dumpingFactor * w0 * y[24] - (pow(w0, 2)) * y[11] + (pow(w0, 2)) * m[11]
-    dy26 = -2 * dumpingFactor * w0 * y[25] - (pow(w0, 2)) * y[12] + (pow(w0, 2)) * m[12]
-
-    return [dy1, dy2, dy3, dy4, dy5, dy6, dy7, dy8, dy9, dy10, dy11, dy12, dy13, dy14, dy15, dy16, dy17, dy18, dy19,
-            dy20, dy21, dy22, dy23, dy24, dy25, dy26]
-
-
-class Diva2016a(DivaProprio2015a):
+class Diva2016b(object):
     def __init__(self):
-        DivaProprio2015a.__init__(self)
+        motor_names = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15',
+                       'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M26']
+        sensor_names = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
+        somato_names = ['P1']
+        n_motor = 26
+        n_sensor = 6
+        n_somato = 1
+        outputScale = [100.0, 500.0, 1500.0, 3000.0]
+        min_motor_values = np.array([-3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -0.25, -0.25, -0.25] * 2)
+        max_motor_values = np.array([3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1] * 2)
 
-        name = 'Diva2016a'
+        min_motor_values_init = np.array([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0] * 2)
+        max_motor_values_init = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] * 2)
+
+        min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        max_sensor_values = np.array([2.0, 2.0, 1.0, 2.0, 2.0, 1.0])
+
+        min_somato_values = np.array([0.])
+        max_somato_values = np.array([1.])
+        ts = 0.01
+
+        name = 'Diva2016b_py'
         self.name = name
 
-    def getMotorDynamics(self, sound=0):
+        self.ts = ts
+        self.time = linspace(0, .8, int(.8 / ts) + 1)
+        self.n_motor = n_motor
+        self.n_sensor = n_sensor
+        self.n_somato = n_somato
+        self.motor_names = motor_names
+        self.sensor_names = sensor_names
+        self.somato_names = somato_names
+
+        self.min_motor_values = min_motor_values
+        self.max_motor_values = max_motor_values
+        self.min_motor_values_init = min_motor_values_init
+        self.max_motor_values_init = max_motor_values_init
+        self.min_sensor_values = min_sensor_values
+        self.max_sensor_values = max_sensor_values
+        self.min_somato_values = min_somato_values
+        self.max_somato_values = max_somato_values
+
+        self.motor_command = [0.0] * n_motor
+        self.sensor_out = [0.0] * n_sensor
+        self.sensor_goal = [0.0] * n_sensor
+        self.somato_out = [0.0] * n_somato
+        self.somato_threshold = 0.6
+        self.competence_result = 0.0
+        self.sensor_instructor = np.empty((self.n_sensor,))
+        self.sensor_instructor.fill(np.nan)
+        self.synth = Diva()
+
+    def set_action(self, motor_command):
+        self.motor_command = motor_command
+
+    def getMotorDynamics(self, sound =0):
         if sound:
             ts = 0.005
         else:
@@ -101,23 +113,16 @@ class Diva2016a(DivaProprio2015a):
             self.art_states[nSamples1 - 1:, :] = art_states2
 
     def vocalize(self):
-        ts = self.ts;
-        perceptionWindowDuration = 0.38;
+        ts = self.ts
+        perceptionWindowDuration = 0.38
         perceptionTime = linspace(ts, perceptionWindowDuration, int(perceptionWindowDuration / ts))
         nPerceptionSamples = (len(perceptionTime))
         self.auditoryResult = [0.0] * 6
         proprioceptiveAv = [0.0] * 2
-        self.matlabSession.putvalue('art_states', self.art_states)
-        # self.matlabSession.run('save art_states.mat art_states')
-        self.matlabSession.run('mscript_Aud_Proprio')
-        auditory_states = self.matlabSession.getvalue('auditory_states')
-        self.auditory_states = auditory_states;
-        minaf = self.matlabSession.getvalue('minaf')
-        self.somato_out = minaf
-        '''print('audStates')
-        print(auditory_states)
-        print('minaf')
-        print(minaf)'''
+
+        auditory_states, tr_, tr__, af = self.synth.get_audsom(self.art_states,scale=True)
+        self.auditory_states = auditory_states
+        minaf = np.array([np.min(x) for x in af])
 
         # First perception time window
         for index in range(nPerceptionSamples):
@@ -148,7 +153,154 @@ class Diva2016a(DivaProprio2015a):
         self.somato_out = 0.0
         if ((proprioceptiveAv[0] < 0.0) or (proprioceptiveAv[1] < 0.0)):
             self.somato_out = 1.0
-        self.sensor_out = self.auditoryResult;
+        self.sensor_out = self.auditoryResult
+
+    def executeMotorCommand(self):
+        self.getMotorDynamics()
+        self.vocalize()
+
+    def plotArticulatoryEvolution(self, arts):
+        for index in range(len(arts)):
+            plt.plot(self.time, self.art_states[:, arts[index] - 1])
+            plt.hold(True)
+        plt.show()
+
+    def plotAuditoryOutput(self, audOut):
+        for index in range(len(audOut)):
+            plt.plot(self.time, self.auditory_states[:, audOut[index] - 1])
+            plt.hold(True)
+        plt.show()
+
+    def plotsomato_out(self):
+        plt.plot(self.time, self.somato_out)
+        plt.show
+
+    def getVocaltractShape(self, art_states, returnShape=0):
+        auditory_states = self.synth.get_audsom(self.art_states,scale=True)
+        tr_,tr__,outline,tr___ = auditory_states
+        if returnShape:
+            return outline
+        else:
+            self.vocalTractshape = outline
+
+    def plotVocalTractShape(self, time, plot=1):
+        self.getVocaltractShape(self.art_states)
+        ts = self.ts
+        index = np.round(time / ts)
+        figVocalTract = plt.figure()
+        axVocalTract = figVocalTract.add_subplot(111, autoscale_on=False, xlim=(-75, 225), ylim=(-200, 100))
+        axVocalTract.plot(np.real(self.vocalTractshape[:, index]), np.imag(self.vocalTractshape[:, index]))
+        figVocalTract.show()
+        '''try:
+            input('Press any key to continue...')
+        except:
+            pass'''
+
+    def drawVocalTractShape_index(self, index, ax):
+        ax.plot(np.real(self.vocalTractshape[:, index]), np.imag(self.vocalTractshape[:, index]))
+        '''try:
+            input('Press any key to continue...')
+        except:
+            pass'''
+
+    def getVocalizationVideo(self, show=0, file_name='vt', keep_audio=0):
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=1 / 0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
+        figVocalTract = plt.figure()
+
+        art_states = self.getSoundWave(save=1, returnArtStates=1, file_name=file_name)
+
+        outline = self.getVocaltractShape(art_states, returnShape=1)
+        nSamples = art_states.shape[0]
+        print(nSamples)
+        sequence = []
+        for index in range(nSamples):
+            sequence.append((plt.plot(np.real(outline[:, index]), np.imag(outline[:, index]))))
+        im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False, blit=True)
+        im_ani.save(file_name + '.mp4', writer=writer, codec="libx264")
+        command = ["ffmpeg",
+                   '-i', file_name + '.wav',
+                   '-i', file_name + '.mp4',
+                   '-strict', '-2',
+                   '-c:v', "libx264", file_name + '_audio.mp4']
+        sp.call(command)
+        if keep_audio == 0:
+            command = ["rm",
+                       file_name + '.wav',
+                       file_name + '.mp4']
+            sp.call(command)
+        if (show):
+            figVocalTract.show()
+
+    def getVideo(self, art_states, show=0, file_name='vt', keep_audio=0):
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=1 / 0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
+        figVocalTract = plt.figure()
+
+        self.get_sound_wave(art_states, save=1, file_name=file_name)
+
+        outline = self.getVocaltractShape(art_states, returnShape=1)
+        nSamples = art_states.shape[0]
+
+        print(nSamples)
+        sequence = []
+        for index in range(nSamples):
+            sequence.append((plt.plot(np.real(outline[:, index]), np.imag(outline[:, index]))))
+        im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False, blit=True)
+        im_ani.save(file_name + '.mp4', writer=writer, codec="libx264")
+        command = ["ffmpeg",
+                   '-i', file_name + '.wav',
+                   '-i', file_name + '.mp4',
+                   '-c:v', "libx264", '-strict', '-2', file_name + '_audio.mp4']
+        sp.call(command)
+        if keep_audio == 0:
+            command = ["rm",
+                       file_name + '.wav',
+                       file_name + '.mp4']
+            sp.call(command)
+        if (show):
+            figVocalTract.show()
+        else:
+            del figVocalTract
+
+    def get_sound_wave(self, art_states, play=0, save=0, file_name='vt'):  # based on explauto
+        self.soundWave = self.synth.get_sound(art_states)
+        if (play):
+            self.playSoundWave()
+        if (save):
+            scaled = np.int16(self.soundWave / np.max(np.abs(self.soundWave)) * 32767)
+            write(file_name + '.wav', 11025, scaled)
+
+    def getSoundWave(self, play=0, save=0, returnArtStates=0, file_name='vt'):  # based on explauto
+        art_states = self.getMotorDynamics(sound=1)
+        self.soundWave = self.synth.get_sound(art_states)
+        if (play):
+            self.playSoundWave()
+        if (save):
+            scaled = np.int16(self.soundWave / np.max(np.abs(self.soundWave)) * 32767)
+            write(file_name + '.wav', 11025, scaled)
+        if (returnArtStates):
+            return art_states
+
+    def plotSoundWave(self, ax):
+        ax.plot(np.float128(xrange(0, len(self.soundWave))) * self.ts, self.soundWave)
+
+    def playSoundWave(self):  # keep in mind that DivaMatlab works with ts=0.005
+        import pyaudio
+        self.pa = pyaudio.PyAudio()  # If pa and stream are not elements of the self object then sound does not play
+        self.stream = self.pa.open(format=pyaudio.paFloat32,
+                                   channels=1,
+                                   rate=11025,
+                                   output=True)
+        self.stream.start_stream()
+        self.stream.write(self.soundWave.astype(np.float32).tostring())
+        self.stream.close()
+
+    def releaseAudioDevice(self):  # any sound in the buffer will be removed
+        try:
+            self.pa.terminate()
+        except:
+            pass
 
     def interactiveSystem(self):
         ### Main window container
@@ -406,18 +558,12 @@ class Diva2016a(DivaProprio2015a):
         self.btn_execute_m.pack(side=tk.LEFT, fill=tk.NONE, expand=0)
 
 
-class Instructor_(Diva2016a):
+class Instructor_(Diva2016b):
     def __init__(self):
         import os
         from ..DataManager.SimulationData import load_sim_h5
-        # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
-        #     for s in ss:
-        #         system.set_action(infer_motor(0, s))
-        #         system.executeMotorCommand()
-        #         data.appendData(system)
-        Diva2016a.__init__(self)
+        Diva2016b.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
         self.instructor_file = abs_path + '/datasets/german_dataset_1.h5'
 
         self.data = load_sim_h5(self.instructor_file)
@@ -456,10 +602,16 @@ class Instructor(object):
     def __init__(self):
         import os
         from ..DataManager.SimulationData import load_sim_h5
+        # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
+        #     for s in ss:
+        #         system.set_action(infer_motor(0, s))
+        #         system.executeMotorCommand()
+        #         data.appendData(system)
         abs_path = os.path.dirname(os.path.abspath(__file__))
+        # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
         self.instructor_file = abs_path + '/datasets/german_dataset_3.h5'
 
-        self.name = 'diva2017a-Nomatlab'
+        self.name = 'diva2017a-memorydata'
         self.data = load_sim_h5(self.instructor_file)
         self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
@@ -493,3 +645,39 @@ class Instructor(object):
 
         self.data = load_sim_h5(self.instructor_file)
         self.n_units = len(self.data.sensor.data.index)
+
+
+def motorDynamics(y, t, self, m):
+    dumpingFactor = 1.01
+    w0 = 2 * math.pi / 0.01
+
+    dy1 = y[13]
+    dy2 = y[14]
+    dy3 = y[15]
+    dy4 = y[16]
+    dy5 = y[17]
+    dy6 = y[18]
+    dy7 = y[19]
+    dy8 = y[20]
+    dy9 = y[21]
+    dy10 = y[22]
+    dy11 = y[23]
+    dy12 = y[24]
+    dy13 = y[25]
+
+    dy14 = -2 * dumpingFactor * w0 * y[13] - (pow(w0, 2)) * y[0] + (pow(w0, 2)) * m[0]
+    dy15 = -2 * dumpingFactor * w0 * y[14] - (pow(w0, 2)) * y[1] + (pow(w0, 2)) * m[1]
+    dy16 = -2 * dumpingFactor * w0 * y[15] - (pow(w0, 2)) * y[2] + (pow(w0, 2)) * m[2]
+    dy17 = -2 * dumpingFactor * w0 * y[16] - (pow(w0, 2)) * y[3] + (pow(w0, 2)) * m[3]
+    dy18 = -2 * dumpingFactor * w0 * y[17] - (pow(w0, 2)) * y[4] + (pow(w0, 2)) * m[4]
+    dy19 = -2 * dumpingFactor * w0 * y[18] - (pow(w0, 2)) * y[5] + (pow(w0, 2)) * m[5]
+    dy20 = -2 * dumpingFactor * w0 * y[19] - (pow(w0, 2)) * y[6] + (pow(w0, 2)) * m[6]
+    dy21 = -2 * dumpingFactor * w0 * y[20] - (pow(w0, 2)) * y[7] + (pow(w0, 2)) * m[7]
+    dy22 = -2 * dumpingFactor * w0 * y[21] - (pow(w0, 2)) * y[8] + (pow(w0, 2)) * m[8]
+    dy23 = -2 * dumpingFactor * w0 * y[22] - (pow(w0, 2)) * y[9] + (pow(w0, 2)) * m[9]
+    dy24 = -2 * dumpingFactor * w0 * y[23] - (pow(w0, 2)) * y[10] + (pow(w0, 2)) * m[10]
+    dy25 = -2 * dumpingFactor * w0 * y[24] - (pow(w0, 2)) * y[11] + (pow(w0, 2)) * m[11]
+    dy26 = -2 * dumpingFactor * w0 * y[25] - (pow(w0, 2)) * y[12] + (pow(w0, 2)) * m[12]
+
+    return [dy1, dy2, dy3, dy4, dy5, dy6, dy7, dy8, dy9, dy10, dy11, dy12, dy13, dy14, dy15, dy16, dy17, dy18, dy19,
+            dy20, dy21, dy22, dy23, dy24, dy25, dy26]

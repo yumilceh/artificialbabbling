@@ -38,7 +38,8 @@ class IGMM(GMMmix):
                        'max_step_components': max_step_components,
                        'max_components': max_components,
                        'a_split': a_split,
-                       'forgetting_factor': forgetting_factor}
+                       'forgetting_factor': forgetting_factor,
+                       'plot': False}
 
         GMMmix.__init__(self, min_components)
 
@@ -57,9 +58,9 @@ class IGMM(GMMmix):
             if self.params['plot']:
                 self.ax_old[0].clear()
                 self.ax_old[0].set_title('Old Model')
-                self.fig_old, self.ax_old[0] = self.plot_gmm_projection(self.fig_old, self.ax_old[0],
-                                                                        self.params['plot_dims'][0],
-                                                                        self.params['plot_dims'][1])
+                self.ax_old[0] = self.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                        self.params['plot_dims'][1],
+                                                                        self.ax_old[0])
                 self.ax_old[0].autoscale_view()
 
             self.short_term_model = GMMmix(self.params['init_components'])
@@ -87,13 +88,13 @@ class IGMM(GMMmix):
                 self.ax_old[1].set_title('Short Term Model')
                 self.ax_old[2].set_title('Current Term Model')
 
-                self.fig_old, self.ax_old[1] = self.short_term_model.plot_gmm_projection(self.fig_old, self.ax_old[1],
-                                                                                         self.params['plot_dims'][0],
-                                                                                         self.params['plot_dims'][1])
+                self.ax_old[1] = self.short_term_model.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                           self.params['plot_dims'][1],
+                                                                           axes=self.ax_old[1])
                 self.ax_old[1].autoscale_view()
-                self.fig_new, self.ax_old[2] = self.plot_gmm_projection(self.fig_old, self.ax_old[2],
-                                                                        self.params['plot_dims'][0],
-                                                                        self.params['plot_dims'][1])
+                self.ax_old[2] = self.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                        self.params['plot_dims'][1],
+                                                                        axes=self.ax_old[2])
                 self.ax_old[2].autoscale_view()
 
                 self.fig_old.canvas.draw()
@@ -102,17 +103,17 @@ class IGMM(GMMmix):
             self.short_term_model = GMMmix(self.model.n_components)
             self.initialized = True
             if self.params['plot']:
-                self.fig_old, self.ax_old[0] = self.plot_gmm_projection(self.fig_old, self.ax_old[0],
-                                                                        self.params['plot_dims'][0],
-                                                                        self.params['plot_dims'][1])
+                self.ax_old[0] = self.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                        self.params['plot_dims'][1],
+                                                                        axes=self.ax_old[0])
                 self.ax_old[0].autoscale_view()
-                self.fig_old, self.ax_old[1] = self.plot_gmm_projection(self.fig_old, self.ax_old[1],
-                                                                        self.params['plot_dims'][0],
-                                                                        self.params['plot_dims'][1])
+                self.ax_old[1] = self.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                        self.params['plot_dims'][1],
+                                                                        axes=self.ax_old[1])
                 self.ax_old[1].autoscale_view()
-                self.fig_old, self.ax_old[2] = self.plot_gmm_projection(self.fig_old, self.ax_old[2],
-                                                                        self.params['plot_dims'][0],
-                                                                        self.params['plot_dims'][1])
+                self.ax_old[2] = self.plot_gmm_projection(self.params['plot_dims'][0],
+                                                                        self.params['plot_dims'][1],
+                                                                        axes=self.ax_old[2])
                 self.ax_old[2].autoscale_view()
                 self.fig_old.canvas.draw()
 
@@ -298,7 +299,13 @@ class IGMM(GMMmix):
 
 
 def get_KL_divergence(gauss1, gauss2):
-    detC1 = LA.det(gauss1['covariance'])
+    try:
+        detC1 = LA.det(gauss1['covariance'])
+    except ValueError:
+        x = raw_input("Broken")
+        pass
+        pass
+
     detC2 = LA.det(gauss2['covariance'])
     logC2C1 = np.log(detC2 / detC1)
 

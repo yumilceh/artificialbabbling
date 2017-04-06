@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
     if __name__ == '__main__':
 
-        directory = 'experiment_4/'
+        directory = 'experiment_1_cmf/'
         data_files = os.listdir(directory)
 
         # Group by:
