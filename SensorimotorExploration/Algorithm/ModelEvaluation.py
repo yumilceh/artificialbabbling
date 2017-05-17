@@ -98,7 +98,7 @@ class SM_ModelEvaluation(object):
                 self.agent.sensor_goal = y_
                 self.model.get_action(self.agent)
                 self.agent.getMotorDynamics()
-                self.agent.executeMotorCommand()
+                self.agent.execute_action()
                 self.comp_func(self.agent)
                 validation_trainSet_data.appendData(self.agent)
                 progress = progress + 1;
@@ -117,7 +117,7 @@ class SM_ModelEvaluation(object):
 
             self.agent.sensor_goal = y_
             self.model.get_action(self.agent)
-            self.agent.executeMotorCommand()
+            self.agent.execute_action()
             self.comp_func(self.agent)
             validation_valSet_data.appendData(self.agent)
             progress = progress + 1;

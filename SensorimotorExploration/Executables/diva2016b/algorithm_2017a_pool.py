@@ -3,23 +3,21 @@ Created on Mar 17, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
-from multiprocessing import Process
-import time
-import itertools
 import datetime
+import itertools
 import os
+import time
+from multiprocessing import Process
 
-
+from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
+from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
+from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
 from SensorimotorExploration.Systems.Diva2016b import Diva2016b as System
 from SensorimotorExploration.Systems.Diva2016b import Instructor
-from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
-from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
-from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
-
 from model_configurations import model_, comp_func
 
-directory = 'experiment_1_cb'
+directory = 'experiment_1_cmf'
 
 # Models
 f_sm_key = 'igmm_sm'
@@ -105,7 +103,7 @@ if __name__ == '__main__':
     mode_ops = ['social','autonomous']
 
     processes = []
-    max_processes = 2
+    max_processes = 4
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
         idx2 = idx

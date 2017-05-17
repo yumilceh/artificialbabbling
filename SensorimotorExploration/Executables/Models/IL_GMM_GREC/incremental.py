@@ -5,17 +5,15 @@ Created on Sep 13, 2016
 '''
 
 if __name__ == '__main__':
-    import os,sys
+    import sys
     import itertools
     
     sys.path.append("../../")
     
     import numpy as np
-    import matplotlib.pyplot as plt
     from matplotlib.pyplot  import draw, show
 
-    from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM
-    from SensorimotorExploration.DataManager.PlotTools import initializeFigure
+    from SensorimotorExploration.Models.GeneralModels.Trash.ILGMM_GREC import ILGMM
 
     # Number of samples per component
     n_samples = 500

@@ -75,7 +75,7 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------ 
         # set_motor_command(agent, fa_SM.infer(fa_SM.out_dims,fa_SM.in_dims,y_.astype(float)))
         #---------------------------------------------- agent.getMotorDynamics()
-        #------------------------------------------- agent.executeMotorCommand()
+        #------------------------------------------- agent.execute_action()
         #-------------------------------------- get_competence_Moulin2013(agent)
         #---------------------------- validation_trainSet_data.appendData(agent)
         #-------------------------------------------------- progress=progress+1;
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         
         set_motor_command(agent, fa_SM.infer(fa_SM.out_dims,fa_SM.in_dims,y_.astype(float)))
         agent.getMotorDynamics()
-        agent.executeMotorCommand()
+        agent.execute_action()
         get_competence_Moulin2013(agent)
         validation_valSet_data.appendData(agent)
         progress=progress+1;

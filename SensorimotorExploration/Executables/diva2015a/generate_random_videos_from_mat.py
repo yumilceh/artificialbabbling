@@ -58,7 +58,7 @@ if __name__ == '__main__' and True:
             motor_command_tmp[23:-1] = motor_data[16:,index].flatten()
     
             system.set_action(motor_command_tmp)
-            system.executeMotorCommand()
+            system.execute_action()
             system.getVocalizationVideo(show=0, file_name=directory + 'vt' + str(i) ) #no extension in files
     
         print('Working in ' + directory)

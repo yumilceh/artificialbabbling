@@ -3,14 +3,12 @@ Created on Mar 8, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
-from numpy import linspace
-from numpy import random as np_rnd
-import itertools
 import datetime
+import itertools
 
 if __name__ == '__main__':
     #  Adding the projects folder to the path##
-    import os, sys, random
+    import os
 
     # sys.path.append("../../")
 
@@ -18,7 +16,7 @@ if __name__ == '__main__':
     from SensorimotorExploration.Systems.Parabola import ParabolicRegion as System
     from SensorimotorExploration.Systems.Parabola import Instructor
     from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
-    from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
+    from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
 
 

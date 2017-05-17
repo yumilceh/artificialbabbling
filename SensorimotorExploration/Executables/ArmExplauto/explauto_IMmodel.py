@@ -50,14 +50,14 @@ if __name__ == '__main__':
     
     for m in get_random_motor_set(system, init_samples):
         system.set_action(m)
-        system.executeMotorCommand()        
+        system.execute_action()        
         simulation_data.appendData(system)
         sm_model.train(simulation_data)
         
     for s_g in get_random_sensor_set(system, init_samples):
         system.sensor_goal = s_g
         sm_model.get_action(system)
-        system.executeMotorCommand()        
+        system.execute_action()        
         simulation_data.appendData(system)
         sm_model.train(simulation_data)
         im_model.train(simulation_data)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         system.sensor_goal = im_model.get_goal(system)
         
         sm_model.get_action(system)
-        system.executeMotorCommand() 
+        system.execute_action() 
         get_competence(system)
         simulation_data.appendData(system)
         

@@ -3,15 +3,15 @@ Created on Mar 13, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
-from numpy import linspace
-from numpy import random as np_rnd
 import datetime
+
+from numpy import random as np_rnd
 
 now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
 
 if __name__ == '__main__':
     #  Adding the projects folder to the path##
-    import os, sys, random
+    import random
 
     # sys.path.append("../../")
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     from SensorimotorExploration.Systems.Diva2016a import Diva2016a as System
     from SensorimotorExploration.Systems.Diva2016a import Instructor
     from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
-    from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
+    from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
 

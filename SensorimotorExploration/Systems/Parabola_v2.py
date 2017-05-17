@@ -22,30 +22,37 @@ class CustomObject:
 class ParabolicRegion:
     def __init__(self, sigma_noise=0.0000001):
 
-        a = 2.0
+        f = 0.
+
+        a = 2.0 + f
         b = 3.0
-        c = 3.0
-        d = 3.5
-        e = 1.5
+        c = 3.0 + f
+        d = 3.5 + f
+        e = 1.5 + f
+
         m1 = 1
         m2 = 1
 
         motor_names = ['M1', 'M2']
         sensor_names = ['S1', 'S2']
-        somato_names = ['P1']
+        cons_names = ['P1']
         n_motor = 2
         n_sensor = 2
-        n_somato = 1
+        n_somato = 4
+        n_cons = 1
 
         min_motor_values = np.array([0.0, 0.0])
         max_motor_values = np.array([b * 2.0, b * 2.0])
 
-        min_sensor_values = np.array([0.0, 0.0])
-        max_sensor_values = np.array([b * 2.0, b ** 2])
+        min_sensor_values = np.array([0.0, 0.0 + f])
+        max_sensor_values = np.array([b * 2.0, b ** 2 + f])
 
-        min_somato_values = np.array([0.])
-        max_somato_values = np.array([1.])
-        somato_threshold = np.array([0.5])
+        # min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0])
+        # max_sensor_values = np.array([9.0, 9.0, 9.0, 9.0])
+
+        min_cons_values = np.array([0])
+        max_cons_values = np.array([1])
+        cons_threshold = np.array([0.6])
 
         name = 'ParabolicRegion'
         self.name = name
@@ -56,57 +63,123 @@ class ParabolicRegion:
         self.params.c = c
         self.params.d = d
         self.params.e = e
+        self.params.f = f
+
         self.params.m1 = m1
         self.params.m2 = m2
         self.params.sigma_noise = sigma_noise
 
         self.n_motor = n_motor
         self.n_sensor = n_sensor
-        self.n_somato = n_somato
+        self.n_cons = n_cons
         self.motor_names = motor_names
         self.sensor_names = sensor_names
-        self.somato_names = somato_names
+        self.cons_names = cons_names
 
         self.min_motor_values = min_motor_values
         self.max_motor_values = max_motor_values
         self.min_sensor_values = min_sensor_values
         self.max_sensor_values = max_sensor_values
-        self.min_somato_values = min_somato_values
-        self.max_somato_values = max_somato_values
-        self.somato_threshold = somato_threshold
+        self.min_cons_values = min_cons_values
+        self.max_cons_values = max_cons_values
+        self.cons_threshold = cons_threshold
 
         self.motor_command = np.array([0.0] * n_motor)
         self.sensor_out = np.array([0.0] * n_sensor)
         self.sensor_goal = np.array([0.0] * n_sensor)
         self.somato_out = np.array([0.0] * n_somato)
+        self.cons_out = np.array([0.0] * n_cons)
         self.competence_result = 0.0
-        self.sensor_instructor = np.empty((self.n_sensor,))
-        self.sensor_instructor.fill(np.nan)
+        self.interaction_result = 0.
+
+    def set_f(self, f):
+        a = 2.0 + f
+        b = 3.0
+        c = 3.0 + f
+        d = 3.5 + f
+        e = 1.5 + f
+        self.params.a = a
+        self.params.b = b
+        self.params.c = c
+        self.params.d = d
+        self.params.e = e
+        self.params.f = f
+
+        self.min_sensor_values = np.array([0.0, 0.0 + f])
+        self.max_sensor_values = np.array([b * 2.0, b ** 2 + f])
+
 
     def set_action(self, motor_command):
         self.motor_command = self.boundMotorCommand(motor_command)
 
-    def executeMotorCommand_unconstrained(self):
+    def execute_action_unconstrained(self):
         self.motor_command = self.boundMotorCommand(self.motor_command)
 
         a = self.params.a
         b = self.params.b
         c = self.params.c
 
-        self.somato_out = 0.0
+        self.cons_out = 0.0
         self.sensor_out[0] = self.motor_command[0]
-        self.sensor_out[1] = math.pow(self.motor_command[1] - b, 2.0)
+        self.sensor_out[1] = math.pow(self.motor_command[1] - b, 2.0) + self.params.f
 
-    def executeMotorCommand(self):
+    def execute_action(self):
         self.motor_command = self.boundMotorCommand(self.motor_command)
 
-        self.executeMotorCommand_unconstrained()
+        self.execute_action_unconstrained()
         self.applyConstraints()
 
         self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
         self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
 
         self.applyConstraints()
+
+        # SOMATO OUT
+        a = self.params.a
+        b = self.params.b
+        c = self.params.c
+        d = self.params.d
+        e = self.params.e
+        f = self.params.f
+
+        m1 = self.params.m1
+        m2 = self.params.m2
+
+        r = c - a
+        point = CustomObject()
+        point.x = self.sensor_out[0]
+        point.y = self.sensor_out[1]
+
+        # Checking inner Parabolic Region Condition
+        parabola = CustomObject()
+        parabola.a = 1.0
+        parabola.b = -2.0 * b
+        parabola.c = b ** 2 + f
+
+        ##Checking if the sensorimotor result is insede of the constrained circle
+        circle = CustomObject()
+        circle.x_c = b
+        circle.y_c = a
+        circle.r = r
+
+        ## Checking if the sensorimotor result is inside of thecontrained region between two parallel lines
+        up_line = CustomObject()
+        up_line.y_0 = d
+        up_line.m = m1
+
+        down_line = CustomObject()
+        down_line.y_0 = e
+        down_line.m = m2
+
+        foo1, foo2, som1 = closestPointInParabola(parabola=parabola, point=point)
+        foo1, foo2, som2 = closestPointInCircle(circle=circle, point=point)
+        foo1, foo2, som3 = closestPointToLine(line=down_line, point=point)
+        foo1, foo2, som4 = closestPointToLine(line=up_line, point=point)
+        self.somato_out[0] = som1
+        self.somato_out[1] = som2
+        self.somato_out[2] = som3
+        self.somato_out[3] = som4
+
 
         # ---------------------------------------- while self.applyConstraints():
         # -------------------------------------------------------------- pass
@@ -117,6 +190,7 @@ class ParabolicRegion:
         c = self.params.c
         d = self.params.d
         e = self.params.e
+        f = self.params.f
 
         m1 = self.params.m1
         m2 = self.params.m2
@@ -135,7 +209,7 @@ class ParabolicRegion:
         parabola = CustomObject()
         parabola.a = 1.0
         parabola.b = -2.0 * b
-        parabola.c = b ** 2
+        parabola.c = b ** 2 + f
 
         ##Checking if the sensorimotor result is insede of the constrained circle
         circle = CustomObject()
@@ -154,28 +228,28 @@ class ParabolicRegion:
         down_line.m = m2
 
         uppest_line = CustomObject()
-        uppest_line.y_0 = self.max_sensor_values[1]
+        uppest_line.y_0 = self.max_sensor_values[1]+f
         uppest_line.m = 0.0
 
         if circle_condition < math.pow(r, 2.0):  # Circle
             changed = True
-            self.somato_out = 1.0
-            x, y = closestPointInCircle(circle, point)
+            self.cons_out = 1.0
+            x, y, foo = closestPointInCircle(circle, point)
             point.x = x
             point.y = y
 
         # if math.pow(self.motor_command[0]-b,2.0) > self.sensor_out[1]: #Parabola
-        if math.pow(self.sensor_out[0] - b, 2.0) > self.sensor_out[1]:  # Parabola
+        if math.pow(self.sensor_out[0] - b, 2.0) + f > self.sensor_out[1]:  # Parabola
             changed = True
             onParabola = True
-            self.somato_out = 1.0
-            x, y = closestPointInParabola(parabola, point)
+            self.cons_out = 1.0
+            x, y, foo = closestPointInParabola(parabola, point)
             point.x = x
             point.y = y
 
         if (checkLineCondition(up_line, point) == -1 and checkLineCondition(down_line, point) == 1):  # Lines
             changed = True
-            self.somato_out = 1.0
+            self.cons_out = 1.0
             x1, y1, distance1 = closestPointToLine(up_line, point)
             x2, y2, distance2 = closestPointToLine(down_line, point)
 
@@ -220,7 +294,7 @@ class ParabolicRegion:
 
         if checkLineCondition(uppest_line, point) == 1:  # Upper limit
             changed = True
-            self.somato_out = 1.0
+            self.cons_out = 1.0
             x, y, distance = closestPointToLine(uppest_line, point)
             point.x = x
             point.y = y
@@ -229,7 +303,7 @@ class ParabolicRegion:
                 point.x = x
                 point.y = y
             elif onParabola:
-                x, y = closestPointInParabola(parabola, point)
+                x, y, foo = closestPointInParabola(parabola, point)
                 point.x = x
                 point.y = y
 
@@ -251,7 +325,10 @@ class ParabolicRegion:
 
         return motor_command
 
-    def drawSystem(self, fig, axes):
+    def drawSystem(self, axes=None):
+        if axes is None:
+            fig, axes = plt.subplots(1,1)
+        plt.sca(axes)
 
         min_sensor_values = self.min_sensor_values
         max_sensor_values = self.max_sensor_values
@@ -261,14 +338,14 @@ class ParabolicRegion:
         c = self.params.c
         d = self.params.d
         e = self.params.e
-
+        f = self.params.f
         m1 = self.params.m1
         m2 = self.params.m2
 
         r = c - a
 
         x_p = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
-        y_p = (x_p - b) ** 2
+        y_p = (x_p - b) ** 2 +f
 
         circle = plt.Circle((b, a), r, color='red')
 
@@ -278,7 +355,6 @@ class ParabolicRegion:
         x_l2 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
         y_l2 = e + m2 * x_l2
 
-        plt.figure(fig.number)
         plt.sca(axes)
 
         plt.plot(x_l1, y_l1, "--r")
@@ -292,8 +368,6 @@ class ParabolicRegion:
         axes.set_ylim([-1.0, 11.0])
 
         plt.plot(x_p, y_p, "b")
-        return fig, axes
-
 
 class Instructor(ParabolicRegion):
     def __init__(self):
@@ -306,11 +380,23 @@ class Instructor(ParabolicRegion):
         #         data.appendData(system)
         ParabolicRegion.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
+        self.intructor_file = abs_path + '/datasets/instructor_parabola_f1_1.h5'
         self.data = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
+        self.unit_threshold = 0.15 # 0.3
 
-        self.unit_threshold = 0.4  # 0.3
+    def plot(self, axes=None):
+        if axes is None:
+            fig, axes = plt.subplots(1,1)
+        plt.sca(axes)
+        x=[]
+        y=[]
+        for i in range(self.n_units):
+            self.set_action(self.data.motor.data.iloc[i])
+            self.execute_action()
+            x += [self.sensor_out[0]]
+            y += [self.sensor_out[1]]
+        plt.plot(x,y,'o')
 
 
     def interaction(self, sensor):
@@ -319,11 +405,10 @@ class Instructor(ParabolicRegion):
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold:
             self.set_action(self.data.motor.data.iloc[min_idx])
-            self.executeMotorCommand()
+            self.execute_action()
             return 1, self.sensor_out.copy()
-        tmp_rtn = np.empty((self.n_sensor,))
-        tmp_rtn.fill(np.nan)
-        return 0, tmp_rtn
+        return 0, np.zeros((self.n_sensor,))
+
 
     def get_distances(self, sensor):
         dist = []
@@ -334,7 +419,7 @@ class Instructor(ParabolicRegion):
 
     def infer_motor(self, sensor_goal):
         m1 = sensor_goal[0]
-        m2 = np.sqrt(sensor_goal[1]) + 3
+        m2 = np.sqrt(sensor_goal[1])+3
         return np.array([m1, m2])
 
 
@@ -363,7 +448,7 @@ def closestPointInParabola(parabola, point):  # Parabola: y=ax^2+bx+c
             d_tmp = distance
             x = x_val
             y = y_val
-    return x, y
+    return x, y, d_tmp
 
 
 def intersectionTwoLines(line1, line2):
@@ -410,7 +495,8 @@ def closestPointInCircle(circle, point):
     theta = math.atan2(y - y_c, x - x_c)
     x_p = x_c + r * math.cos(theta)
     y_p = y_c + r * math.sin(theta)
-    return x_p, y_p
+    distance = math.sqrt((x - x_p) ** 2 + (y - y_p) ** 2)
+    return x_p, y_p, distance
 
 
 def checkLineCondition(line, point):

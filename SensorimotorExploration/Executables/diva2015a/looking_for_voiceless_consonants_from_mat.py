@@ -62,10 +62,10 @@ if __name__ == '__main__' and True:
             motor_command_tmp[23:-1] = motor_data[16:,i].flatten()
     
             system.set_action(motor_command_tmp)
-            system.executeMotorCommand()
+            system.execute_action()
             
             try:
-                system.getSoundWave(play=1)
+                system.get_sound(play=1)
             except:
                 print('Something wnet wrong with this configuration. No sound played.')
             

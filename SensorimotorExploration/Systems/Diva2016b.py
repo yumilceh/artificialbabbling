@@ -605,7 +605,7 @@ class Instructor(object):
         # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
         #     for s in ss:
         #         system.set_action(infer_motor(0, s))
-        #         system.executeMotorCommand()
+        #         system.execute_action()
         #         data.appendData(system)
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'

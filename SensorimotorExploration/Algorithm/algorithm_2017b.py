@@ -1,5 +1,5 @@
 """
-Created on Feb 20, 2017
+Created on May 13, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
@@ -7,7 +7,7 @@ import numpy as np
 import random
 from numpy import linalg
 import datetime
-from ..DataManager.SimulationData import SimulationDataSocial as SimulationData
+from ..DataManager.SimulationData import SimulationData_v2 as SimulationData
 from ..Algorithm.utils.functions import get_random_motor_set
 from ..Algorithm.utils.logging import write_config_log
 
@@ -47,6 +47,8 @@ class InteractionAlgorithm(object):
         self.params.n_experiments = n_experiments
         self.params.random_seed = random_seed
         self.params.g_im_initialization_method = g_im_initialization_method
+
+        self.params.expl_space = 'sensor' # 'sensor' for salient and 'somato' for haptic
 
         if n_save_data == -1:
             n_save_data = np.floor(n_experiments / 5)
@@ -94,7 +96,7 @@ class InteractionAlgorithm(object):
         self.run_()
 
     def run_(self):
-        if self.params.g_im_initialization_method is 'non-painful':
+        if self.params.g_im_initialization_method is 'non-painful': # Check this
             print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
             print('G_IM, init: Switching to all samples method')
             self.params.g_im_initialization_method = 'all'
@@ -109,9 +111,9 @@ class InteractionAlgorithm(object):
             self.learner.set_action(motor_commands[i, :])
             self.learner.execute_action()
             self.data.appendData(self.learner)
-            self.do_training(i, up_=['sm'])
+            self.do_training(i, up_=['sm','ss'])
 
-        self.do_training(i, up_=['sm','ss'], force=True, all=True)
+        self.do_training(i, up_=['sm','ss','cons'], force=True, all=True)
 
         print('G_SM initialized')
 
@@ -128,12 +130,12 @@ class InteractionAlgorithm(object):
             self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
-            self.do_training(i, up_=['im', 'ss','sm'])
+            self.do_training(i, up_=['im', 'cons','sm','ss'])
 
         print('G_IM initialized')
         if n_save_data is not np.nan:
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
-        self.do_training(i, up_=['sm', 'ss', 'im'], force=True, all=True)
+        self.do_training(i, up_=['sm','ss', 'cons', 'im'], force=True, all=True)
 
         print('SM Exploration ({}, {}), First evaluation of G_SM'.format(self.type, self.mode))
         self.do_evaluation(-1)
@@ -150,11 +152,11 @@ class InteractionAlgorithm(object):
             if self.type is 'proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
                                                                          self.models.f_sm,
-                                                                         self.models.f_ss)
+                                                                         self.models.f_cons)
                 self.models.f_sm.get_action(self.learner)
                 self.learner.execute_action()
                 self.get_competence(self.learner)
-                if self.learner.somato_out > self.learner.somato_threshold:
+                if self.learner.cons_out > self.learner.cons_threshold:
                     self.learner.competence_result = 0.7 * self.learner.competence_result
             else:
                 self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
@@ -164,7 +166,7 @@ class InteractionAlgorithm(object):
 
             self.data.appendData(self.learner)
             i += 1
-            self.do_training(i, up_=['sm', 'ss', 'im'])
+            self.do_training(i, up_=['sm','ss', 'cons', 'im'])
             self.do_evaluation(i)
 
             if self.instructor is not None:
@@ -175,19 +177,19 @@ class InteractionAlgorithm(object):
                         if self.type is 'proprio':
                             tmp_goal = self.learner.sensor_instructor
                             tmp_motor = self.models.f_sm.get_action(self.learner, sensor_goal=tmp_goal)
-                            tmp_somato = self.models.f_ss.predict_somato(self.learner, motor_command=tmp_motor)
-                            if tmp_somato < self.learner.somato_threshold:
+                            tmp_cons = self.models.f_cons.predict_cons(self.learner, motor_command=tmp_motor)
+                            if tmp_cons < self.learner.cons_threshold:
                                 self.learner.sensor_goal = tmp_goal
                                 self.learner.set_action(tmp_motor)
                                 self.learner.execute_action()
                                 self.get_competence(self.learner)
-                                if self.learner.somato_out > self.learner.somato_threshold:
+                                if self.learner.cons_out > self.learner.cons_threshold:
                                     self.learner.competence_result = 0.7 * self.learner.competence_result
 
                                 self.data.appendData(self.learner)
                                 i += 1
                                 # self.learner.sensor_instructor.fill(np.nan)
-                                self.do_training(i, up_=['sm', 'ss', 'im'])
+                                self.do_training(i, up_=['sm','ss', 'cons', 'im'])
                                 self.do_evaluation(i)
 
                         else:
@@ -198,7 +200,7 @@ class InteractionAlgorithm(object):
                             self.data.appendData(self.learner)
                             i += 1#
                             # self.learner.sensor_instructor.fill(np.nan)
-                            self.do_training(i, up_=['sm', 'ss', 'im'])
+                            self.do_training(i, up_=['sm','ss', 'cons', 'im'])
                             self.do_evaluation(i)
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
@@ -208,7 +210,7 @@ class InteractionAlgorithm(object):
                 self.data.saveData(self.data.file_prefix + 'sim_data.h5')
                 # ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
 
-        self.do_training(i, up_=['sm', 'ss', 'im'], force=True)
+        self.do_training(i, up_=['sm','ss', 'cons', 'im'], force=True)
 
         self.models.f_sm.set_sigma_explo_ratio(0.)
         self.do_evaluation(-1)
@@ -224,20 +226,24 @@ class InteractionAlgorithm(object):
     def get_im_init_data(self, method='all'):  # Non-painful is missing
         if method == 'non-zero':
             print('SM Exploration: IM initialization: Non-null sensory result considered')
-            sensor_goals = self.data.sensor.get_all().as_matrix()
+            sensor_data = getattr(self.data,self.params.expl_space)
+            sensor_goals = sensor_data.get_all().as_matrix()
             return sensor_goals[np.where(linalg.norm(sensor_goals, axis=1) > 0)[0], :]
 
         elif method == 'all':
             print('SM Exploration: IM initialization: All sensory result considered')
-            return self.data.sensor.get_all().as_matrix()
+            sensor_data = getattr(self.data, self.params.expl_space)
+            sensor_goals = sensor_data.get_all().as_matrix()
+            return sensor_goals
 
         elif method == 'non-painful':
             print('SM Exploration: IM initialization: Non-painful result considered')
-            somato_results = self.data.somato.get_all().as_matrix()
-            sensor_goals = self.data.sensor.get_all().as_matrix()
-            return sensor_goals[np.where(somato_results == 0.)[0], :]
+            cons_results = self.data.cons.get_all().as_matrix()
+            sensor_data = getattr(self.data,self.params.expl_space)
+            sensor_goals = sensor_data.get_all().as_matrix()
+            return sensor_goals[np.where(cons_results == 0.)[0], :]
 
-    def do_training(self, i, up_=['sm', 'ss', 'im'], force=False, all=False):
+    def do_training(self, i, up_=['sm','ss', 'cons', 'im'], force=False, all=False):
 
         """ Train Interest Model"""
         if 'im' in up_ and ((i + 1) % self.models.f_im.params.im_step == 0 or force):
@@ -248,10 +254,14 @@ class InteractionAlgorithm(object):
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
             self.models.f_sm.train_incremental(self.data, all = all)
+            
+        # if 'ss' in up_ and ((i + 1) % self.models.f_cons.params.sm_step == 0 or force):
+        #     # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
+        #     self.models.f_sm.train_incremental(self.data, all = all)
 
-        if hasattr(self.models, 'f_ss'):
-            if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.ss_step == 0 or force):
-                self.models.f_ss.train_incremental(self.data)
+        if hasattr(self.models, 'f_cons'):
+            if 'cons' in up_ and ((i + 1) % self.models.f_cons.params.ss_step == 0 or force):
+                self.models.f_cons.train_incremental(self.data)
 
     def do_evaluation(self, i, force=False, save_data=False):
         if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:
@@ -268,3 +278,9 @@ class InteractionAlgorithm(object):
             print('Evaluation finished.')
             self.evaluation.model.set_sigma_explo(tmp_sigma)
         #  print(self.evaluation.model.get_sigma_explo())
+
+    def set_expl_space(self, space = 'sensor'):
+        self.params.expl_space = space  # 'sensor' for salient and 'somato' for haptic
+        print('Exploration in {} space'.format(space))
+        if space is 'somato':
+            self.instructor = None

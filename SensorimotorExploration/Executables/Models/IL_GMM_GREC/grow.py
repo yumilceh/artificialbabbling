@@ -5,7 +5,7 @@ Created on Sep 13, 2016
 '''
 
 if __name__ == '__main__':
-    import os,sys
+    import sys
     import itertools
     
     sys.path.append("../../")
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from matplotlib.pyplot  import draw, show
 
-    from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM
+    from SensorimotorExploration.Models.GeneralModels.Trash.ILGMM_GREC import ILGMM
     from SensorimotorExploration.DataManager.PlotTools import initializeFigure
 
     # Number of samples per component

@@ -3,9 +3,11 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM as GMM
-import numpy as np
 import pandas as pd
+
+import numpy as np
+
+from SensorimotorExploration.Models.GeneralModels.Trash.ILGMM_GREC import ILGMM as GMM
 
 
 class PARAMS(object):

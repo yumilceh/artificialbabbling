@@ -72,7 +72,7 @@ class Algorithm_Random(object):
         
         for i in range(n_experiments):
             self.agent.set_action(motor_commands[i, :])
-            self.agent.executeMotorCommand()
+            self.agent.execute_action()
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 self.models.f_sm.train_incremental(self.data.simulation_data)
@@ -98,7 +98,7 @@ class Algorithm_Random(object):
         
         for i in range(n_motor_initialization):
             self.agent.set_action(motor_commands[i, :])
-            self.agent.executeMotorCommand()
+            self.agent.execute_action()
             self.data.initialization_data_sm_ss.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 self.models.f_sm.train_incremental(self.data.initialization_data_sm_ss)
@@ -116,7 +116,7 @@ class Algorithm_Random(object):
         for i in range(n_experiments):
             self.agent.sensor_goal = sensor_goals[i,:]
             self.models.f_sm.get_action(self.agent)
-            self.agent.executeMotorCommand()
+            self.agent.execute_action()
             get_competence(self.agent)
             self.data.simulation_data.appendData(self.agent)
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:

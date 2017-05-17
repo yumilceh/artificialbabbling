@@ -46,7 +46,7 @@ class ManualSimulation(object):
         self.system.set_action(motor_command)
         self.system.executeMotorCommand_unconstrained()
         plt.plot(self.system.sensor_out[0], self.system.sensor_out[1], "*k")
-        self.system.executeMotorCommand()
+        self.system.execute_action()
         plt.plot(self.system.sensor_out[0], self.system.sensor_out[1], "ob")
         
         self.fig = fig

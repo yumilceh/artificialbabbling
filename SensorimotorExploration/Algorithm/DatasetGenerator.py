@@ -60,7 +60,7 @@ class DatasetGenerator(object):
         
         for i in range(n_experiments):
             self.system.set_action(motor_commands[i, :])
-            self.system.executeMotorCommand()
+            self.system.execute_action()
             self.data.appendData(self.system)
             if (np.mod(i,n_save_data) == 0):
                 print('Saving data in sample {}'.format(i))

@@ -10,10 +10,10 @@ Created on Feb 20, 2017
 import numpy as np
 from numpy import linalg
 import datetime  # copy.deepcopy
-from ..DataManager.SimulationData import SimulationData
-from ..Algorithm.utils.functions import get_random_motor_set
-from ..Algorithm.ModelEvaluation import SM_ModelEvaluation
-from ..Algorithm.utils.data_storage_funcs import saveSimulationData
+from SensorimotorExploration.DataManager.SimulationData import SimulationData
+from SensorimotorExploration.Algorithm.utils.functions import get_random_motor_set
+from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
+from SensorimotorExploration.Algorithm.utils.data_storage_funcs import saveSimulationData
 
 # import logging
 # logging.basicConfig(filename='cylinder.log', level=logging.DEBUG,\
@@ -111,7 +111,7 @@ class Algorithm_2015(object):
         print('SM Exploration (Simple), Line 1: Initializing G_SM')
         for i in range(n_init):
             self.learner.set_action(motor_commands[i, :])
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.data.appendData(self.learner)
             self.do_training(i, up_=['sm'])
 
@@ -139,7 +139,7 @@ class Algorithm_2015(object):
             #       ' experiment: {} of {}'.format(i + 1, n_init))
             self.learner.sensor_goal = sensor_goals[i, :]
             self.models.f_sm.get_action(self.learner)
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
             self.do_training(i, up_=['im', 'ss','sm'])
@@ -165,7 +165,7 @@ class Algorithm_2015(object):
         for i in range(n_experiments):
             self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
             self.models.f_sm.get_action(self.learner)
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
 
@@ -204,7 +204,7 @@ class Algorithm_2015(object):
         print('SM Exploration (Proprio), Line 1: Initializing G_SM and G_SS')
         for i in range(n_init):
             self.learner.set_action(motor_commands[i, :])
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.data.appendData(self.learner)
             self.do_training(i, up_=['sm', 'ss'])
 
@@ -223,7 +223,7 @@ class Algorithm_2015(object):
         for i in range(sensor_goals.shape[0]):
             self.learner.sensor_goal = sensor_goals[i, :]
             self.models.f_sm.get_action(self.learner)
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
             self.do_training(i, up_=['im', 'sm', 'ss'])
@@ -247,7 +247,7 @@ class Algorithm_2015(object):
                                                                          self.models.f_sm,
                                                                          self.models.f_ss)
             self.models.f_sm.get_action(self.learner)
-            self.learner.executeMotorCommand()
+            self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
 

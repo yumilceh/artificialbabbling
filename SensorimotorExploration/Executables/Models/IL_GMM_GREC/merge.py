@@ -11,7 +11,7 @@ if __name__ == '__main__':
     import numpy as np
     from matplotlib.pyplot  import draw, show
 
-    from SensorimotorExploration.Models.GeneralModels.ILGMM_GREC import ILGMM
+    from SensorimotorExploration.Models.GeneralModels.Trash.ILGMM_GREC import ILGMM
     from SensorimotorExploration.DataManager.PlotTools import initializeFigure
 
     # Number of samples per component
@@ -29,19 +29,19 @@ if __name__ == '__main__':
     
     #Model computed with three Gaussians
     fig1, ax1 = initializeFigure()
-    fig1, ax1 = model.plotGMMProjection(fig1,ax1,0,1)
+    ax1 = model.plot_gmm_projection(0,1,axes=ax1)
     
     model.mergeGaussians(0,2)
     
     #Model merging similar Gaussians
     fig2, ax2 = initializeFigure()
-    fig2, ax2 = model.plotGMMProjection(fig2, ax2, 0, 1)
+    ax2 = model.plot_gmm_projection(0, 1, axes=ax2)
     
     #Model computed with two Gaussians
     model = ILGMM(min_components=2)
     model.train(X)
     fig3, ax3 = initializeFigure()
-    fig3, ax3 = model.plotGMMProjection(fig3, ax3, 0, 1)
+    ax3 = model.plot_gmm_projection(0, 1, axes=ax3)
     
     ax1.relim()
     ax1.autoscale_view()
@@ -49,9 +49,7 @@ if __name__ == '__main__':
     ax2.autoscale_view()
     ax3.relim()
     ax3.autoscale_view()
-    
-    
-    
+
     draw()
     show()
     

@@ -13,11 +13,11 @@ from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
 from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
 from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
-from SensorimotorExploration.Systems.Diva2016a import Diva2016a as System
-from SensorimotorExploration.Systems.Diva2016a import Instructor
+from SensorimotorExploration.Systems.Diva2017a import Diva2017a as System
+from SensorimotorExploration.Systems.Diva2017a import Instructor
 from model_configurations import model_, comp_func
 
-directory = 'experiment_3'
+directory = 'experiment_1_cmf'
 
 # Models
 f_sm_key = 'igmm_sm'
@@ -92,18 +92,18 @@ if __name__ == '__main__':
         print('WARNING. Directory already exists.')
 
     n_initialization = 100
-    n_experiments = 100000
+    n_experiments = 250000
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 5000 #np.nan to not evaluate
 
-    # 1321,1457, 283,2469, 147831,
-    random_seeds = [1234]
-    proprio_ops = [True]
-    mode_ops = ['social']
+    # ,
+    random_seeds = [1234,1321,1457, 283,2469, 147831]
+    proprio_ops = [True, False]
+    mode_ops = ['social','autonomous']
 
     processes = []
-    max_processes = 1
+    max_processes = 4
 
     for idx, ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops)):
         idx2 = idx
