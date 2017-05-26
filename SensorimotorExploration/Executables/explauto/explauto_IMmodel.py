@@ -86,7 +86,7 @@ if __name__ == '__main__':
         if i in evaluation_samples:
             sm_model.set_sigma_explo_ratio(0)
             evaluation.model = sm_model
-            eval_data = evaluation.evaluateModel()
+            eval_data = evaluation.evaluate()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis = 1)
             evaluation_error = np.append(evaluation_error, np.mean(error_))
             sm_model.set_sigma_explo_ratio(sigma_explo_ratio)

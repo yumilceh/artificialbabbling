@@ -9,7 +9,7 @@ def write_config_log(alg, file_name):
     with open(file_name, "a") as log_file:
 
         root_attr = ['name', 'mode', 'type','f_sm_key',
-                     'f_ss_key', 'f_im_key']
+                     'f_ss_key', 'f_im_key', 'f_cons_key']
 
         for attr_ in root_attr:
             if hasattr(alg, attr_):
@@ -18,11 +18,14 @@ def write_config_log(alg, file_name):
         root_attr_names = ['learner', 'instructor']
         for attr_ in root_attr_names:
             if hasattr(alg, attr_):
-                log_file.write(attr_ + ': ' + getattr(getattr(alg, attr_), 'name') + '\n')
+                try:
+                    log_file.write(attr_ + ': ' + getattr(getattr(alg, attr_), 'name') + '\n')
+                except:
+                    pass #In case instructor is  None
 
         for attr_ in dir(alg.params):
             if not attr_.startswith('__') and not callable(getattr(alg.params, attr_)):
-                log_file.write('{}: {} \n'.format(attr_, getattr(alg.params, attr_)))
+                log_file.write('{}: {}\n'.format(attr_, getattr(alg.params, attr_)))
 
 
 def add_log_line(line, file_name):

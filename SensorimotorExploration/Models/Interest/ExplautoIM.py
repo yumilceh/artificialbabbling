@@ -6,7 +6,7 @@ Created on Jan 24, 2017
 import numpy as np
 from importlib import import_module
 
-from SensorimotorExploration.Models.Sensorimotor.ExplautoSM import generateConfigurationExplauto
+# from SensorimotorExploration.Models.Sensorimotor.ExplautoSM import generateConfigurationExplauto
 
 model_class_name = {'discretized_progress': 'DiscretizedProgress',
                     'tree': 'InterestTree',
@@ -41,14 +41,14 @@ class explauto_IM(object):
     '''
     Implemented for non-parametric models
     '''
-    def __init__(self, system,competence_func,  model_type, model_conf = model_conf):
+    def __init__(self, system,competence_func,  model_type, model_conf = model_conf, somato=False):
         model_competence_conf = {'discretized_progress': {'measure': competence_func},
                                  'tree':{'competence_measure': lambda target,reached : competence_func(target, reached)},
                                  'gmm_progress_beta':    {'measure': competence_func}             
                                       }
         model_conf[model_type].update(model_competence_conf[model_type])    
         
-        conf = generateConfigurationExplauto(system)
+        conf = generateConfigurationExplauto(system, somato=somato)
         self.conf = conf
 
                 #-------------------------------------- ['discretized_progress', IMPLEMENTED
@@ -63,33 +63,67 @@ class explauto_IM(object):
         self.model = InterestModel(conf, conf.s_dims, **model_conf[model_type])
         
         self.params = PARAMS()
+        
+        if somato:
+            self.params.sensor_space = 'somato'
+        else:
+            self.params.sensor_space = 'sensor'
+
+
         self.params.im_step = 1 #only ok with non-parametric
         self.params.n_training_samples = 1  # only ok with non-parametric
 
-    def train(self,simulation_data):  
+    def train(self,simulation_data): 
+        sensor_data = getattr(simulation_data, self.params.sensor_space)
         m = simulation_data.motor.get_last(1).as_matrix()
-        s = simulation_data.sensor.get_last(1).as_matrix()
-        s_g =  simulation_data.sensor_goal.get_last(1).as_matrix()
+        s = sensor_data.get_last(1).as_matrix()
+        sensor_goal_data = getattr(simulation_data, self.params.sensor_space+'_goal')
+        s_g =  sensor_goal_data.get_last(1).as_matrix()
         self.model.update(np.hstack((m, s_g))[0], np.hstack((m, s))[0])
             
-    def get_goal(self, system):
+    def get_goal(self):
         return self.model.sample()
 
-    def get_goal_proprio(self, system, sm_model, ss_model, n_attempts = 10): #n_attempts = 30 worse behavior
-        tmp_goal = self.get_goal(system)
+    def get_goal_proprio(self, system, sm_model, cons_model, n_attempts = 10): #n_attempts = 30 worse behavior
+        tmp_goal = self.get_goal()
         tmp_motor = sm_model.get_action(system, sensor_goal=tmp_goal)
-        tmp_somato = ss_model.predict_somato(system, motor_command=tmp_motor)
+        tmp_cons = cons_model.predict_cons(system, motor_command=tmp_motor)
         n_attempts -= 1
-        if tmp_somato < system.somato_threshold or n_attempts == 0:
+        if tmp_cons < system.cons_threshold or n_attempts == 0:
             return tmp_goal
         else:
-            return self.get_goal_proprio(system, sm_model, ss_model, n_attempts=n_attempts)
+            return self.get_goal_proprio(system, sm_model, cons_model, n_attempts=n_attempts)
 
-    def get_goals(self, system, n_goals=1):
-        s_g = np.zeros((n_goals,system.n_sensor))
+    def get_goals(self, n_goals=1):
+        s_g = np.zeros((n_goals,self.conf.n_sensor))
         for i in range(n_goals):
             s_g[i,:] = self.model.sample()
         pass
-           
-    
-    
+
+
+def generateConfigurationExplauto(system, somato=False):
+    conf = PARAMS()
+    conf.m_maxs = system.max_motor_values
+    conf.m_mins = system.min_motor_values
+    if somato:
+        conf.s_maxs = system.max_somato_values
+        conf.s_mins = system.min_somato_values
+        n_sensor = system.n_somato
+    else:
+        conf.s_maxs = system.max_sensor_values
+        conf.s_mins = system.min_sensor_values
+        n_sensor = system.n_sensor
+
+    n_motor = system.n_motor
+
+    conf.m_ndims = n_motor
+    conf.s_ndims = n_sensor
+
+    conf.m_dims = np.arange(0, n_motor, 1).tolist()
+    conf.s_dims = np.arange(n_motor, n_motor + n_sensor, 1).tolist()
+
+    conf.bounds = np.zeros((2, n_motor + n_sensor))
+    conf.bounds[0, :] = np.array(np.hstack((conf.m_mins, conf.s_mins))).flatten()
+    conf.bounds[1, :] = np.array(np.hstack((conf.m_maxs, conf.s_maxs))).flatten()
+    return conf
+

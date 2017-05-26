@@ -93,7 +93,7 @@ if __name__ == '__main__':
                                   file_prefix=file_prefix)
     evaluation.setValidationEvaluationSets()
     
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)    
+    validation_valSet_data = evaluation.evaluate(saveData=True)
     
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor', 0, "ob")
     fig1,ax1=validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor_goal', 0, "ok")

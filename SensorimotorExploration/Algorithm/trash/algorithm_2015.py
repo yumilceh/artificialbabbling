@@ -300,7 +300,7 @@ class Algorithm_2015(object):
         self.evaluation.model.set_sigma_explo_ratio(0)
         if self.evaluate and (i + 1) % self.params.eval_step == 0:
             self.evaluation.model = self.models.f_sm
-            eval_data = self.evaluation.evaluateModel()
+            eval_data = self.evaluation.evaluate()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data.as_matrix() -
                                     eval_data.sensor_data.data.as_matrix(), axis=1)
             self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))

@@ -7,7 +7,7 @@ Created on Feb 21, 2017
 from SensorimotorExploration.Models.Interest.GMM_IM import GMM_IM
 from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
-from SensorimotorExploration.Models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
+# from SensorimotorExploration.Models.Somatomotor.ILGMM_SM import GMM_SS as IGMM_SS
 
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
@@ -18,35 +18,24 @@ from SensorimotorExploration.Models.Interest.ExplautoIM import explauto_IM as ea
 from SensorimotorExploration.Models.Random import Random
 from SensorimotorExploration.Models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
 from SensorimotorExploration.Models.Sensorimotor.GMM_SM import GMM_SM
-from SensorimotorExploration.Models.Somatomotor.ExplautoSS import ExplautoSS as ea_SS
+from SensorimotorExploration.Models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 
-model_class = {'gmm_sm': GMM_SM,
-               'gmm_ss': GMM_SS,
-               'igmm_sm': IGMM_SM,
-               'igmm_ss': IGMM_SS,
-               'gmm_im': GMM_IM,
+model_class = {'igmm_sm': IGMM_SM,
+               'igmm_ss': IGMM_SM,
                'explauto_im': ea_IM,
-               'explauto_sm': ea_SM,
-               'explauto_ss': ea_SS,
+               'explauto_im_som': ea_IM,
+               'explauto_cons': ea_cons,
                'random': Random}
 
-models_params_list = {'gmm_sm': [28],
-                      'gmm_ss': [28],
-                      'igmm_sm': [],
+models_params_list = {'igmm_sm': [],
                       'igmm_ss': [],
-                      'gmm_im': [10],
-                      'explauto_sm': [],  # 'LWLR-BFGS', 'nearest_neighbor', 'WNN', 'LWLR-CMAES'
-                      'explauto_ss': [],  # 'LWLR-BFGS', 'nearest_neighbor', 'WNN', 'LWLR-CMAES'
+                      'explauto_cons': [],
+                      'explauto_im_som': [],
                       'explauto_im': [],
                       'random': []
                       }
 
-models_params_dict = {'gmm_sm': {'sm_step': 400,
-                                 'alpha': 0.1,
-                                  'sigma_explo_ratio': 0.},
-                      'gmm_ss': {'ss_step': 400,
-                                 'alpha': 0.1},
-                      'igmm_sm': {'min_components': 3,
+models_params_dict = {'igmm_sm': {'min_components': 3,
                                   'max_step_components': 10,
                                   'max_components': 30,
                                   'sm_step': 400,
@@ -55,17 +44,14 @@ models_params_dict = {'gmm_sm': {'sm_step': 400,
                       'igmm_ss': {'min_components': 3,
                                   'max_step_components': 10,
                                   'max_components': 30,
-                                  'ss_step': 400,
+                                  'somato':True,
+                                  'sm_step': 400,
                                   'forgetting_factor': 0.1},
-                      'gmm_im': {'im_step': 30,
-                                 'im_samples': 800},
-                      'explauto_sm': {'model_type': 'non_parametric', 'model_conf': {'fwd': 'WNN', 'inv': 'WNN',
-                                                                                     'k':3, 'sigma':.5,
-                                                                                     'sigma_explo_ratio':0.}},
-                      'explauto_ss': {'model_type': 'non_parametric', 'model_conf': {'fwd': 'WNN', 'inv': 'WNN',
-                                                                                     'k':3, 'sigma':1.,
-                                                                                     'sigma_explo_ratio':0.1}},
+                      'explauto_cons': {'model_type': 'non_parametric', 'model_conf': {'fwd': 'WNN', 'inv': 'WNN',
+                                                                                       'k': 3, 'sigma': 1.,
+                                                                                       'sigma_explo_ratio': 0.1}},
                       'explauto_im': {'competence_func': comp_func_expl, 'model_type': 'tree'},
+                      'explauto_im_som': {'competence_func': comp_func_expl, 'model_type': 'tree','somato':True},
                       'random': {'mode': 'sensor'}
                       }
 

@@ -17,7 +17,7 @@ class OBJECT(object):
     def __init__(self):
         pass
 
-class InteractionAlgorithm(object):
+class Algorithm(object):
     """
     Approach to social learning
      """
@@ -125,10 +125,12 @@ class InteractionAlgorithm(object):
         sensor_goals = self.get_im_init_data(f_im_init)
 
         for i in range(sensor_goals.shape[0]):
-            self.learner.sensor_goal = sensor_goals[i, :]
-            self.models.f_sm.get_action(self.learner)
+            setattr(self.learner, self.params.expl_space+'_goal' ,sensor_goals[i, :])
+            self.select_expl_model().get_action(self.learner)
             self.learner.execute_action()
-            self.get_competence(self.learner)
+
+
+            self.get_competence(self.learner, sensor_space=self.params.expl_space)
             self.data.appendData(self.learner)
             self.do_training(i, up_=['im', 'cons','sm','ss'])
 
@@ -138,7 +140,8 @@ class InteractionAlgorithm(object):
         self.do_training(i, up_=['sm','ss', 'cons', 'im'], force=True, all=True)
 
         print('SM Exploration ({}, {}), First evaluation of G_SM'.format(self.type, self.mode))
-        self.do_evaluation(-1)
+
+        self.do_evaluation(-1,space=self.params.expl_space)
 
         n_experiments = self.params.n_experiments
         eval_step = self.params.eval_step
@@ -150,24 +153,26 @@ class InteractionAlgorithm(object):
         while i < n_experiments:
             self.learner.sensor_instructor.fill(np.nan)
             if self.type is 'proprio':
-                self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
-                                                                         self.models.f_sm,
-                                                                         self.models.f_cons)
-                self.models.f_sm.get_action(self.learner)
+                setattr(self.learner, self.params.expl_space+'_goal',
+                            self.models.f_im.get_goal_proprio(self.learner,
+                                                             self.select_expl_model(),
+                                                             self.models.f_cons))
+                self.select_expl_model().get_action(self.learner)
                 self.learner.execute_action()
-                self.get_competence(self.learner)
+                self.get_competence(self.learner, sensor_space=self.params.expl_space)
                 if self.learner.cons_out > self.learner.cons_threshold:
                     self.learner.competence_result = 0.7 * self.learner.competence_result
             else:
-                self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
-                self.models.f_sm.get_action(self.learner)
+                setattr(self.learner, self.params.expl_space+'_goal',
+                            self.models.f_im.get_goal())
+                self.select_expl_model().get_action(self.learner)
                 self.learner.execute_action()
-                self.get_competence(self.learner)
+                self.get_competence(self.learner, sensor_space=self.params.expl_space)
 
             self.data.appendData(self.learner)
             i += 1
             self.do_training(i, up_=['sm','ss', 'cons', 'im'])
-            self.do_evaluation(i)
+            self.do_evaluation(i,space=self.params.expl_space)
 
             if self.instructor is not None:
                 reinforce, self.learner.sensor_instructor = self.instructor.interaction(self.learner.sensor_out)
@@ -176,13 +181,13 @@ class InteractionAlgorithm(object):
                     if self.mode is 'social':
                         if self.type is 'proprio':
                             tmp_goal = self.learner.sensor_instructor
-                            tmp_motor = self.models.f_sm.get_action(self.learner, sensor_goal=tmp_goal)
+                            tmp_motor = self.select_expl_model().get_action(self.learner, sensor_goal=tmp_goal)
                             tmp_cons = self.models.f_cons.predict_cons(self.learner, motor_command=tmp_motor)
                             if tmp_cons < self.learner.cons_threshold:
                                 self.learner.sensor_goal = tmp_goal
                                 self.learner.set_action(tmp_motor)
                                 self.learner.execute_action()
-                                self.get_competence(self.learner)
+                                self.get_competence(self.learner, sensor_space=self.params.expl_space)
                                 if self.learner.cons_out > self.learner.cons_threshold:
                                     self.learner.competence_result = 0.7 * self.learner.competence_result
 
@@ -190,18 +195,18 @@ class InteractionAlgorithm(object):
                                 i += 1
                                 # self.learner.sensor_instructor.fill(np.nan)
                                 self.do_training(i, up_=['sm','ss', 'cons', 'im'])
-                                self.do_evaluation(i)
+                                self.do_evaluation(i,space=self.params.expl_space)
 
                         else:
                             self.learner.sensor_goal = self.learner.sensor_instructor
-                            self.models.f_sm.get_action(self.learner)
+                            self.models.self.select_expl_model().get_action(self.learner)
                             self.learner.execute_action()
-                            self.get_competence(self.learner)
+                            self.get_competence(self.learner, sensor_space=self.params.expl_space)
                             self.data.appendData(self.learner)
                             i += 1#
                             # self.learner.sensor_instructor.fill(np.nan)
                             self.do_training(i, up_=['sm','ss', 'cons', 'im'])
-                            self.do_evaluation(i)
+                            self.do_evaluation(i,space=self.params.expl_space)
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
             if (i + 1) % n_save_data == 0:
@@ -212,8 +217,8 @@ class InteractionAlgorithm(object):
 
         self.do_training(i, up_=['sm','ss', 'cons', 'im'], force=True)
 
-        self.models.f_sm.set_sigma_explo_ratio(0.)
-        self.do_evaluation(-1)
+        self.select_expl_model().set_sigma_explo_ratio(0.)
+        self.do_evaluation(-1,space=self.params.expl_space)
         self.data.cut_final_data()
 
         if n_save_data is not np.nan:
@@ -245,6 +250,7 @@ class InteractionAlgorithm(object):
 
     def do_training(self, i, up_=['sm','ss', 'cons', 'im'], force=False, all=False):
 
+
         """ Train Interest Model"""
         if 'im' in up_ and ((i + 1) % self.models.f_im.params.im_step == 0 or force):
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
@@ -252,26 +258,39 @@ class InteractionAlgorithm(object):
 
         """Train Sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
+            # if i > 3200:
+            #     pass
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
             self.models.f_sm.train_incremental(self.data, all = all)
+            # print('i: {}, sum w: {}'.format(i,sum(self.models.f_sm.model.weights_)))
+
+
+        if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.sm_step == 0 or force):
+            # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
+            self.models.f_ss.train_incremental(self.data, all = all)
             
         # if 'ss' in up_ and ((i + 1) % self.models.f_cons.params.sm_step == 0 or force):
         #     # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
         #     self.models.f_sm.train_incremental(self.data, all = all)
 
         if hasattr(self.models, 'f_cons'):
-            if 'cons' in up_ and ((i + 1) % self.models.f_cons.params.ss_step == 0 or force):
+            if 'cons' in up_ and ((i + 1) % self.models.f_cons.params.cons_step == 0 or force):
                 self.models.f_cons.train_incremental(self.data)
 
-    def do_evaluation(self, i, force=False, save_data=False):
+    def do_evaluation(self, i, space=None, force=False, save_data=False):
         if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:
             tmp_sigma = self.evaluation.model.get_sigma_explo()
-            self.evaluation.model = self.models.f_sm
+            self.evaluation.model = self.select_expl_model()
             self.evaluation.model.set_sigma_explo_ratio(0)
-            eval_data = self.evaluation.evaluateModel(saveData=save_data)
-            error_ = np.linalg.norm(eval_data.sensor_goal.get_all().as_matrix() -
-                                    eval_data.sensor.get_all().as_matrix(), axis=1)
-            self.evaluation_error += [i, np.mean(error_)]
+            eval_data = self.evaluation.evaluate(saveData=save_data, space=space)
+
+            sensor_goal_data = getattr(eval_data, self.params.expl_space+'_goal').get_all().as_matrix()
+            sensor_data = getattr(eval_data, self.params.expl_space).get_all().as_matrix()
+
+            error_ = np.linalg.norm(sensor_goal_data - sensor_data, axis=1)
+
+
+            self.evaluation_error += [[i, np.mean(error_)]]
             if self.params.n_save_data is not np.nan:
                 with open(self.data.file_prefix + 'eval_error.txt', "a") as log_file:
                     log_file.write('{}: {}\n'.format(i, np.mean(error_)))
@@ -284,3 +303,11 @@ class InteractionAlgorithm(object):
         print('Exploration in {} space'.format(space))
         if space is 'somato':
             self.instructor = None
+
+    def select_expl_model(self):
+        if self.params.expl_space == 'somato':
+            return self.models.f_ss
+        elif self.params.expl_space == 'sensor':
+            return self.models.f_sm
+        else:
+            NotImplementedError()

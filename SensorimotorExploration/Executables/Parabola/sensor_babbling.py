@@ -81,9 +81,9 @@ if __name__ == '__main__':
                                   n_samples,
                                   simulation1.models.f_sm,
                                   file_prefix=file_prefix)
-    evaluation.loadEvaluationDataSet('parabola_dataset_2.h5')
+    evaluation.load_eval_dataset('parabola_dataset_2.h5')
     
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)   
+    validation_valSet_data = evaluation.evaluate(saveData=True)
     
     fig1,ax1 = initializeFigure()
     fig1.suptitle('All Sensory Results')

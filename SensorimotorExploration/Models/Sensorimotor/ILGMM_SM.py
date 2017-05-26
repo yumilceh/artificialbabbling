@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from SensorimotorExploration.Models.GeneralModels.IGMMpy import IGMM as GMM
+from igmm import IGMM as GMM
 import numpy as np
 import pandas as pd
 import copy 
@@ -26,24 +26,37 @@ class GMM_SM(object):
                        a_split = 0.8,
                        forgetting_factor = 0.05,
                        sigma_explo_ratio = 0.0,
+                       somato=False,
                        plot = False, plot_dims=[0,1]):
         '''
         Constructor
         '''
 
-        self.params=PARAMS()
-        self.params.size_data=system.n_motor+system.n_sensor
-        self.params.motor_names=system.motor_names
-        self.params.sensor_names=system.sensor_names
+        if somato:
+            n_sensor = system.n_somato
+            sensor_names = system.somato_names
+            sensor_space = 'somato'
+        else:
+            n_sensor = system.n_sensor
+            sensor_names = system.sensor_names
+            sensor_space = 'sensor'
+
+        self.params = PARAMS()
+        self.params.sensor_space = sensor_space
+        self.params.size_data = system.n_motor+ n_sensor
+        self.params.motor_names = system.motor_names
+        self.params.sensor_names = sensor_names
+
         self.params.n_motor=system.n_motor
-        self.params.n_sensor=system.n_sensor
+        self.params.n_sensor = n_sensor
+
         self.params.min_components = min_components
         self.params.max_step_components = max_step_components
         self.params.forgetting_factor = forgetting_factor
         self.params.sm_step = sm_step
 
         self.delta_motor_values = system.max_motor_values - system.min_motor_values
-        self.sigma_expl =  self.delta_motor_values * float(sigma_explo_ratio)
+        self.sigma_expl = self.delta_motor_values * float(sigma_explo_ratio)
         self.mode = 'explore'
 
         self.model=GMM(min_components = min_components,
@@ -53,59 +66,40 @@ class GMM_SM(object):
                        forgetting_factor = forgetting_factor)
 
     def train(self, simulation_data):
+        sensor_data = getattr(simulation_data, self.params.sensor_space)
         train_data_tmp = pd.concat([simulation_data.motor.get_all(),
-                                    simulation_data.sensor.get_all()], axis=1)
+                                    sensor_data.get_all()], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
 
     def train_incremental(self, simulation_data, all=True):
+        sensor_data = getattr(simulation_data, self.params.sensor_space)
         if all:
             data = np.zeros((simulation_data.motor.current_idx,
                              self.params.n_motor+self.params.n_sensor))
             data_m = simulation_data.motor.get_all().as_matrix()
-            data_s = simulation_data.sensor.get_all().as_matrix()
+            data_s = sensor_data.get_all().as_matrix()
             data[:,:self.params.n_motor] = data_m
             data[:, self.params.n_motor:] = data_s
         else:
             data = np.zeros((self.params.sm_step,
                              self.params.n_motor+self.params.n_sensor))
             data_m = simulation_data.motor.get_last(self.params.sm_step).as_matrix()
-            data_s = simulation_data.sensor.get_last(self.params.sm_step).as_matrix()
+            data_s = sensor_data.get_last(self.params.sm_step).as_matrix()
             data[:,:self.params.n_motor] = data_m
             data[:, self.params.n_motor:] = data_s
         self.model.train(data)
-
-    # def train_old(self,simulation_data):
-    #     train_data_tmp=pd.concat([simulation_data.motor.data,
-    #                               simulation_data.sensor.data], axis=1)
-    #     self.model.train(train_data_tmp.as_matrix(columns=None))
-    #
-    # def trainIncrementalLearning_old(self,simulation_data):
-    #     #=======================================================================
-    #     # sm_step=self.params.sm_step
-    #     # alpha=self.params.alpha
-    #     # motor_data_size=len(simulation_data.motor.data.index)
-    #     # motor=simulation_data.motor.data[motor_data_size-sm_step:-1]
-    #     # sensor_data_size=len(simulation_data.sensor.data.index)
-    #     # sensor=simulation_data.sensor.data[sensor_data_size-sm_step:-1]
-    #     # new_data=pd.concat([motor,sensor],axis=1)
-    #     # self.model.train_incremental(new_data, alpha)
-    #     #=======================================================================
-    #     train_data_tmp=pd.concat([simulation_data.motor.data,
-    #                               simulation_data.sensor.data], axis=1)
-    #     self.model.train(train_data_tmp.as_matrix(columns=None))
-         
     
     def get_action(self, system, sensor_goal=None):
         n_motor=system.n_motor
-        n_sensor=system.n_sensor
+        n_sensor=self.params.n_sensor
         
         if sensor_goal is None:
-            sensor_goal=system.sensor_goal  #s_g
+            sensor_goal = getattr(system, self.params.sensor_space+'_goal')  #s_g
         
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
 
-        motor_command = self.model.predict(m_dims, s_dims, sensor_goal)
+        motor_command = self.model.infer(m_dims, s_dims, sensor_goal)
 
         if self.mode == 'explore':
             motor_command[self.sigma_expl > 0] = np.random.normal(motor_command[self.sigma_expl > 0],

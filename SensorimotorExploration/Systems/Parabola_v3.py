@@ -34,22 +34,22 @@ class ParabolicRegion:
         m2 = 1
 
         motor_names = ['M1', 'M2']
-        sensor_names = ['S1', 'S2']
-        somato_names = ['SS1','SS2','SS3','SS4']
+        somato_names = ['S1', 'S2']
+        sensor_names = ['SS1','SS2','SS3','SS4']
         cons_names = ['P1']
         n_motor = 2
-        n_sensor = 2
-        n_somato = 4
+        n_somato = 2
+        n_sensor = 4
         n_cons = 1
 
         min_motor_values = np.array([0.0, 0.0])
         max_motor_values = np.array([b * 2.0, b * 2.0])
 
-        min_sensor_values = np.array([0.0, 0.0 + f])
-        max_sensor_values = np.array([b * 2.0, b ** 2 + f])
+        min_somato_values = np.array([0.0, 0.0 + f])
+        max_somato_values = np.array([b * 2.0, b ** 2 + f])
 
-        min_somato_values = np.array([0.3, -0.5, -0.20, -0.20])
-        max_somato_values = np.array([1.0, 1.0, 1.0, 1.0])
+        min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0])
+        max_sensor_values = np.array([9.0, 9.0, 9.0, 9.0])
 
         min_cons_values = np.array([0])
         max_cons_values = np.array([1])
@@ -71,29 +71,29 @@ class ParabolicRegion:
         self.params.sigma_noise = sigma_noise
 
         self.n_motor = n_motor
-        self.n_sensor = n_sensor
         self.n_somato = n_somato
+        self.n_sensor = n_sensor
         self.n_cons = n_cons
         self.motor_names = motor_names
-        self.sensor_names = sensor_names
-        self.cons_names = cons_names
         self.somato_names = somato_names
+        self.cons_names = cons_names
+        self.sensor_names = sensor_names
 
         self.min_motor_values = min_motor_values
         self.max_motor_values = max_motor_values
-        self.min_sensor_values = min_sensor_values
-        self.max_sensor_values = max_sensor_values
         self.min_somato_values = min_somato_values
         self.max_somato_values = max_somato_values
+        self.min_sensor_values = min_sensor_values
+        self.max_sensor_values = max_sensor_values
         self.min_cons_values = min_cons_values
         self.max_cons_values = max_cons_values
         self.cons_threshold = cons_threshold
 
         self.motor_command = np.array([0.0] * n_motor)
-        self.sensor_out = np.array([0.0] * n_sensor)
-        self.sensor_goal = np.array([0.0] * n_sensor)
-        self.somato_goal = np.array([0.0] * n_somato)
         self.somato_out = np.array([0.0] * n_somato)
+        self.somato_goal = np.array([0.0] * n_somato)
+        self.sensor_goal = np.array([0.0] * n_sensor)
+        self.sensor_out = np.array([0.0] * n_sensor)
         self.cons_out = np.array([0.0] * n_cons)
         self.competence_result = 0.0
         self.sensor_instructor = np.empty((self.n_sensor,))
@@ -113,8 +113,8 @@ class ParabolicRegion:
         self.params.e = e
         self.params.f = f
 
-        self.min_sensor_values = np.array([0.0, 0.0 + f])
-        self.max_sensor_values = np.array([b * 2.0, b ** 2 + f])
+        self.min_somato_values = np.array([0.0, 0.0 + f])
+        self.max_somato_values = np.array([b * 2.0, b ** 2 + f])
 
 
     def set_action(self, motor_command):
@@ -128,8 +128,8 @@ class ParabolicRegion:
         c = self.params.c
 
         self.cons_out = 0.0
-        self.sensor_out[0] = self.motor_command[0]
-        self.sensor_out[1] = math.pow(self.motor_command[1] - b, 2.0) + self.params.f
+        self.somato_out[0] = self.motor_command[0]
+        self.somato_out[1] = math.pow(self.motor_command[1] - b, 2.0) + self.params.f
 
     def execute_action(self):
         self.motor_command = self.boundMotorCommand(self.motor_command)
@@ -137,8 +137,8 @@ class ParabolicRegion:
         self.execute_action_unconstrained()
         self.applyConstraints()
 
-        self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
-        self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        self.somato_out[0] = self.somato_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        self.somato_out[1] = self.somato_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
 
         self.applyConstraints()
 
@@ -155,8 +155,8 @@ class ParabolicRegion:
 
         r = c - a
         point = CustomObject()
-        point.x = self.sensor_out[0]
-        point.y = self.sensor_out[1]
+        point.x = self.somato_out[0]
+        point.y = self.somato_out[1]
 
         # Checking inner Parabolic Region Condition
         parabola = CustomObject()
@@ -164,13 +164,13 @@ class ParabolicRegion:
         parabola.b = -2.0 * b
         parabola.c = b ** 2 + f
 
-        ##Checking if the sensorimotor result is insede of the constrained circle
+        ##Checking if the somatoimotor result is insede of the constrained circle
         circle = CustomObject()
         circle.x_c = b
         circle.y_c = a
         circle.r = r
 
-        ## Checking if the sensorimotor result is inside of thecontrained region between two parallel lines
+        ## Checking if the somatoimotor result is inside of thecontrained region between two parallel lines
         up_line = CustomObject()
         up_line.y_0 = d
         up_line.m = m1
@@ -183,10 +183,10 @@ class ParabolicRegion:
         foo1, foo2, som2 = closestPointInCircle(circle=circle, point=point)
         foo1, foo2, som3 = closestPointToLine(line=down_line, point=point)
         foo1, foo2, som4 = closestPointToLine(line=up_line, point=point)
-        self.somato_out[0] = 1.-som1/4.5
-        self.somato_out[1] = 1.-som2/4.5
-        self.somato_out[2] = 1.-som3/4.5
-        self.somato_out[3] = 1.-som4/4.5
+        self.sensor_out[0] = som1
+        self.sensor_out[1] = som2
+        self.sensor_out[2] = som3
+        self.sensor_out[3] = som4
 
 
         # ---------------------------------------- while self.applyConstraints():
@@ -204,8 +204,8 @@ class ParabolicRegion:
         m2 = self.params.m2
 
         r = c - a
-        x = self.sensor_out[0]
-        y = self.sensor_out[1]
+        x = self.somato_out[0]
+        y = self.somato_out[1]
 
         changed = False
         onParabola = False
@@ -219,14 +219,14 @@ class ParabolicRegion:
         parabola.b = -2.0 * b
         parabola.c = b ** 2 + f
 
-        ##Checking if the sensorimotor result is insede of the constrained circle
+        ##Checking if the somatoimotor result is insede of the constrained circle
         circle = CustomObject()
         circle.x_c = b
         circle.y_c = a
         circle.r = r
         circle_condition = math.pow(x - b, 2.0) + math.pow(y - a, 2.0)
 
-        ## Checking if the sensorimotor result is inside of thecontrained region between two parallel lines
+        ## Checking if the somatoimotor result is inside of thecontrained region between two parallel lines
         up_line = CustomObject()
         up_line.y_0 = d
         up_line.m = m1
@@ -236,7 +236,7 @@ class ParabolicRegion:
         down_line.m = m2
 
         uppest_line = CustomObject()
-        uppest_line.y_0 = self.max_sensor_values[1]+f
+        uppest_line.y_0 = self.max_somato_values[1]+f
         uppest_line.m = 0.0
 
         if circle_condition < math.pow(r, 2.0):  # Circle
@@ -246,8 +246,8 @@ class ParabolicRegion:
             point.x = x
             point.y = y
 
-        # if math.pow(self.motor_command[0]-b,2.0) > self.sensor_out[1]: #Parabola
-        if math.pow(self.sensor_out[0] - b, 2.0) + f > self.sensor_out[1]:  # Parabola
+        # if math.pow(self.motor_command[0]-b,2.0) > self.somato_out[1]: #Parabola
+        if math.pow(self.somato_out[0] - b, 2.0) + f > self.somato_out[1]:  # Parabola
             changed = True
             onParabola = True
             self.cons_out = 1.0
@@ -315,8 +315,8 @@ class ParabolicRegion:
                 point.x = x
                 point.y = y
 
-        self.sensor_out[0] = x
-        self.sensor_out[1] = y
+        self.somato_out[0] = x
+        self.somato_out[1] = y
         return changed
 
     def boundMotorCommand(self, motor_command):
@@ -338,8 +338,8 @@ class ParabolicRegion:
             fig, axes = plt.subplots(1,1)
         plt.sca(axes)
 
-        min_sensor_values = self.min_sensor_values
-        max_sensor_values = self.max_sensor_values
+        min_somato_values = self.min_somato_values
+        max_somato_values = self.max_somato_values
 
         a = self.params.a
         b = self.params.b
@@ -352,15 +352,15 @@ class ParabolicRegion:
 
         r = c - a
 
-        x_p = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+        x_p = np.linspace(min_somato_values[0], max_somato_values[0], 100)
         y_p = (x_p - b) ** 2 +f
 
         circle = plt.Circle((b, a), r, color='red')
 
-        x_l1 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+        x_l1 = np.linspace(min_somato_values[0], max_somato_values[0], 100)
         y_l1 = d + m1 * x_l1
 
-        x_l2 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+        x_l2 = np.linspace(min_somato_values[0], max_somato_values[0], 100)
         y_l2 = e + m2 * x_l2
 
         plt.sca(axes)
@@ -388,7 +388,7 @@ class Instructor(ParabolicRegion):
         #         data.appendData(system)
         ParabolicRegion.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.intructor_file = abs_path + '/datasets/instructor_parabola_f1_1.h5'
+        self.intructor_file = abs_path + '/datasets/parabola_v3_dataset.h5'
         self.data = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
         self.unit_threshold = 0.15 # 0.3
@@ -439,7 +439,7 @@ def closestPointInParabola(parabola, point):  # Parabola: y=ax^2+bx+c
     x = point.x
     y = point.y
 
-    # self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
+    # self.somato_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
 
     coeff = [2.0 * a ** 2, 3.0 * a * b, b ** 2 + 2 * a * (c - y) + 1, b * (c - y) - x]
 
@@ -478,7 +478,7 @@ def intersectionParabolaLine(parabola, line):  # Parabola: y=ax^2+bx+c
     y_0 = line.y_0
     m = line.m
 
-    # self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
+    # self.somato_out[0] = self.motor_command[1] #Simply takes the value of the other motor command
 
     coeff = [a, b - m, c - y_0]
 

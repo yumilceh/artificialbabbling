@@ -32,10 +32,13 @@ class Diva2017a(object):
                        'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M26']
         sensor_names = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
         somato_names = ['SS1', 'SS2', 'SS3', 'SS4', 'SS5', 'SS6', 'SS7', 'SS8', 'SS9', 'SS10', 'SS11', 'SS12', 'SS13', 'SS14', 'SS15',
-                       'SS16', 'SS17', 'SS18']
+                       'SS16']
+        cons_names = ['P1']
+
         n_motor = 26
         n_sensor = 6
         n_somato = 16
+        n_cons = 1
         outputScale = [100.0, 500.0, 1500.0, 3000.0]
         min_motor_values = np.array([-3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -0.25, -0.25, -0.25] * 2)
         max_motor_values = np.array([3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1] * 2)
@@ -46,8 +49,12 @@ class Diva2017a(object):
         min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         max_sensor_values = np.array([2.0, 2.0, 1.0, 2.0, 2.0, 1.0])
 
-        min_somato_values = np.array([-1.0] *16)
-        max_somato_values = np.array([1.0] *16)
+        min_somato_values = np.array([-1.0] *n_somato)
+        max_somato_values = np.array([1.0] *n_somato)
+
+
+        min_cons_values = np.array([0])
+        max_cons_values = np.array([1])
 
         ts = 0.01
 
@@ -66,9 +73,12 @@ class Diva2017a(object):
         self.n_motor = n_motor
         self.n_sensor = n_sensor
         self.n_somato = n_somato
+        self.n_cons = n_cons
+
         self.motor_names = motor_names
         self.sensor_names = sensor_names
         self.somato_names = somato_names
+        self.cons_names = cons_names
 
         self.min_motor_values = min_motor_values
         self.max_motor_values = max_motor_values
@@ -78,13 +88,15 @@ class Diva2017a(object):
         self.max_sensor_values = max_sensor_values
         self.min_somato_values = min_somato_values
         self.max_somato_values = max_somato_values
+        self.min_cons_values = min_cons_values
+        self.max_cons_values = max_cons_values
 
         self.motor_command = np.array([0.0] * n_motor)
         self.sensor_out = np.array([0.0] * n_sensor)
         self.sensor_goal = np.array([0.0] * n_sensor)
         self.somato_out = np.array([0.0] * n_somato)
         self.somato_goal = np.array([0.0] * n_somato)
-        self.const_out = 0.0 #Constraint violations flag
+        self.cons_out = 0.0 #Constraint violations flag
         self.cons_threshold = 0.6
         self.competence_result = 0.0
         self.sensor_instructor = np.empty((self.n_sensor,))

@@ -258,7 +258,7 @@ class InteractionAlgorithm(object):
             tmp_sigma = self.evaluation.model.get_sigma_explo()
             self.evaluation.model = self.models.f_sm
             self.evaluation.model.set_sigma_explo_ratio(0)
-            eval_data = self.evaluation.evaluateModel(saveData=save_data)
+            eval_data = self.evaluation.evaluate(saveData=save_data)
             error_ = np.linalg.norm(eval_data.sensor_goal.get_all().as_matrix() -
                                     eval_data.sensor.get_all().as_matrix(), axis=1)
             self.evaluation_error += [i, np.mean(error_)]

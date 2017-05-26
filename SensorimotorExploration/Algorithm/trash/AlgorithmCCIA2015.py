@@ -92,7 +92,7 @@ class Algorithm_CCIA2015(object):
         
         if not self.evaluation == None:
             self.evaluation.model = self.models.f_sm
-            eval_data = self.evaluation.evaluateModel()
+            eval_data = self.evaluation.evaluate()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data,axis = 1)
             self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
 
@@ -175,7 +175,7 @@ class Algorithm_CCIA2015(object):
                     self.models.f_sm.train_incremental(self.data.simulation_data)
                 if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
-                    eval_data = self.evaluation.evaluateModel()
+                    eval_data = self.evaluation.evaluate()
                     error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data,axis = 1)
                     self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
                   
@@ -216,7 +216,7 @@ class Algorithm_CCIA2015(object):
         
         if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
-                    eval_data = self.evaluation.evaluateModel()
+                    eval_data = self.evaluation.evaluate()
                     error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data,axis = 1)
                     self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
                     
@@ -294,7 +294,7 @@ class Algorithm_CCIA2015(object):
                     self.models.f_sm.train_incremental(self.data.simulation_data)
                 if not self.evaluation == None:
                     self.evaluation.model = self.models.f_sm
-                    eval_data = self.evaluation.evaluateModel()
+                    eval_data = self.evaluation.evaluate()
                     error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data,axis = 1)
                     self.evaluation_error = np.append(self.evaluation_error, np.mean(error_))
                     

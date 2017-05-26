@@ -6,19 +6,19 @@ Created on May 26, 2016
 
 import numpy as np
 import numpy.linalg as linalg
-def comp_mix(agent):
-    y = agent.sensor_out
-    y_g = agent.sensor_goal
+def comp_mix(agent,sensor_space = 'sensor'):
+    y = getattr(agent,  sensor_space+'_out')
+    y_g = getattr(agent, sensor_space+'_goal')
     agent.competence_result = comp_mix_expl(y_g, y)
 
-def comp_Moulin2013(agent):
-    y=agent.sensor_out
-    y_g=agent.sensor_goal      
+def comp_Moulin2013(agent, sensor_space = 'sensor'):
+    y = getattr(agent,  sensor_space+'_out')
+    y_g = getattr(agent, sensor_space+'_goal')
     agent.competence_result = comp_Moulin2013_expl(y_g, y)
 
-def comp_Baraglia2015(agent):
-    y=agent.sensor_out
-    y_g=agent.sensor_goal
+def comp_Baraglia2015(agent,sensor_space = 'sensor'):
+    y = getattr(agent,  sensor_space+'_out')
+    y_g = getattr(agent, sensor_space+'_goal')
     agent.competence_result = comp_Baraglia2015_expl(y_g, y)
 
 def comp_mix_expl(target, reached, dist_min=0., dist_max = 1.):
@@ -34,7 +34,7 @@ def comp_Baraglia2015_expl(target, reached, dist_min=0., dist_max = 1.):
     return exp_norm_moderate_error(err)
 
 def exp_norm_error(err):
-    err_norm=linalg.norm(err)
+    err_norm = linalg.norm(err)
     return np.exp(-err_norm)
 
 def exp_norm_moderate_error(err):

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     model_eval = SM_ModelEvaluation(agent,data,model,ratio_samples_val)
     model_eval.setValidationEvaluationSets()
     model_eval.trainModel()
-    validation_trainSet_data, validation_valSet_data = model_eval.evaluateModel(saveData, eva_train_set)    
+    validation_trainSet_data, validation_valSet_data = model_eval.evaluate(saveData, eva_train_set)
     
     fig1,ax1=initializeFigure();
     fig1,ax1=validation_trainSet_data.plot_time_series(fig1, ax1, 'competence', 0, "r", moving_average=2000)
