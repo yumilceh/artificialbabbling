@@ -213,9 +213,9 @@ class Diva2017a(object):
         self.sensor_out[4] = self.sensor_out[4] / n_percep_samples
         self.sensor_out[5] = self.sensor_out[5] / n_percep_samples
 
-        self.const_out = 0.0
+        self.cons_out = 0.0
         if ((const_av[0] < 0.0) or (const_av[1] < 0.0)):
-            self.const_out = 1.0
+            self.cons_out = 1.0
 
     def plot_arts_evo(self, arts_idx, axes=None):
         if axes is None:
