@@ -279,9 +279,15 @@ class Algorithm(object):
 
     def do_evaluation(self, i, space=None, force=False, save_data=False):
         if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:
+            if space is None:
+                space = self.params.expl_space
+                self.evaluation.model = self.select_expl_model()
+            else:
+                self.evaluation.model = self.select_expl_model(space=space)
+
             tmp_sigma = self.evaluation.model.get_sigma_explo()
-            self.evaluation.model = self.select_expl_model()
             self.evaluation.model.set_sigma_explo_ratio(0)
+
             eval_data = self.evaluation.evaluate(saveData=save_data, space=space)
 
             sensor_goal_data = getattr(eval_data, self.params.expl_space+'_goal').get_all().as_matrix()
@@ -289,11 +295,12 @@ class Algorithm(object):
 
             error_ = np.linalg.norm(sensor_goal_data - sensor_data, axis=1)
 
-
             self.evaluation_error += [[i, np.mean(error_)]]
-            if self.params.n_save_data is not np.nan:
+
+            if self.params.n_save_data is not np.nan and force is False:
                 with open(self.data.file_prefix + 'eval_error.txt', "a") as log_file:
                     log_file.write('{}: {}\n'.format(i, np.mean(error_)))
+
             print('Evaluation finished.')
             self.evaluation.model.set_sigma_explo(tmp_sigma)
         #  print(self.evaluation.model.get_sigma_explo())
@@ -304,10 +311,12 @@ class Algorithm(object):
         if space is 'somato':
             self.instructor = None
 
-    def select_expl_model(self):
-        if self.params.expl_space == 'somato':
+    def select_expl_model(self, space=None):
+        if space is None:
+            space = self.params.expl_space
+        if space == 'somato':
             return self.models.f_ss
-        elif self.params.expl_space == 'sensor':
+        elif space == 'sensor':
             return self.models.f_sm
         else:
             NotImplementedError()

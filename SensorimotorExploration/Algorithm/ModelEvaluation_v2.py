@@ -73,7 +73,7 @@ class SM_ModelEvaluation(object):
         validation_valSet_data.cut_final_data()
 
         if (saveData):
-            validation_valSet_data.saveData(self.file_prefix + 'eva_valset.h5')
+            validation_valSet_data.saveData(self.file_prefix + space +'_eva_valset.h5')
             return validation_valSet_data
         else:
             return validation_valSet_data

@@ -105,7 +105,7 @@ def sim_agent(ops,idx):
     simulation.mode = mode_
 
     simulation.run(proprio=proprio)
-    simulation.do_evaluation(0, force=True, save_data=True)
+    simulation.do_evaluation(0, space='somato', force=True, save_data=True)
 
 if __name__ == '__main__':
     try:
