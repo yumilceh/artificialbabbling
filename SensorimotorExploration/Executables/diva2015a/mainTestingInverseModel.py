@@ -53,7 +53,7 @@ if __name__ == '__main__':
     sensor_goals=sensor_goals[random_indexes,:]
     
      # simulation_data.sensor.data.drop(simulation_data.sensor.data.index[:])
-     # simulation_data.motor.data.drop(simulation_data.motor.data.index[:])
+     # simulation_data.art.data.drop(simulation_data.art.data.index[:])
      # simulation_data.somato.data.drop(simulation_data.somato.data.index[:])
     simulation_data=SimulationData(diva_agent);
 

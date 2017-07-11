@@ -45,7 +45,7 @@ if __name__ == '__main__':
     simulation_data=simulation1.data.simulation_data
 
     h,ax3=initializeFigure();
-    h,ax3=simulation_data.plot_2D(h, ax3, 'sensor', 0, 'motor', 0, "or")
+    h,ax3=simulation_data.plot_2D(h, ax3, 'sensor', 0, 'art', 0, "or")
      
     fig2,ax2=initializeFigure();
     fig2,ax2=simulation_data.plot_time_series(fig2, ax2, 'competence', 0, "r", moving_average=200)

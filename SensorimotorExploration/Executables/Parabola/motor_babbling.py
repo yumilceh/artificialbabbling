@@ -115,8 +115,8 @@ if __name__ == '__main__':
     
     # fig2,ax2=initializeFigure()
     # fig2.suptitle('Motor Commands: M1 vs M2')
-    # fig2,ax2=simulation_data.plot_2D(fig2,ax2,'motor', 0, 'motor', 1,"or")
-    # fig2, ax2 = validation_valSet_data.plot_2D(fig2,ax2,'motor', 0, 'motor', 1,"ob")
+    # fig2,ax2=simulation_data.plot_2D(fig2,ax2,'art', 0, 'art', 1,"or")
+    # fig2, ax2 = validation_valSet_data.plot_2D(fig2,ax2,'art', 0, 'art', 1,"ob")
     # fig2, ax2 = simulation1.models.f_sm.model.plot_gmm_projection(fig2,ax2,0, 1)
     # ax2.relim()
     # ax2.autoscale_view()

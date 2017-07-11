@@ -70,11 +70,11 @@ if __name__ == '__main__':
 
     '''
     fig,ax=initializeFigure();
-    fig,ax=initialization_data_sm_ss.plot_2D(fig,ax,'motor', 0, 'sensor', 0,"or")
+    fig,ax=initialization_data_sm_ss.plot_2D(fig,ax,'art', 0, 'sensor', 0,"or")
     '''
 
     fig1,ax1=initializeFigure();
-    fig1,ax1=simulation_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor', 0, "or")
+    fig1,ax1=simulation_data.plot_2D(fig1, ax1, 'art', 0, 'sensor', 0, "or")
     
     
     ## Validation of the model ##
@@ -87,8 +87,8 @@ if __name__ == '__main__':
     
     validation_valSet_data = evaluation.evaluate(saveData=True)
     
-    fig1, ax1 = validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor', 0, "ob")
-    fig1, ax1 = validation_valSet_data.plot_2D(fig1, ax1, 'motor', 0, 'sensor_goal', 0, "ok")
+    fig1, ax1 = validation_valSet_data.plot_2D(fig1, ax1, 'art', 0, 'sensor', 0, "ob")
+    fig1, ax1 = validation_valSet_data.plot_2D(fig1, ax1, 'art', 0, 'sensor_goal', 0, "ok")
     fig1, ax1 = simulation1.models.f_sm.model.plot_gmm_projection(fig1, ax1, 0, 1)
     ax1.relim()
     ax1.autoscale_view()

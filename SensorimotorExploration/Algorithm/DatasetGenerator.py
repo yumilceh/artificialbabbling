@@ -39,7 +39,7 @@ class DatasetGenerator(object):
         n_save_data = 100,                              Save data each given number of samples  
         file_prefix = now.strftime("DSG_%Y_%m_%d_%H_%M_")
         '''
-        self.params = OBJECT();
+        self.params = OBJECT()
         self.params.n_experiments = n_experiments
         self.params.random_seed = random_seed
         

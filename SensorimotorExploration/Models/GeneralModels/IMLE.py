@@ -41,9 +41,9 @@ class IMLE(object):
         """
     # def __init__(self, m_dims, s_dims, sigma0, psi0, mode='explore'):
     def __init__(self, params, mode='exploit', **kwargs_imle):
-        """ :param list m_dims: indices of motor dimensions
+        """ :param list m_dims: indices of art dimensions
             :param list_ndims: indices of sensory dimensions
-            :param float sigma0: a priori variance of the linear models on motor dimensions
+            :param float sigma0: a priori variance of the linear models on art dimensions
             :param list psi0: a priori variance of the gaussian noise on each sensory dimensions
             :param string mode: either 'exploit' or 'explore' (default 'explore') to choose if the infer(.) method will return the most likely output or will sample according to the output probability.
             .. note::

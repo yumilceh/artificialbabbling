@@ -58,7 +58,7 @@ class GMM_SS(object):
         # ------------------------------------------- ss_step=self.params.ss_step
         # ----------------------------------------------- alpha=self.params.alpha
         # ------------ motor_data_size=len(simulation_data.motor.data.index)
-        # motor=simulation_data.motor.data[motor_data_size-ss_step:-1]
+        # art=simulation_data.art.data[motor_data_size-ss_step:-1]
         # ---------- somato_data_size=len(simulation_data.somato.data.index)
         # somato=simulation_data.somato.data[somato_data_size-ss_step:-1]
         # ------------------- new_data=pd.concat([motor,somato],axis=1)

@@ -7,7 +7,7 @@ import numpy as np
 import itertools
 
 def generate_motor_grid(system, n_samples):
-    """ Currently works for 2D motor systems"""
+    """ Currently works for 2D art systems"""
     xmin = system.min_motor_values[0]
     xmax = system.max_motor_values[0]
     ymin = system.min_motor_values[1]

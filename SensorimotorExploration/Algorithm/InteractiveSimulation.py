@@ -41,7 +41,7 @@ class ManualSimulation(object):
                 
         motor_command = self.system.motor_command        
         for i in range(len(motor_command)):
-            motor_command[i] = float(input("Insert the element " + str(i) + " of the motor command vector: "))
+            motor_command[i] = float(input("Insert the element " + str(i) + " of the art command vector: "))
             
         self.system.set_action(motor_command)
         self.system.executeMotorCommand_unconstrained()

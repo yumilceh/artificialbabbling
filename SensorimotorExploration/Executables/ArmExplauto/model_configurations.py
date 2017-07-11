@@ -52,7 +52,7 @@ models_params = {'gmm_sm': {'k_sm': 10,
                  'explauto_sm': {'model_type': 'nearest_neighbor'},
                  'explauto_ss': {'model_type': 'nearest_neighbor'},
                  'explauto_im': {'model_type': 'discretized_progress'},
-                 'random': {'model_type': 'motor'}
+                 'random': {'model_type': 'art'}
                  }
 
 

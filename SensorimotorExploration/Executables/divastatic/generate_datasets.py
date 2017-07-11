@@ -64,7 +64,7 @@ if __name__ == '__main__' and explore:
 if __name__ == '__main__' and explore_vowels:
 
     '''
-     ORIGINAL EXPERIMENT: Script to look for motor configurations producing english
+     ORIGINAL EXPERIMENT: Script to look for art configurations producing english
      vowels using a random approach.
     '''
     from SensorimotorExploration.Systems.DivaStatic import DivaStatic

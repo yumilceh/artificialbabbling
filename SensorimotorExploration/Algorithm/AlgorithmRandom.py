@@ -38,7 +38,7 @@ class Algorithm_Random(object):
                         random_seed = np.random.random((1,1)),
                         n_save_data = 100,
                         file_prefix='',
-                        random_babbling='motor' #'sensor', 'motor'
+                        random_babbling='art' #'sensor', 'art'
                         ): 
         '''
         Constructor
@@ -59,7 +59,7 @@ class Algorithm_Random(object):
         self.data.file_prefix=file_prefix
         
     def runNonProprioceptiveAlgorithm(self, n_motor_initialization=10):
-        if self.params.random_babbling=='motor':
+        if self.params.random_babbling=='art':
             self.runNonPA_motor()        
         elif self.params.random_babbling=='sensor' :
             self.runNonPA_sensor(n_motor_initialization)
@@ -78,8 +78,8 @@ class Algorithm_Random(object):
                 self.models.f_sm.train_incremental(self.data.simulation_data)
             if ((i+1)%self.models.f_ss.params.ss_step) == 0:
                 self.models.f_ss.train_incremental(self.data.simulation_data)
-                print('Random motor babbling (Non-proprioceptive): Experiment: Training Models')
-            print('Random motor babbling (Non-proprioceptive): Experiment: {} of {}'.format(i+1,n_experiments))
+                print('Random art babbling (Non-proprioceptive): Experiment: Training Models')
+            print('Random art babbling (Non-proprioceptive): Experiment: {} of {}'.format(i+1,n_experiments))
             if (np.mod(i,n_save_data) == 0):
                 self.data.simulation_data.saveData(self.data.file_prefix +'simulation_data.h5')
         

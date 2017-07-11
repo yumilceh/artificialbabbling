@@ -29,7 +29,7 @@ class Random(object):
         pass
     
     def get_goal(self,agent):
-        if self.mode=='motor':
+        if self.mode=='art':
             return get_random_motor_set(agent, 1)[0]
         elif self.mode=='sensor':
             return get_random_sensor_set(agent, 1)[0]
@@ -37,7 +37,7 @@ class Random(object):
             raise ValueError('Unknown Mode')
         
     def get_goals(self,agent, n_samples=2):
-        if self.mode=='motor':
+        if self.mode=='art':
             return get_random_motor_set(agent, n_samples)
         elif self.mode=='sensor':
             return get_random_sensor_set(agent, n_samples)
