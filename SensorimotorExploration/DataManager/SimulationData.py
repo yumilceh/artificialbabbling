@@ -36,7 +36,7 @@ class SimulationData(object):
         self.competence.appendData(system.competence_result)
 
     def saveData(self, file_name):
-        self.motor.data.to_hdf(file_name, 'art')
+        self.motor.data.to_hdf(file_name, 'motor')
         self.sensor.data.to_hdf(file_name, 'sensor')
         self.sensor_goal.data.to_hdf(file_name, 'sensor_goal')
         self.somato.data.to_hdf(file_name, 'somato')
@@ -129,7 +129,7 @@ class SimulationData_v2(object):
         self.cons.appendData(system.cons_out)
 
     def saveData(self, file_name):
-        self.motor.data.to_hdf(file_name, 'art')
+        self.motor.data.to_hdf(file_name, 'motor')
         self.sensor.data.to_hdf(file_name, 'sensor')
         self.sensor_goal.data.to_hdf(file_name, 'sensor_goal')
         self.somato.data.to_hdf(file_name, 'somato')
@@ -190,7 +190,7 @@ class SimulationData_v2(object):
 
 
 def load_sim_h5_v2(file_name, system=None):
-    motor = pd.read_hdf(file_name, 'art')
+    motor = pd.read_hdf(file_name, 'motor')
     sensor = pd.read_hdf(file_name, 'sensor')
     sensor_goal = pd.read_hdf(file_name, 'sensor_goal')
     somato = pd.read_hdf(file_name, 'somato')
@@ -219,7 +219,7 @@ def load_sim_h5_v2(file_name, system=None):
 def load_sim_h5(file_name, system=None):
     # Keeping support to old datamanager files
     try:
-        motor = pd.read_hdf(file_name, 'art')
+        motor = pd.read_hdf(file_name, 'motor')
         suff = ''
     except KeyError:
         motor = pd.read_hdf(file_name, 'motor_data')

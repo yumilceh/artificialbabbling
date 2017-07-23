@@ -100,7 +100,7 @@ if __name__ == '__main__':
     # ,
     random_seeds = [1234,1321,1457, 283,2469, 147831]
     proprio_ops = [True, False]
-    mode_ops = ['social','autonomous']
+    mode_ops = ['social', 'autonomous']
 
     processes = []
     max_processes = 4

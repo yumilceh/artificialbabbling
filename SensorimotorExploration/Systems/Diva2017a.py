@@ -156,17 +156,17 @@ class Diva2017a(object):
         art_states2 = odeint(motor_dynamics, art_states1[-1, :], t2, args=(self, m2,
                                damping_factor,
                                w0))
-        if sound:
-            return np.concatenate((art_states1, art_states2))
-        else:
-            self.art_states = np.zeros((nSamples, 26))
-            self.art_states[:nSamples1, :] = art_states1
-            self.art_states[nSamples1 - 1:, :] = art_states2
+        #if sound:
+        #    return np.concatenate((art_states1, art_states2))
+        #else:
+        self.art_states = np.zeros((nSamples, 26))
+        self.art_states[:nSamples1, :] = art_states1
+        self.art_states[nSamples1 - 1:, :] = art_states2
 
 
     def vocalize(self):
         ts = self.ts
-        perceptionWindowDuration = np.min(self.params['duration_m1'],self.params['duration_m1'])-0.02
+        perceptionWindowDuration = np.min([self.params['duration_m1'],self.params['duration_m1']])-0.02
         perceptionTime = linspace(ts, perceptionWindowDuration, int(perceptionWindowDuration / ts))
         n_percep_samples = (len(perceptionTime))
 
@@ -175,6 +175,7 @@ class Diva2017a(object):
         auditory_states, somato_states, tr__, af = self.synth.get_audsom(self.art_states[:,0:13],scale=True)
         self.auditory_states = auditory_states
         self.somato_states = somato_states
+        self.af = af
         minaf = np.array([np.min(x) for x in af])
         self.cons_states = minaf
 
@@ -244,9 +245,11 @@ class Diva2017a(object):
         plt.sca(axes)
         plt.plot(self.time, self.cons_states)
 
-    def get_vt_shape(self):
-        a, b, outline, d = self.synth.get_audsom(self.art_states)
+    def get_vt_shape(self, sound=True):
+        self.get_motor_dynamics(sound=True)
+        a, b, outline, af = self.synth.get_audsom(self.art_states[:,0:13])
         self.vt_shape = outline
+        self.af = af
 
     def plot_vt_shape(self, index=-1, time=None, axes=None):
         if axes is None:
@@ -265,14 +268,13 @@ class Diva2017a(object):
         writer = Writer(fps=1 / 0.005, metadata=dict(artist='Juan Manuel Acevedo Valle'))
         figVocalTract = plt.figure()
 
-        art_states = self.getSoundWave(save=1, returnArtStates=1, file_name=file_name)
-
-        outline = self.get_vt_shape(art_states, returnShape=1)
-        nSamples = art_states.shape[0]
-        print(nSamples)
+        self.get_sound(save=1, file_name=file_name)
+        self.get_vt_shape()
+        nSamples = self.art_states.shape[0]
+        #print(nSamples)
         sequence = []
         for index in range(nSamples):
-            sequence.append((plt.plot(np.real(outline[:, index]), np.imag(outline[:, index]))))
+            sequence += [plt.plot(np.real(self.vt_shape[index]), np.imag(self.vt_shape[index]))]
         im_ani = animation.ArtistAnimation(figVocalTract, sequence, interval=0.005, repeat=False, blit=True)
         im_ani.save(file_name + '.mp4', writer=writer, codec="libx264")
         command = ["ffmpeg",
@@ -288,8 +290,11 @@ class Diva2017a(object):
             sp.call(command)
         if (show):
             figVocalTract.show()
+        else:
+            plt.close(figVocalTract)
 
     def get_sound(self, play=0, save=0, file_name='vt'):  # based on explauto
+        self.get_motor_dynamics(sound = True)
         self.soundWave = self.synth.get_sound(self.art_states[:,0:13])
         if (play):
             self.playSoundWave()
