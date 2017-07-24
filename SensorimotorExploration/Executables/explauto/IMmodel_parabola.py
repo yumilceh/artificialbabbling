@@ -71,7 +71,7 @@ if __name__ == '__main__':
         if i in evaluation_samples:
             sm_model.set_sigma_explo_ratio(0)
             evaluation.model = sm_model
-            eval_data = evaluation.evaluateModel()
+            eval_data = evaluation.evaluate_model()
             error_ = np.linalg.norm(eval_data.sensor_goal_data.data - eval_data.sensor_data.data, axis = 1)
             evaluation_error = np.append(evaluation_error, np.mean(error_))
             sm_model.set_sigma_explo_ratio(sigma_explo_ratio)
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     evaluation.loadEvaluationDataSet('../Parabola/parabola_dataset_2.h5')
 
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)
+    validation_valSet_data = evaluation.evaluate_model(saveData=True)
 
     fig4, ax4 = initializeFigure()
     fig4.suptitle('All Sensory Results')

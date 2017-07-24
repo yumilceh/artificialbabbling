@@ -58,7 +58,7 @@ class Diva2017a(object):
 
         ts = 0.01
 
-        name = 'Diva2016b_py'
+        name = 'Diva2017a_py'
         self.name = name
 
         self.params={'duration_m1': 0.4,
@@ -245,8 +245,8 @@ class Diva2017a(object):
         plt.sca(axes)
         plt.plot(self.time, self.cons_states)
 
-    def get_vt_shape(self, sound=True):
-        self.get_motor_dynamics(sound=True)
+    def get_vt_shape(self, sound=False):
+        self.get_motor_dynamics(sound=sound)
         a, b, outline, af = self.synth.get_audsom(self.art_states[:,0:13])
         self.vt_shape = outline
         self.af = af
@@ -327,24 +327,27 @@ class Diva2017a(object):
             pass
 
 class Instructor(object):
-    def __init__(self):
-        import os
+    def __init__(self, n_su = None): #n_su -> n_sensor_units
+        import os, random
         from ..DataManager.SimulationData import load_sim_h5
-        # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
-        #     for s in ss:
-        #         system.set_action(infer_motor(0, s))
-        #         system.execute_action()
-        #         data.appendData(system)
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
         self.instructor_file = abs_path + '/datasets/german_dataset_3.h5'
 
         self.name = 'diva2017a-memorydata'
         self.data = load_sim_h5(self.instructor_file)
-        self.sensor_out = self.data.sensor.data.iloc[0].as_matrix()
+        n_samples = len(self.data.sensor.data.iloc[:])
+        self.idx_sensor = range(n_samples)
+        self.n_su = n_samples
+        if n_su is not None:
+            self.n_su = n_su
+            random.seed(1234)#To gurantee that the first samples are going to be equal in any subset
+            self.idx_sensor = random.sample(range(n_samples), n_su)
+        self.sensor_out = 0. * self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.5
+
+        self.unit_threshold = 0.5*np.ones((self.n_su,))
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
@@ -353,6 +356,7 @@ class Instructor(object):
         if dist[min_idx] <= self.unit_threshold:
             out_tmp = self.data.sensor.data.iloc[min_idx].as_matrix()
             out = out_tmp.copy()
+            self.unit_threshold[self.idx_sensor[min_idx]] *= 0.98
             return 1, out  # Analize implications of return the object itself
         tmp_rtn = np.empty((self.n_sensor,))
         tmp_rtn.fill(np.nan)
@@ -360,8 +364,8 @@ class Instructor(object):
 
     def get_distances(self, sensor):
         dist = []
-        s_data = self.data.sensor.data.as_matrix()
-        for i in range(self.n_units):
+        s_data = self.data.sensor.data.iloc[self.idx_sensor].as_matrix()
+        for i in range(self.n_su):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist
 

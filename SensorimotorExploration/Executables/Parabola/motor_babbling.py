@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     evaluation.loadEvaluationDataSet('parabola_dataset_2.h5')
     
-    validation_valSet_data = evaluation.evaluateModel(saveData=True)   
+    validation_valSet_data = evaluation.evaluate_model(saveData=True)
     
     fig1,ax1 = initializeFigure()
     fig1.suptitle('All Sensory Results')

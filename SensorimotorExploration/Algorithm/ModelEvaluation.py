@@ -83,7 +83,7 @@ class SM_ModelEvaluation(object):
             self.model.train_incremental(data_tmp)
             progress = progress + 1;
 
-    def evaluateModel(self, saveData=False, eva_train_set=0):
+    def evaluate_model(self, saveData=False, eva_train_set=0):
         # Validation against Training set
         if (eva_train_set > 0):
             n_samples_evatrain = np.ceil(eva_train_set * self.n_samples_train).astype(int)

@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     evaluation_sim.model.set_sigma_explo_ratio(0.)
     evaluation_sim.model.mode = 'exploit'
-    val_data = evaluation_sim.evaluateModel(saveData=False)
+    val_data = evaluation_sim.evaluate_model(saveData=False)
     error_ = np.linalg.norm(val_data.sensor_goal.data.as_matrix() -
                             val_data.sensor.data.as_matrix(), axis=1)
     print("Mean evaluation error is {} (max: {}, min: {})".format(np.mean(error_),
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                                         comp_func=comp_func,
                                         file_prefix=file_prefix + 'social_')
     evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/instructor_parabola_1.h5')
-    val_data = evaluation_sim.evaluateModel(saveData=False)
+    val_data = evaluation_sim.evaluate_model(saveData=False)
     val_data.cut_final_data()
 
 

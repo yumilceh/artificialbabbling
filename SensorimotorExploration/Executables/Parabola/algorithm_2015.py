@@ -88,7 +88,7 @@ if __name__ == '__main__':
     sim_data = simulation.data
 
     evaluation_sim.model.set_sigma_explo_ratio(0.)
-    val_data = evaluation_sim.evaluateModel(saveData=False)
+    val_data = evaluation_sim.evaluate_model(saveData=False)
     error_ = np.linalg.norm(val_data.sensor_goal_data.data.as_matrix() -
                             val_data.sensor_data.data.as_matrix(), axis=1)
     print("Mean evaluation error is {} (max: {}, min: {})".format(np.mean(error_),

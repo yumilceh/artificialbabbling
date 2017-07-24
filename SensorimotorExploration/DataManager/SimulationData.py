@@ -193,24 +193,33 @@ def load_sim_h5_v2(file_name, system=None):
     motor = pd.read_hdf(file_name, 'motor')
     sensor = pd.read_hdf(file_name, 'sensor')
     sensor_goal = pd.read_hdf(file_name, 'sensor_goal')
-    somato = pd.read_hdf(file_name, 'somato')
-    somato_goal = pd.read_hdf(file_name, 'somato_goal')
     competence = pd.read_hdf(file_name, 'competence')
     social = pd.read_hdf(file_name, 'social')
-    cons = pd.read_hdf(file_name, 'cons')
+
+    is_somato = True
+    try:
+        cons = pd.read_hdf(file_name, 'cons')
+        somato = pd.read_hdf(file_name, 'somato')
+        somato_goal = pd.read_hdf(file_name, 'somato_goal')
+    except:
+        is_somato = False
+
 
     system = Object()
     system.motor_names = ['M' + str(x) for x in range(motor.shape[0])]
     system.sensor_names = ['S' + str(x) for x in range(sensor.shape[0])]
-    system.somato_names = ['Som' + str(x) for x in range(somato.shape[0])]
+
+    if is_somato:
+        system.somato_names = ['Som' + str(x) for x in range(somato.shape[0])]
 
     tmp = SimulationData_v2(system,prelocated_samples=1)
 
     tmp.motor.data = motor
     tmp.sensor.data = sensor
     tmp.sensor_goal.data = sensor_goal
-    tmp.somato.data = somato
-    tmp.somato_goal.data = somato_goal
+    if is_somato:
+        tmp.somato.data = somato
+        tmp.somato_goal.data = somato_goal
     tmp.competence.data = competence
     tmp.cons.data = cons
     tmp.social.data = social

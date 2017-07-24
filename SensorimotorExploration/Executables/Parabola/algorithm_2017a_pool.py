@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
         evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/parabola_dataset_1.h5')
         evaluation_sim.model.set_sigma_explo_ratio(0.)
-        val_data = evaluation_sim.evaluateModel(saveData=True)
+        val_data = evaluation_sim.evaluate_model(saveData=True)
         del(evaluation_sim)
 
         evaluation_sim = SM_ModelEvaluation(system,
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                                             comp_func=comp_func,
                                             file_prefix=file_prefix + 'social_')
         evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/instructor_parabola_1.h5')
-        val_data = evaluation_sim.evaluateModel(saveData=True)
+        val_data = evaluation_sim.evaluate_model(saveData=True)
 
         del simulation
         del models

@@ -1,5 +1,5 @@
 # Import libraries
-from SensorimotorExploration.Systems.Diva2017a import Diva2017b as Diva
+from SensorimotorExploration.Systems.Diva2017a import Diva2017a as Diva
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,7 +11,7 @@ duration_m1 = 0.4
 duration_m2 = 0.4
 w0 = 2 * np.pi / 0.01
 damping_factor = 1.01
-motor_command = np.array([0.1]*10 + [1.]*3 + [0.1]*10 + [1.]*3)
+motor_command = np.array([0.1]*10 + [1.]*3 + [0.2]*10 + [1.]*3)
 print(motor_command)
 
 

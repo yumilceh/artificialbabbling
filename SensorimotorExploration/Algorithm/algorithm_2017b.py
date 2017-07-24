@@ -264,11 +264,12 @@ class Algorithm(object):
             self.models.f_sm.train_incremental(self.data, all = all)
             # print('i: {}, sum w: {}'.format(i,sum(self.models.f_sm.model.weights_)))
 
-
-        if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.sm_step == 0 or force):
-            # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
-            self.models.f_ss.train_incremental(self.data, all = all)
-            
+        try:
+            if 'ss' in up_ and ((i + 1) % self.models.f_ss.params.sm_step == 0 or force):
+                # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
+                self.models.f_ss.train_incremental(self.data, all = all)
+        except:
+            pass
         # if 'ss' in up_ and ((i + 1) % self.models.f_cons.params.sm_step == 0 or force):
         #     # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
         #     self.models.f_sm.train_incremental(self.data, all = all)
