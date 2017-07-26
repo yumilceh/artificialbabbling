@@ -57,7 +57,7 @@ class GMM_SM(object):
 
         self.delta_motor_values = system.max_motor_values - system.min_motor_values
         self.sigma_expl = self.delta_motor_values * float(sigma_explo_ratio)
-        self.mode = 'explore'
+        self.mode = 'exploit'
 
         self.model=GMM(min_components = min_components,
                        max_step_components = max_step_components,

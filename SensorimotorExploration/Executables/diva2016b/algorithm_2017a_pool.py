@@ -98,7 +98,7 @@ if __name__ == '__main__':
     eval_step = 5000 #np.nan to not evaluate
 
     # ,
-    random_seeds = [1234,1321,1457, 283,2469, 147831]
+    random_seeds = [1234, 1321,1457, 283,2469, 147831]
     proprio_ops = [True, False]
     mode_ops = ['social', 'autonomous']
 

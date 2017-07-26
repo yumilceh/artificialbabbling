@@ -38,12 +38,12 @@ f_im_key = 'explauto_im'
 if __name__ == '__main__':
 
     n_initialization = 100
-    n_experiments = 90000
-    n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
+    n_experiments = 10000
+    n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 5000 #np.nan to not evaluate
+    eval_step = 1000 #np.nan to not evaluate
 
-    random_seeds = 1234
+    random_seeds = 123545 # 1234:Esta semilla is very bad!!
     proprio = True
     mode_ = 'social'
 
