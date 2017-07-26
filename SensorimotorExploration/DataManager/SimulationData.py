@@ -150,6 +150,18 @@ class SimulationData_v2(object):
         simulationdata_tmp.cons.data = self.cons.data.iloc[start:stop]
         return simulationdata_tmp
 
+    def get_samples(self, system, idx):
+        simulationdata_tmp = SimulationData_v2(system)
+        simulationdata_tmp.motor.data = self.motor.data.iloc[idx]
+        simulationdata_tmp.sensor.data = self.sensor.data.iloc[idx]
+        simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[idx]
+        simulationdata_tmp.somato.data = self.somato.data.iloc[idx]
+        simulationdata_tmp.somato_goal.data = self.somato_goal.data.iloc[idx]
+        simulationdata_tmp.competence.data = self.competence.data.iloc[idx]
+        simulationdata_tmp.social.data = self.social.data.iloc[idx]
+        simulationdata_tmp.cons.data = self.cons.data.iloc[idx]
+        return simulationdata_tmp
+
     def cut_final_data(self):
         self.motor.data = self.motor.get_all()
         self.sensor.data = self.sensor.get_all()
@@ -194,7 +206,12 @@ def load_sim_h5_v2(file_name, system=None):
     sensor = pd.read_hdf(file_name, 'sensor')
     sensor_goal = pd.read_hdf(file_name, 'sensor_goal')
     competence = pd.read_hdf(file_name, 'competence')
-    social = pd.read_hdf(file_name, 'social')
+
+    is_social = True
+    try:
+        social = pd.read_hdf(file_name, 'social')
+    except:
+        is_social = False
 
     is_somato = True
     try:
@@ -202,6 +219,7 @@ def load_sim_h5_v2(file_name, system=None):
         somato = pd.read_hdf(file_name, 'somato')
         somato_goal = pd.read_hdf(file_name, 'somato_goal')
     except:
+        cons = pd.read_hdf(file_name, 'somato')
         is_somato = False
 
 
@@ -211,6 +229,8 @@ def load_sim_h5_v2(file_name, system=None):
 
     if is_somato:
         system.somato_names = ['Som' + str(x) for x in range(somato.shape[0])]
+    else:
+        system.somato_names = ['SOM_FOO']
 
     tmp = SimulationData_v2(system,prelocated_samples=1)
 
@@ -222,8 +242,9 @@ def load_sim_h5_v2(file_name, system=None):
         tmp.somato_goal.data = somato_goal
     tmp.competence.data = competence
     tmp.cons.data = cons
-    tmp.social.data = social
-    return tmp
+    if is_social:
+        tmp.social.data = social
+    return tmp, system
 
 def load_sim_h5(file_name, system=None):
     # Keeping support to old datamanager files

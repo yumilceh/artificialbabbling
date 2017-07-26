@@ -329,13 +329,13 @@ class Diva2017a(object):
 class Instructor(object):
     def __init__(self, n_su = None): #n_su -> n_sensor_units
         import os, random
-        from ..DataManager.SimulationData import load_sim_h5
+        from SensorimotorExploration.DataManager.SimulationData import load_sim_h5_v2 as load_sim_h5
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
-        self.instructor_file = abs_path + '/datasets/german_dataset_3.h5'
+        self.instructor_file = abs_path + '/datasets/german_dataset_somato.h5'
 
         self.name = 'diva2017a-memorydata'
-        self.data = load_sim_h5(self.instructor_file)
+        self.data, sys = load_sim_h5(self.instructor_file)
         n_samples = len(self.data.sensor.data.iloc[:])
         self.idx_sensor = range(n_samples)
         self.n_su = n_samples
@@ -343,6 +343,7 @@ class Instructor(object):
             self.n_su = n_su
             random.seed(1234)#To gurantee that the first samples are going to be equal in any subset
             self.idx_sensor = random.sample(range(n_samples), n_su)
+            self.data = self.data.get_samples(sys, self.idx_sensor)
         self.sensor_out = 0. * self.data.sensor.data.iloc[0].as_matrix()
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
@@ -353,10 +354,10 @@ class Instructor(object):
         dist = np.array(self.get_distances(sensor))
         min_idx = np.argmin(dist)
         self.min_idx = min_idx
-        if dist[min_idx] <= self.unit_threshold:
+        if dist[min_idx] <= self.unit_threshold[min_idx]:
             out_tmp = self.data.sensor.data.iloc[min_idx].as_matrix()
             out = out_tmp.copy()
-            self.unit_threshold[self.idx_sensor[min_idx]] *= 0.98
+            self.unit_threshold[min_idx] *= 0.98
             return 1, out  # Analize implications of return the object itself
         tmp_rtn = np.empty((self.n_sensor,))
         tmp_rtn.fill(np.nan)
@@ -364,7 +365,7 @@ class Instructor(object):
 
     def get_distances(self, sensor):
         dist = []
-        s_data = self.data.sensor.data.iloc[self.idx_sensor].as_matrix()
+        s_data = self.data.sensor.data.as_matrix()#.iloc[self.idx_sensor].as_matrix()
         for i in range(self.n_su):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist

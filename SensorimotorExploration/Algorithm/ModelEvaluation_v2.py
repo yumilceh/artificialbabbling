@@ -44,8 +44,15 @@ class SM_ModelEvaluation(object):
         self.ratio_samples_val = ratio_samples_val
 
     def load_eval_dataset(self, file_name):
-        self.data = load_sim_h5_v2(file_name, self.agent)
+        self.data, foo = load_sim_h5_v2(file_name)
         n_samples = len(self.data.sensor.data)
+        self.n_samples_val = n_samples
+        self.random_indexes_val = range(n_samples)
+
+
+    def set_eval_dataset(self, data):
+        n_samples = len(data.sensor.data)
+        self.data = data
         self.n_samples_val = n_samples
         self.random_indexes_val = range(n_samples)
 

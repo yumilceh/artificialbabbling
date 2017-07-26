@@ -15,7 +15,7 @@ from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
 from SensorimotorExploration.Systems.Diva2017a import Diva2017a as System
 from SensorimotorExploration.Systems.Diva2017a import Instructor
-from model_configurations import model_, comp_func
+from diva_configurations import model_, comp_func
 
 # Models
 f_sm_key = 'igmm_sm'
@@ -38,10 +38,10 @@ f_im_key = 'explauto_im'
 if __name__ == '__main__':
 
     n_initialization = 100
-    n_experiments = 20000
-    n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
+    n_experiments = 90000
+    n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 2000 #np.nan to not evaluate
+    eval_step = 5000 #np.nan to not evaluate
 
     random_seeds = 1234
     proprio = True
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     # tree/DP Interest Model
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_")
 
-    file_prefix = 'test/motherese_test1_' + now
+    file_prefix = 'test/motherese_test2_cmf_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,
