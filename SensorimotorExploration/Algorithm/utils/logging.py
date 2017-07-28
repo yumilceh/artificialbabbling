@@ -21,9 +21,10 @@ def write_config_log(alg, file_name):
                 try:
                     log_file.write(attr_ + ': ' + getattr(getattr(alg, attr_), 'name') + '\n')
                     if attr_ is 'instructor':
-
-                        log_file.write(attr_ + ': ' + str(getattr(getattr(alg, attr_), 'idx_sensor')) + '\n')
-
+                        try:
+                            log_file.write(attr_ + ': ' + str(getattr(getattr(alg, attr_), 'idx_sensor')) + '\n')
+                        except:
+                            pass
                 except IndexError:
                     pass #In case instructor is  None
 

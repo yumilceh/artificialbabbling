@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 
     proprio = True
-    mode = 'autonomous'
+    mode = 'social'
     expl_space = 'sensor'  # 'sensor' for salient and 'somato' for haptic
 
     if expl_space is 'sensor':
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor()
+    instructor = Instructor(thresh_slope=0.95)
 
     # Creating Models ##
     models = OBJECT()

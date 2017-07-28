@@ -378,7 +378,7 @@ class ParabolicRegion:
         plt.plot(x_p, y_p, "b")
 
 class Instructor(ParabolicRegion):
-    def __init__(self):
+    def __init__(self, thresh_slope=1.):
         import os
         from ..DataManager.SimulationData import load_sim_h5_v2 as load_sim_h5
         # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
@@ -388,10 +388,11 @@ class Instructor(ParabolicRegion):
         #         data.appendData(system)
         ParabolicRegion.__init__(self)
         abs_path = os.path.dirname(os.path.abspath(__file__))
-        self.intructor_file = abs_path + '/datasets/instructor_parabola_f1_1.h5'
+        self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
         self.data, foo = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.3*np.ones((self.n_units,))
+        self.unit_threshold = 0.6 * np.ones((self.n_units,))
+        self.thresh_slope = thresh_slope
 
     def plot(self, axes=None):
         if axes is None:
@@ -413,7 +414,7 @@ class Instructor(ParabolicRegion):
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold[min_idx]:
             self.set_action(self.data.motor.data.iloc[min_idx])
-            self.unit_threshold[min_idx] *= 0.98
+            self.unit_threshold[min_idx] *= self.thresh_slope
             self.execute_action()
             return 1, self.sensor_out.copy()
         return 0, np.zeros((self.n_sensor,))
