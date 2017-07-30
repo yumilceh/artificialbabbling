@@ -39,16 +39,16 @@ if __name__ == '__main__':
 
     n_initialization = 100
     n_experiments = 20000
-    n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
+    n_save_data = -1  # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 2000 #np.nan to not evaluate
 
-    random_seeds = 123545 # 1234:Esta semilla is very bad!!
+    random_seeds = 2469
     proprio = True
     mode_ = 'social'
 
     system = System()
-    instructor = Instructor()#n_su=15)
+    instructor = Instructor()#n_su=15
 
     random_seed = random_seeds
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     # tree/DP Interest Model
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_")
 
-    file_prefix = 'test/motherese_test2_cmf_' + now
+    file_prefix = 'test/motherese_test2_bar_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,

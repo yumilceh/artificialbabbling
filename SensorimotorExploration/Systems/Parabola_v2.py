@@ -391,7 +391,7 @@ class Instructor(ParabolicRegion):
         self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
         self.data, foo = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.6 * np.ones((self.n_units,))
+        self.unit_threshold = 0.3 * np.ones((self.n_units,))
         self.thresh_slope = thresh_slope
 
     def plot(self, axes=None):

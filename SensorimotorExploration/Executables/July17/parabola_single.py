@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     random_seed = 1234  # 12455   #1234
+    thres_slope=0.8
 
     n_initialization = 100
     n_experiments = 2000
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor(thresh_slope=0.95)
+    instructor = Instructor(thresh_slope=thres_slope)
 
     # Creating Models ##
     models = OBJECT()
@@ -169,4 +170,4 @@ if __name__ == '__main__':
 
 
     from parabola_results import show_results
-    show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val)
+    show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val, thres=thres_slope )

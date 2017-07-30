@@ -199,7 +199,8 @@ class Algorithm(object):
 
                         else:
                             self.learner.sensor_goal = self.learner.sensor_instructor
-                            self.models.self.select_expl_model().get_action(self.learner)
+                            self.select_expl_model().get_action(self.learner)
+                            #self.models.self.select_expl_model().get_action(self.learner)
                             self.learner.execute_action()
                             self.get_competence(self.learner, sensor_space=self.params.expl_space)
                             self.data.appendData(self.learner)

@@ -97,7 +97,7 @@ class Diva2017a(object):
         self.somato_out = np.array([0.0] * n_somato)
         self.somato_goal = np.array([0.0] * n_somato)
         self.cons_out = 0.0 #Constraint violations flag
-        self.cons_threshold = 0.6
+        self.cons_threshold = 0.5
         self.competence_result = 0.0
         self.sensor_instructor = np.empty((self.n_sensor,))
         self.sensor_instructor.fill(np.nan)
@@ -348,7 +348,7 @@ class Instructor(object):
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
 
-        self.unit_threshold = 0.5*np.ones((self.n_su,))
+        self.unit_threshold = 0.5 * np.ones((self.n_su,))
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))
@@ -357,7 +357,7 @@ class Instructor(object):
         if dist[min_idx] <= self.unit_threshold[min_idx]:
             out_tmp = self.data.sensor.data.iloc[min_idx].as_matrix()
             out = out_tmp.copy()
-            self.unit_threshold[min_idx] *= 0.98
+            self.unit_threshold[min_idx] *= 1.
             return 1, out  # Analize implications of return the object itself
         tmp_rtn = np.empty((self.n_sensor,))
         tmp_rtn.fill(np.nan)
