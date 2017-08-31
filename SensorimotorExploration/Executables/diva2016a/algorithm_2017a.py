@@ -9,6 +9,10 @@ import datetime
 
 now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
 
+class OBJECT(object):
+    def __init__(self):
+        pass
+
 if __name__ == '__main__':
     #  Adding the projects folder to the path##
     import os, sys, random
@@ -16,10 +20,10 @@ if __name__ == '__main__':
     # sys.path.append("../../")
 
     #  Adding libraries##
-    from SensorimotorExploration.Systems.Diva2016a import Diva2016a as System
-    from SensorimotorExploration.Systems.Diva2016a import Instructor
+    from SensorimotorExploration.Systems.Diva2017a import Diva2017a as System
+    from SensorimotorExploration.Systems.Diva2017a import Instructor
     from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
-    from SensorimotorExploration.Algorithm.algorithm_2015 import OBJECT
+    from SensorimotorExploration.Algorithm.algorithm_2017a import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
 
@@ -49,7 +53,7 @@ if __name__ == '__main__':
     n_experiments = 20000
     n_save_data = 5000   # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 5000
+    eval_step = 2000
 
     random.seed(random_seed)
     np_rnd.seed(random_seed)
@@ -76,7 +80,7 @@ if __name__ == '__main__':
 
     evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_1.h5')
 
-    proprio = False
+    proprio = True
     mode = 'social'
 
     simulation = Algorithm(system,
@@ -85,7 +89,7 @@ if __name__ == '__main__':
                            comp_func,
                            instructor = instructor,
                            n_initialization_experiments=n_initialization,
-                           random_seed=1234,
+                           random_seed=1321,
                            g_im_initialization_method='all',
                            n_save_data=n_save_data,
                            evaluation=evaluation_sim,
