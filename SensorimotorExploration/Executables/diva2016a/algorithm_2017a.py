@@ -7,7 +7,7 @@ from numpy import linspace
 from numpy import random as np_rnd
 import datetime
 
-now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_")
+now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_%S_")
 
 class OBJECT(object):
     def __init__(self):
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     # Models
     f_sm_key = 'igmm_sm'
-    f_ss_key = 'explauto_ss'
+    f_ss_key = 'explauto_cons'
     f_im_key = 'explauto_im'
 
     """
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     """
 
     # To guarantee reproducible experiments
-    random_seed = 1234
+    random_seed = 9751  # 1234 3487 9751
 
     n_initialization = 100
     n_experiments = 20000
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_1.h5')
+    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/vowels_dataset_3.h5')
 
     proprio = True
     mode = 'social'
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                            comp_func,
                            instructor = instructor,
                            n_initialization_experiments=n_initialization,
-                           random_seed=1321,
+                           random_seed=random_seed,#1321,
                            g_im_initialization_method='all',
                            n_save_data=n_save_data,
                            evaluation=evaluation_sim,
