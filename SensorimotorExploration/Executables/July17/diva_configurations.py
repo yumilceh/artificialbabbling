@@ -9,6 +9,7 @@ from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 # from SensorimotorExploration.Models.Somatomotor.ILGMM_SM import GMM_SS as IGMM_SS
 
+from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as ILGMM_old
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
 from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
@@ -21,6 +22,7 @@ from SensorimotorExploration.Models.Sensorimotor.GMM_SM import GMM_SM
 from SensorimotorExploration.Models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 
 model_class = {'igmm_sm': IGMM_SM,
+               'igmm_old': ILGMM_old,
                'igmm_ss': IGMM_SM,
                'explauto_im': ea_IM,
                'explauto_im_som': ea_IM,
@@ -28,6 +30,7 @@ model_class = {'igmm_sm': IGMM_SM,
                'random': Random}
 
 models_params_list = {'igmm_sm': [],
+                      'igmm_old': [],
                       'igmm_ss': [],
                       'explauto_cons': [],
                       'explauto_im_som': [],
@@ -36,6 +39,12 @@ models_params_list = {'igmm_sm': [],
                       }
 
 models_params_dict = {'igmm_sm': {'min_components': 3,
+                                  'max_step_components': 10,
+                                  'max_components': 30,
+                                  'sm_step': 400,
+                                  'forgetting_factor': 0.1,
+                                  'sigma_explo_ratio': 0.},
+                      'igmm_old': {'min_components': 3,
                                   'max_step_components': 10,
                                   'max_components': 30,
                                   'sm_step': 400,

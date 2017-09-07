@@ -38,14 +38,14 @@ f_im_key = 'explauto_im'
 if __name__ == '__main__':
 
     n_initialization = 100
-    n_experiments = 20000
+    n_experiments = 250000
     n_save_data = 5000  # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 2000 #np.nan to not evaluate
 
     random_seeds = 123545 # 1234:Esta semilla is very bad!!
     proprio = True
-    mode_ = 'social'
+    mode_ = 'autonomous'
 
     system = System()
     instructor = Instructor()#n_su=15)
