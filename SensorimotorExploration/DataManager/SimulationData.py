@@ -327,4 +327,4 @@ def plot_time_series_(data, src, column, color='b', x=None, axes=None, moving_av
         except AttributeError:
             data = movingAverage(data, moving_average)
 
-    plt.plot(x_data, data, color)
+    plt.plot(x_data, data, color, lw=3)
