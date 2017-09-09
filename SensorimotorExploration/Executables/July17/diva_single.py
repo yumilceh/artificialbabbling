@@ -43,14 +43,12 @@ if __name__ == '__main__':
 
     eval_step = 2000 #np.nan to not evaluate
 
-    random_seeds = 123545 # 1234:Esta semilla is very bad!!
+    random_seed = 9751  # 1234 3487 9751
     proprio = True
-    mode_ = 'autonomous'
+    mode_ = 'social'
 
     system = System()
     instructor = Instructor()#n_su=15)
-
-    random_seed = random_seeds
 
     # Creating Models ##
     models = OBJECT()
@@ -61,9 +59,9 @@ if __name__ == '__main__':
 
     # Creating Simulation object, running simulation and plotting experiments##
     # tree/DP Interest Model
-    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_")
+    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
 
-    file_prefix = 'test/motherese_test2_cmf_' + now
+    file_prefix = 'RndExperiments/motherese_test2_cmf_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,
