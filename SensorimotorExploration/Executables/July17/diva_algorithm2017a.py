@@ -115,6 +115,6 @@ if __name__ == '__main__':
                                                                   np.max(error_),
                                                                   np.min(error_)))
 
-    from plot_results import show_results
+    from diva_plot_results import show_results
 
     show_results(system, simulation, val_data)
