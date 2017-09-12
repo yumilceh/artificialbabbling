@@ -3,7 +3,7 @@ Created on Sep, 2016
 
 @author: Juan Manuel Acevedo Valle
 '''
-from .Mixture2 import GMM as GMMmix
+from .Mixture import GMM as GMMmix
 from ...DataManager.PlotTools import initializeFigure
 
 import matplotlib.pyplot as plt
