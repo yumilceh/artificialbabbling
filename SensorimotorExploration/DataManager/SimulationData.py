@@ -76,11 +76,18 @@ class SimulationData(object):
         tmp.competence.data = self.competence.data.copy(deep=True)
         return tmp
 
-    def plot_time_series(self, fig, axes, src, column, color, moving_average=0):
-        return plot_time_series_(self, fig, axes, src, column, color, moving_average)
+    # def plot_time_series(self, fig, axes, src, column, color, moving_average=0):
+    #     return plot_time_series_(self, fig, axes, src, column, color, moving_average)
+    #
+    # def plot_2D(self, fig, axes, src1, column1, src2, column2, color):
+    #     return plot_2D_(self, fig, axes, src1, column1, src2, column2, color)
 
-    def plot_2D(self, fig, axes, src1, column1, src2, column2, color):
-        return plot_2D_(self, fig, axes, src1, column1, src2, column2, color)
+
+    def plot_time_series(self, src, column, color='b', axes=None, moving_average=0):
+        return plot_time_series_(self, src, column, color=color, moving_average=moving_average, axes=axes)
+
+    def plot_2D(self, src1, column1, src2, column2, color='b', axes=None):
+        return plot_2D_(self, src1, column1, src2, column2, color=color, axes=axes)
 
 
 class SimulationDataSocial(SimulationData):

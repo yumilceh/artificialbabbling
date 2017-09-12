@@ -13,9 +13,11 @@ from ..Algorithm.utils.logging import write_config_log
 
 now = datetime.datetime.now().strftime("Alg2017a_%Y_%m_%d_%H_%M_")
 
+
 class OBJECT(object):
     def __init__(self):
         pass
+
 
 class InteractionAlgorithm(object):
     """
@@ -26,7 +28,7 @@ class InteractionAlgorithm(object):
                  models,
                  n_experiments,
                  competence_func,
-                 instructor = None,
+                 instructor=None,
                  n_initialization_experiments=100,
                  random_seed=np.random.random((1, 1)),
                  g_im_initialization_method='non-zero',  # 'non-zero' 'all' 'non-painful'
@@ -60,11 +62,11 @@ class InteractionAlgorithm(object):
         self.models = models
         self.get_competence = competence_func
 
-        try:
+        try: #Check id the system has option for  initialization bounds
             self.init_motor_commands = get_random_motor_set(learner,
                                                             n_initialization_experiments,
-                                                            min_values = learner.self.min_motor_values_init,
-                                                            max_values = learner.self.max_motor_values_init)
+                                                            min_values=learner.self.min_motor_values_init,
+                                                            max_values=learner.self.max_motor_values_init)
         except AttributeError:
             self.init_motor_commands = get_random_motor_set(learner,
                                                             n_initialization_experiments)
@@ -74,7 +76,8 @@ class InteractionAlgorithm(object):
             # self.imitation = []
             self.mode = 'social'
 
-        self.data = SimulationData(learner, prelocated_samples=n_experiments+2*n_initialization_experiments+1)
+        # Analyze whether is necessary to  sum 1 and 2
+        self.data = SimulationData(learner, prelocated_samples=n_experiments + 2 * n_initialization_experiments + 1)
         self.data.file_prefix = file_prefix
 
         self.evaluation = evaluation
@@ -101,7 +104,6 @@ class InteractionAlgorithm(object):
         n_init = self.params.n_initialization_experiments
         motor_commands = self.init_motor_commands
 
-
         n_save_data = self.params.n_save_data
 
         print('SM Exploration ({}, {}), Line 1: Initializing G_SM'.format(self.type, self.mode))
@@ -111,7 +113,7 @@ class InteractionAlgorithm(object):
             self.data.appendData(self.learner)
             self.do_training(i, up_=['sm'])
 
-        self.do_training(i, up_=['sm','cons'], force=True, all=True)
+        self.do_training(i, up_=['sm', 'cons'], force=True, all=True)
 
         print('G_SM initialized')
 
@@ -128,7 +130,7 @@ class InteractionAlgorithm(object):
             self.learner.execute_action()
             self.get_competence(self.learner)
             self.data.appendData(self.learner)
-            self.do_training(i, up_=['im', 'cons','sm'])
+            self.do_training(i, up_=['im', 'cons', 'sm'])
 
         print('G_IM initialized')
         if n_save_data is not np.nan:
@@ -149,8 +151,8 @@ class InteractionAlgorithm(object):
             self.learner.sensor_instructor.fill(np.nan)
             if self.type is 'proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
-                                                                         self.models.f_sm,
-                                                                         self.models.f_cons)
+                                                                             self.models.f_sm,
+                                                                             self.models.f_cons)
                 self.models.f_sm.get_action(self.learner)
                 self.learner.execute_action()
                 self.get_competence(self.learner)
@@ -168,9 +170,10 @@ class InteractionAlgorithm(object):
             self.do_evaluation(i)
 
             if self.instructor is not None:
-                reinforce, self.learner.sensor_instructor = self.instructor.interaction(self.learner.sensor_out)
+                reinforce, self.learner.sensor_instructor =\
+                    self.instructor.interaction(self.learner.sensor_out)
                 if reinforce is 1:
-                    #self.imitation += [i, self.instructor.min_idx]
+                    # self.imitation += [i, self.instructor.min_idx]
                     if self.mode is 'social':
                         if self.type is 'proprio':
                             tmp_goal = self.learner.sensor_instructor
@@ -196,7 +199,7 @@ class InteractionAlgorithm(object):
                             self.learner.execute_action()
                             self.get_competence(self.learner)
                             self.data.appendData(self.learner)
-                            i += 1#
+                            i += 1  #
                             # self.learner.sensor_instructor.fill(np.nan)
                             self.do_training(i, up_=['sm', 'cons', 'im'])
                             self.do_evaluation(i)
@@ -219,7 +222,6 @@ class InteractionAlgorithm(object):
             self.data.saveData(self.data.file_prefix + 'sim_data.h5')
             # ndarray_to_h5(self.imitation, 'imitation', self.data.file_prefix + 'social_data.h5')
         print('SM Exploration ({}, {}), Experiment was finished.'.format(self.type, self.mode))
-
 
     def get_im_init_data(self, method='all'):  # Non-painful is missing
         if method == 'non-zero':
@@ -247,7 +249,7 @@ class InteractionAlgorithm(object):
         """Train Sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('Algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
-            self.models.f_sm.train_incremental(self.data, all = all)
+            self.models.f_sm.train_incremental(self.data, all=all)
 
         if hasattr(self.models, 'f_cons'):
             if 'cons' in up_ and ((i + 1) % self.models.f_cons.params.cons_step == 0 or force):
@@ -267,4 +269,4 @@ class InteractionAlgorithm(object):
                     log_file.write('{}: {}\n'.format(i, np.mean(error_)))
             print('Evaluation finished.')
             self.evaluation.model.set_sigma_explo(tmp_sigma)
-        #  print(self.evaluation.model.get_sigma_explo())
+            #  print(self.evaluation.model.get_sigma_explo())
