@@ -23,6 +23,7 @@ def write_config_log(alg, file_name):
                     if attr_ is 'instructor':
                         try:
                             log_file.write(attr_ + ': ' + str(getattr(getattr(alg, attr_), 'idx_sensor')) + '\n')
+                            log_file.write(attr_ + ': ' + str(getattr(getattr(alg, attr_), 'slope')) + '\n')
                         except:
                             pass
                 except IndexError:

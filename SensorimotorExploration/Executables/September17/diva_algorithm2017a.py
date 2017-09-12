@@ -30,7 +30,7 @@ if __name__ == '__main__':
     from diva_configurations import model_, comp_func
 
     # Models
-    f_sm_key = 'igmm_sm'
+    f_sm_key = 'igmm_old'
     f_cons_key = 'explauto_cons'
     f_im_key = 'explauto_im'
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor()
+    instructor = Instructor(n_su=5)
 
     # Creating Models ##
     models = OBJECT()
@@ -78,10 +78,13 @@ if __name__ == '__main__':
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.load_eval_dataset('../../Systems/datasets/german_dataset_3.h5')
-
+    #evaluation_sim.load_eval_dataset('../../Systems/datasets/german_dataset_3.h5')
+    #Use only the vowels that are used by the instructor
+    evaluation_sim.data = instructor.data
+    evaluation_sim.n_samples_val = len(evaluation_sim.data.sensor.data)
+    evaluation_sim.random_indexes_val = range(evaluation_sim.n_samples_val)
     proprio = True
-    mode = 'autonomous'
+    mode = 'social'
 
     simulation = Algorithm(system,
                            models,

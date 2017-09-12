@@ -327,7 +327,7 @@ class Diva2017a(object):
             pass
 
 class Instructor(object):
-    def __init__(self, n_su = None): #n_su -> n_sensor_units
+    def __init__(self, n_su = None, slope = 1.): #n_su -> n_sensor_units
         import os, random
         from SensorimotorExploration.DataManager.SimulationData import load_sim_h5_v2 as load_sim_h5
         abs_path = os.path.dirname(os.path.abspath(__file__))
@@ -338,6 +338,7 @@ class Instructor(object):
         self.data, sys = load_sim_h5(self.instructor_file)
         n_samples = len(self.data.sensor.data.iloc[:])
         self.idx_sensor = range(n_samples)
+        self.slope = slope
         self.n_su = n_samples
         if n_su is not None:
             self.n_su = n_su
@@ -357,7 +358,7 @@ class Instructor(object):
         if dist[min_idx] <= self.unit_threshold[min_idx]:
             out_tmp = self.data.sensor.data.iloc[min_idx].as_matrix()
             out = out_tmp.copy()
-            self.unit_threshold[min_idx] *= 1.
+            self.unit_threshold[min_idx] = self.slope * self.unit_threshold[min_idx]
             return 1, out  # Analize implications of return the object itself
         tmp_rtn = np.empty((self.n_sensor,))
         tmp_rtn.fill(np.nan)
