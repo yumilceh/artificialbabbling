@@ -30,7 +30,7 @@ if __name__ == '__main__':
     from diva_configurations import model_, comp_func
 
     # Models
-    f_sm_key = 'igmm_old'
+    f_sm_key = 'igmm_sm'
     f_cons_key = 'explauto_cons'
     f_im_key = 'explauto_im'
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor(n_su=5)
+    instructor = Instructor()
 
     # Creating Models ##
     models = OBJECT()
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Creating Simulation object, running simulation and plotting experiments##
     # tree/DP Interest Model
     directory = 'test'
-    file_prefix = directory + '/Vowels_Tree_' + now
+    file_prefix = directory + '/IEEE_SI_optGMM_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,

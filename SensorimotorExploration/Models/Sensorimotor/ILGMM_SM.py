@@ -59,11 +59,16 @@ class GMM_SM(object):
         self.sigma_expl = self.delta_motor_values * float(sigma_explo_ratio)
         self.mode = 'exploit'
 
+        m_dims = np.arange(0,self.params. n_motor, 1)
+        s_dims = np.arange(self.params.n_motor, self.params.n_motor + self.params.n_sensor, 1)
+
         self.model=GMM(min_components = min_components,
                        max_step_components = max_step_components,
                        max_components = max_components,
                        a_split = a_split,
-                       forgetting_factor = forgetting_factor)
+                       forgetting_factor = forgetting_factor,
+                       x_dims = m_dims,
+                       y_dims = s_dims)
 
     def train(self, simulation_data):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
