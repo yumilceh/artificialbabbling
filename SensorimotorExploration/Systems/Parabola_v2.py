@@ -392,7 +392,7 @@ class Instructor(ParabolicRegion):
         self.data, foo = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
         self.unit_threshold = 0.3 * np.ones((self.n_units,))
-        self.thresh_slope = thresh_slope
+        self.slope = thresh_slope
 
     def plot(self, axes=None):
         if axes is None:
@@ -414,7 +414,7 @@ class Instructor(ParabolicRegion):
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold[min_idx]:
             self.set_action(self.data.motor.data.iloc[min_idx])
-            self.unit_threshold[min_idx] *= self.thresh_slope
+            self.unit_threshold[min_idx] = self.slope * self.unit_threshold[min_idx]
             self.execute_action()
             return 1, self.sensor_out.copy()
         return 0, np.zeros((self.n_sensor,))

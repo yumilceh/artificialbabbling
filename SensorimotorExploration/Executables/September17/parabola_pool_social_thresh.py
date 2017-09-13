@@ -18,16 +18,12 @@ if __name__ == '__main__':
     from SensorimotorExploration.Algorithm.algorithm_2017b import Algorithm
     from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation_v2 import SM_ModelEvaluation
-
-
     from parabola_configurations import model_, comp_func
-
 
     # Models
     f_sm_key = 'igmm_sm'
     f_ss_key = 'igmm_ss'
     f_cons_key = 'explauto_cons'
-
 
     """
        'igmm_sm': IGMM_SM,
@@ -48,28 +44,20 @@ if __name__ == '__main__':
     directory = 'parabola_var_social_thresh'
     os.mkdir(directory)
 
-
     random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455, 8975, 91324,752324,1264183, 82376, 92835, 823975, 2376324]
-    proprio_ops = [True]
     mode_ops = ['autonomous','social']
-    expl_space_ops = ['sensor']
-    alpha_social_thresh = [1, 0.96, 0.92, 0.88, 0.84, 0.80]
+    social_slopes = [1, 0.96, 0.92, 0.88, 0.84, 0.80]
 
-    for idx,ops in enumerate(itertools.product(random_seeds, proprio_ops, mode_ops, expl_space_ops, alpha_social_thresh)):
+    for idx,ops in enumerate(itertools.product(random_seeds, mode_ops, social_slopes)):
         # Creating Agent ##
         system = System()
-        instructor = Instructor(thresh_slope=ops[4])
+        instructor = Instructor(thresh_slope=ops[2])
 
         #interest model selection
-        expl_space = ops[3]
-        if expl_space is 'somato':
-            f_im_key = 'explauto_im_som'
-        else:
-            f_im_key = 'explauto_im'
+        f_im_key = 'explauto_im'
 
         random_seed = ops[0]
-        proprio = ops[1]
-        mode_ = ops[2]
+        mode_ = ops[1]
 
         # Creating Models ##
         models = OBJECT()
@@ -101,9 +89,6 @@ if __name__ == '__main__':
                                n_save_data=n_save_data,
                                sm_all_samples=False,
                                file_prefix=file_prefix)
-
-        simulation.set_expl_space(space=expl_space)
-
         simulation.mode = mode_ # social or autonomous
 
         simulation.f_sm_key = f_sm_key
@@ -111,13 +96,13 @@ if __name__ == '__main__':
         simulation.f_cons_key = f_cons_key
         simulation.f_im_key = f_im_key
 
-        simulation.run(proprio=proprio)
+        simulation.run(proprio=True)
 
         #evaluate sensorimotor
         evaluation_sim = SM_ModelEvaluation(system,
                                             simulation.models.f_sm,
                                             comp_func=comp_func,
-                                            file_prefix=file_prefix + 'sensori_')
+                                            file_prefix=file_prefix + 'eval_whole_')
 
         # evaluate
         evaluation_sim.model.set_sigma_explo_ratio(0.)
@@ -127,20 +112,18 @@ if __name__ == '__main__':
         evaluation_sim.model.set_sigma_explo_ratio(0.)
         val_data = evaluation_sim.evaluate(space='sensor', saveData=True)
 
-        # evaluate somatosensorimotor
         evaluation_sim = SM_ModelEvaluation(system,
-                                            simulation.models.f_ss,
+                                            simulation.models.f_sm,
                                             comp_func=comp_func,
-                                            file_prefix=file_prefix + 'somato_')
+                                            file_prefix=file_prefix + 'eval_social_')
 
-
-        #evaluate
+        # evaluate
         evaluation_sim.model.set_sigma_explo_ratio(0.)
         evaluation_sim.model.mode = 'exploit'
 
-        evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')
+        evaluation_sim.load_eval_dataset('../../Systems/datasets/instructor_parabola_1.h5')
         evaluation_sim.model.set_sigma_explo_ratio(0.)
-        val_data = evaluation_sim.evaluate(space='somato',saveData=True)
+        val_data = evaluation_sim.evaluate(space='sensor', saveData=True)
 
         del simulation
         del models
