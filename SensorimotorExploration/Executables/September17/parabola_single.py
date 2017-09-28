@@ -17,7 +17,7 @@ if __name__ == '__main__':
     #  Adding libraries##
     from SensorimotorExploration.Systems.Parabola_v2 import ParabolicRegion as System
     from SensorimotorExploration.Systems.Parabola_v2 import Instructor
-    from SensorimotorExploration.Algorithm.algorithm_2017b import Algorithm
+    from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
     from SensorimotorExploration.Algorithm.ModelEvaluation_v2 import SM_ModelEvaluation
     from SensorimotorExploration.DataManager.PlotTools import *
     from SensorimotorExploration.Algorithm.utils.functions import generate_motor_grid
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         f_im_key = 'explauto_im_som'
 
     # Models
-    f_sm_key = 'igmm_old'
+    f_sm_key = 'igmm_sm'
     f_ss_key = 'igmm_ss'
     f_cons_key = 'explauto_cons'
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     """
 
     # To guarantee reproducible experiments
-    random_seed = 12455 # 12455   #1234
+    random_seed = 1234 # 12455   #1234
     thres_slope=.8
 
     n_initialization = 100
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                            sm_all_samples=False)
 
     simulation.mode = mode  # social or autonomous
-    simulation.set_expl_space(space = expl_space)
+    #simulation.set_expl_space(space = expl_space)
 
 
     # del(models)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
         if cons_pred < cons_th <= cons_res:
             proprio_val += [[system.sensor_out[0], system.sensor_out[1], 'xk']]
-
+    '''
     simulation.params.expl_space='somato'
     model_to_eva = simulation.select_expl_model()
     evaluation_sim = SM_ModelEvaluation(system,
@@ -156,11 +156,12 @@ if __name__ == '__main__':
 
     val_ssm_data = evaluation_sim.evaluate(saveData=False, space=simulation.params.expl_space)
     val_ssm_data.cut_final_data()
+    '''
 
     simulation.params.expl_space='sensor'
-    model_to_eva = simulation.select_expl_model()
+    #model_to_eva = simulation.select_expl_model()
     evaluation_sim = SM_ModelEvaluation(system,
-                                        model_to_eva,
+                                        simulation.models.f_sm,
                                         comp_func=comp_func,
                                         file_prefix=file_prefix + '_')
     evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')
@@ -170,4 +171,4 @@ if __name__ == '__main__':
 
 
     from parabola_results import show_results
-    show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val, thres=thres_slope )
+    show_results(system, simulation, val_sm_data, val_sm_data, proprio_val, thres=thres_slope )

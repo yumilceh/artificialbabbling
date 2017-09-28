@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #  Adding libraries##
     from SensorimotorExploration.Systems.Parabola_v2 import ParabolicRegion as System
     from SensorimotorExploration.Systems.Parabola_v2 import Instructor
-    from SensorimotorExploration.Algorithm.algorithm_2017b import Algorithm
+    from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
     from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
     from SensorimotorExploration.Algorithm.ModelEvaluation_v2 import SM_ModelEvaluation
     from parabola_configurations import model_, comp_func
@@ -34,19 +34,20 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     n_initialization = 100
-    n_experiments = 2000
+    n_experiments = 10000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 200
+    eval_step = 500
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_var_social_thresh'
+    directory = 'parabola_slope_social_thresh_4'
     os.mkdir(directory)
 
-    random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455, 8975, 91324,752324,1264183, 82376, 92835, 823975, 2376324]
+    #8975, 91324,752324,1264183, 82376, 92835, 823975,
+    random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455,  2376324]
     mode_ops = ['autonomous','social']
-    social_slopes = [1, 0.96, 0.92, 0.88, 0.84, 0.80]
+    social_slopes = [1, 0.99, 0.98, 0.87, 0.96, 0.95]
 
     for idx,ops in enumerate(itertools.product(random_seeds, mode_ops, social_slopes)):
         # Creating Agent ##

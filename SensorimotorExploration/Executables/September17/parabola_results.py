@@ -17,7 +17,7 @@ def show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val, thr
     fig2.suptitle('Evaluation Error Evolution para {}'.format(thres))
     tmp = simulation.evaluation_error
     tmp = np.array(tmp)
-    plt.plot(tmp[:-1,0],tmp[:-1,1], 'b') #last sample has i=-1 to force plot (Fix it!!!!!!)
+    plt.plot(tmp[:-1], 'b') #last sample has i=-1 to force plot (Fix it!!!!!!)
     plt.hold(True)
     plt.xlabel('Evaluation training step')
     plt.ylabel('Mean error')
