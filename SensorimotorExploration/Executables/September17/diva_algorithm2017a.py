@@ -49,18 +49,18 @@ if __name__ == '__main__':
     # To guarantee reproducible experiments
     random_seed = 3487  # 1234 3487 9751
 
-    n_initialization = 100
-    n_experiments = 20000
+    n_initialization = 1000
+    n_experiments = 100000
     n_save_data = 5000   # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 2000
+    eval_step = 5000
 
     random.seed(random_seed)
     np_rnd.seed(random_seed)
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor()
+    instructor = Instructor(slope = .99)
 
     # Creating Models ##
     models = OBJECT()

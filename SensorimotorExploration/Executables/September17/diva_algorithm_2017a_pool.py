@@ -9,19 +9,19 @@ import os
 import time
 from multiprocessing import Process
 
-from SensorimotorExploration.Algorithm.ModelEvaluation import SM_ModelEvaluation
+from SensorimotorExploration.Algorithm.ModelEvaluation_v2 import SM_ModelEvaluation
 from SensorimotorExploration.Algorithm.algorithm_2017a import InteractionAlgorithm as Algorithm
 from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
-from SensorimotorExploration.Systems.Diva2016a import Diva2016a as System
-from SensorimotorExploration.Systems.Diva2016a import Instructor
-from model_configurations import model_, comp_func
+from SensorimotorExploration.Systems.Diva2017a import Diva2017a as System
+from SensorimotorExploration.Systems.Diva2017a import Instructor
+from diva_configurations import model_, comp_func
 
 directory = 'experiment_IEEE_SI_1'
 
 # Models
 f_sm_key = 'igmm_sm'
-f_ss_key = 'explauto_cons'
+f_cons_key = 'explauto_cons'
 f_im_key = 'explauto_im'
 
 """
@@ -50,20 +50,22 @@ def sim_agent(ops,idx):
     # Creating Models ##
     models = OBJECT()
     models.f_sm = model_(f_sm_key, system)
-    models.f_ss = model_(f_ss_key, system)
+    models.f_cons = model_(f_cons_key, system)
     models.f_im = model_(f_im_key, system)
 
     # Creating Simulation object, running simulation and plotting experiments##
     # tree/DP Interest Model
-    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_")
+    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
 
-    file_prefix = directory + '/Vowels_Tree_' + str(idx) + '_'+ now
+    file_prefix = directory + '/IEEE_TCDS_SI_' + str(idx) + '_'+ now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,
                                         file_prefix=file_prefix)
 
-    evaluation_sim.loadEvaluationDataSet('../../Systems/datasets/german_dataset_3.h5')
+    evaluation_sim.data = instructor.data
+    evaluation_sim.n_samples_val = len(evaluation_sim.data.sensor.data)
+    evaluation_sim.random_indexes_val = range(evaluation_sim.n_samples_val)
 
     simulation = Algorithm(system,
                           models,
@@ -80,7 +82,7 @@ def sim_agent(ops,idx):
                           file_prefix=file_prefix)
 
     simulation.f_sm_key = f_sm_key
-    simulation.f_ss_key = f_ss_key
+    simulation.f_cons_key = f_cons_key
     simulation.f_im_key = f_im_key
 
     simulation.mode = mode_
@@ -100,11 +102,11 @@ if __name__ == '__main__':
 
     eval_step = 5000 #np.nan to not evaluate
 
-    # 1321,1457, 283,2469, 147831, 1234
-    random_seeds = [1321,1457, 283, 2469, 147831, 1234]
+    # 2469, 147831, 1234
+    random_seeds = [1321,1457, 283]
     mode_ops = ['autonomous','social']
-    social_slopes = [1., 0.99, 0.96, 0.94]
-    vowel_units = [323,273,223,123,50]
+    social_slopes = [1., 0.99, 0.96, 0.93]
+    vowel_units = [323,223,123,50]
 
     processes = []
     max_processes = 3
