@@ -41,13 +41,13 @@ if __name__ == '__main__':
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_slope_social_thresh_4'
+    directory = 'parabola_slope_social_thresh_5'
     os.mkdir(directory)
 
-    #8975, 91324,752324,1264183, 82376, 92835, 823975,
-    random_seeds = [1234, 1321, 1457, 283, 2469, 147831, 234096, 2453, 2340554, 12455,  2376324]
+    #8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554,
+    random_seeds = [1234, 1321, 1457, 283, 2469,  12455,  2376324]
     mode_ops = ['autonomous','social']
-    social_slopes = [1, 0.99, 0.98, 0.87, 0.96, 0.95]
+    social_slopes = [1, 0.995, 0.99, 0.985, 0.98, 0.95]
 
     for idx,ops in enumerate(itertools.product(random_seeds, mode_ops, social_slopes)):
         # Creating Agent ##
