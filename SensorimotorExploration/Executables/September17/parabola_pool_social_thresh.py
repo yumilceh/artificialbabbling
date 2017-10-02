@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     n_initialization = 100
-    n_experiments = 15000
+    n_experiments = 25000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 500
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     #                 879363, 248979,43087926,564642,256874,344134,434634,34564,534645,344655,36455,31256]
     random_seeds = range(100)
     mode_ops = ['social']
-    social_slopes = [1., 0.995, 0.99, 0.985, 0.98]
+    social_slopes = [1., 0.999999, 0.995, 0.99, 0.985, 0.98]
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes)
     groups2 = itertools.product(random_seeds, ['autonomous'], [1.])
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             evaluation_sim = SM_ModelEvaluation(system,
                                                 models.f_sm, comp_func=comp_func)
 
-            evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')
+            evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')#('../../Systems/datasets/instructor_parabola_1.h5')'../../Systems/datasets/parabola_v2_dataset.h5'
 
             simulation = Algorithm(system,
                                    models,
@@ -134,6 +134,8 @@ if __name__ == '__main__':
             evaluation_sim.model.set_sigma_explo_ratio(0.)
             val_data = evaluation_sim.evaluate(space='sensor', saveData=True)
 
+            import numpy as np
+            np.savetxt(file_prefix + '_instructor_thresh.txt', instructor.unit_threshold)
             del simulation
             del models
             del evaluation_sim

@@ -76,6 +76,7 @@ class InteractionAlgorithm(object):
             # self.imitation = []
             self.mode = 'social'
         else:
+            # pass
             self.instructor = None
 
 
