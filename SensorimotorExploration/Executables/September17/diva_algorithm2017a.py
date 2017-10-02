@@ -50,7 +50,7 @@ if __name__ == '__main__':
     random_seed = 3487  # 1234 3487 9751
 
     n_initialization = 1000
-    n_experiments = 100000
+    n_experiments = 250000
     n_save_data = 5000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 5000
