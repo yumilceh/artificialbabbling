@@ -75,6 +75,9 @@ class InteractionAlgorithm(object):
             self.instructor = instructor
             # self.imitation = []
             self.mode = 'social'
+        else:
+            self.instructor = None
+
 
         # Analyze whether is necessary to  sum 1 and 2
         self.data = SimulationData(learner, prelocated_samples=n_experiments + 2 * n_initialization_experiments + 1)

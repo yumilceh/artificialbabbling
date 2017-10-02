@@ -27,7 +27,9 @@ def write_config_log(alg, file_name):
                         except:
                             pass
                 except IndexError:
-                    pass #In case instructor is  None
+                    pass
+                except AttributeError:
+                    log_file.write(attr_ + ': ' + 'None\n') #In case instructor is  None
 
         for attr_ in dir(alg.params):
             if not attr_.startswith('__') and not callable(getattr(alg.params, attr_)):

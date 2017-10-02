@@ -34,25 +34,29 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     n_initialization = 100
-    n_experiments = 10000
+    n_experiments = 15000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 500
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_slope_social_thresh_5'
+    directory = 'parabola_slope_social_thresh_8'
     os.mkdir(directory)
 
-    #8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554,
-    random_seeds = [1234, 1321, 1457, 283, 2469,  12455,  2376324]
+    #
+    random_seeds = [8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554, 1234, 1321, 1457, 283, 2469,  12455,  2376324,
+                    879363, 248979,43087926,564642,256874,344134,434634,34564,534645,344655,36455,31256]
     mode_ops = ['autonomous','social']
-    social_slopes = [1, 0.995, 0.99, 0.985, 0.98, 0.95]
+    social_slopes = [1, 0.995]
 
     for idx,ops in enumerate(itertools.product(random_seeds, mode_ops, social_slopes)):
         # Creating Agent ##
         system = System()
-        instructor = Instructor(thresh_slope=ops[2])
+        if ops[1] is 'social':
+            instructor = Instructor(thresh_slope=ops[2])
+        else:
+            instructor = None
 
         #interest model selection
         f_im_key = 'explauto_im'
