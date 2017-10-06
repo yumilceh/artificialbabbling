@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes)
     groups2 = itertools.product(random_seeds, ['autonomous'], [1.])
-    for group in [groups1, groups2]:
+    for group in [groups2]:#[groups1, groups2]:
         for idx,ops in enumerate(group):
             # Creating Agent ##
             system = System()
@@ -134,8 +134,9 @@ if __name__ == '__main__':
             evaluation_sim.model.set_sigma_explo_ratio(0.)
             val_data = evaluation_sim.evaluate(space='sensor', saveData=True)
 
-            import numpy as np
-            np.savetxt(file_prefix + '_instructor_thresh.txt', instructor.unit_threshold)
+            if simulation.instructor is not None:
+                import numpy as np
+                np.savetxt(file_prefix + '_instructor_thresh.txt', instructor.unit_threshold)
             del simulation
             del models
             del evaluation_sim
