@@ -137,8 +137,8 @@ class ParabolicRegion:
         self.execute_action_unconstrained()
         self.applyConstraints()
 
-        self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
-        self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        #self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        #self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
 
         self.applyConstraints()
 
