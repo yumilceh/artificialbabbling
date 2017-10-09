@@ -83,7 +83,7 @@ if __name__ == '__main__':
             evaluation_sim = SM_ModelEvaluation(system,
                                                 models.f_sm, comp_func=comp_func)
 
-            evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')#('../../Systems/datasets/instructor_parabola_1.h5')'../../Systems/datasets/parabola_v2_dataset.h5'
+            evaluation_sim.load_eval_dataset('../../Systems/datasets/instructor_parabola_1.h5')#('../../Systems/datasets/instructor_parabola_1.h5')'../../Systems/datasets/parabola_v2_dataset.h5'
 
             simulation = Algorithm(system,
                                    models,
@@ -134,7 +134,7 @@ if __name__ == '__main__':
             evaluation_sim.model.set_sigma_explo_ratio(0.)
             val_data = evaluation_sim.evaluate(space='sensor', saveData=True)
 
-            if simulation.instructor is not None:
+            if mode_ is 'social':
                 import numpy as np
                 np.savetxt(file_prefix + '_instructor_thresh.txt', instructor.unit_threshold)
             del simulation

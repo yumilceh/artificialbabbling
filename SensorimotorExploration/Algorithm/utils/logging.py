@@ -15,6 +15,11 @@ def write_config_log(alg, file_name):
             if hasattr(alg, attr_):
                 log_file.write(attr_ + ': ' + getattr(alg, attr_) + '\n')
 
+        try:
+            log_file.write('evaluation_file: ' + alg.evaluation.dataset_file + '\n')
+        except:
+            pass
+
         root_attr_names = ['learner', 'instructor']
         for attr_ in root_attr_names:
             if hasattr(alg, attr_):
