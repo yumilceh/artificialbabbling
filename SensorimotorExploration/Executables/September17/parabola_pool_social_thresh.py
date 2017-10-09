@@ -42,14 +42,14 @@ if __name__ == '__main__':
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_slope_social_thresh_final_1'
+    directory = 'parabola_slope_social_test_random'
     os.mkdir(directory)
 
     # random_seeds = [8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554, 1234, 1321, 1457, 283, 2469,  12455,  2376324,
     #                 879363, 248979,43087926,564642,256874,344134,434634,34564,534645,344655,36455,31256]
-    random_seeds = range(100)
+    random_seeds = range(20)
     mode_ops = ['social']
-    social_slopes = [1., 0.999999, 0.995, 0.99, 0.985, 0.98]
+    social_slopes = [1., 0.999999]
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes)
     groups2 = itertools.product(random_seeds, ['autonomous'], [1.])
