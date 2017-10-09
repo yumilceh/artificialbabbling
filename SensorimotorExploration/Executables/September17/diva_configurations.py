@@ -4,8 +4,8 @@ Created on Feb 21, 2017
 @author: Juan Manuel Acevedo Valle
 """
 
-from SensorimotorExploration.Models.Interest.GMM_IM import GMM_IM
-from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
+#from SensorimotorExploration.Models.Interest.GMM_IM import GMM_IM
+#from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 # from SensorimotorExploration.Models.Somatomotor.ILGMM_SM import GMM_SS as IGMM_SS
 

@@ -101,6 +101,8 @@ class InteractionAlgorithm(object):
         self.run_()
 
     def run_(self):
+        random.seed(self.random_seed)    #Added October 2017
+        np.random.seed(self.random_seed) #Added October 2017
         if self.params.g_im_initialization_method is 'non-painful':
             print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
             print('G_IM, init: Switching to all samples method')
@@ -176,7 +178,7 @@ class InteractionAlgorithm(object):
 
             if self.instructor is not None:
                 reinforce, self.learner.sensor_instructor =\
-                    self.instructor.interaction(self.learner.sensor_out)
+                    self.instructor.interaction(self.learner.sensor_out.copy())
                 if reinforce is 1:
                     # self.imitation += [i, self.instructor.min_idx]
                     if self.mode is 'social':

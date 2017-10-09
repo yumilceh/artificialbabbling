@@ -13,6 +13,7 @@ if __name__ == '__main__':
     #  Adding the projects folder to the path##
 
     # sys.path.append("../../")
+    from parabola_configurations import model_, comp_func
 
     #  Adding libraries##
     from SensorimotorExploration.Systems.Parabola_v2 import ParabolicRegion as System
@@ -22,11 +23,11 @@ if __name__ == '__main__':
     from SensorimotorExploration.DataManager.PlotTools import *
     from SensorimotorExploration.Algorithm.utils.functions import generate_motor_grid
 
-    from parabola_configurations import model_, comp_func
+
 
 
     proprio = True
-    mode = 'social'
+    mode = 'autonomous'
     expl_space = 'sensor'  # 'sensor' for salient and 'somato' for haptic
 
     if expl_space is 'sensor':
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     random_seed = 1234 # 12455   #1234
-    thres_slope=.8
+    thres_slope=.9999
 
     n_initialization = 100
     n_experiments = 2000

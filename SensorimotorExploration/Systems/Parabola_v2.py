@@ -380,7 +380,7 @@ class ParabolicRegion:
 class Instructor(ParabolicRegion):
     def __init__(self, thresh_slope=1.):
         import os
-        from ..DataManager.SimulationData import load_sim_h5_v2 as load_sim_h5
+        from SensorimotorExploration.DataManager.SimulationData import load_sim_h5_v2 as load_sim_h5
         # ss = [[3., 0.5], [1.9, 1.25], [4.15, 2],[2.3, 3.4], [5.27, 6.23], [0.15, 8.7], [2.36, 7.46], [5.2, 8.87]]
         #     for s in ss:
         #         system.set_action(infer_motor(0, s))
