@@ -101,8 +101,8 @@ class InteractionAlgorithm(object):
         self.run_()
 
     def run_(self):
-        random.seed(self.random_seed)    #Added October 2017
-        np.random.seed(self.random_seed) #Added October 2017
+        # random.seed(self.random_seed)    #Added October 2017
+        # np.random.seed(self.random_seed) #Added October 2017
         if self.params.g_im_initialization_method is 'non-painful':
             print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
             print('G_IM, init: Switching to all samples method')
