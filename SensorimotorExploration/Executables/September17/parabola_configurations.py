@@ -4,17 +4,19 @@ Created on May 17, 2017
 @author: Juan Manuel Acevedo Valle
 """
 
+from igmm import DynamicParameter
+
 # from SensorimotorExploration.Models.Interest.GMM_IM import GMM_IM
 # from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 # from SensorimotorExploration.Models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
 from SensorimotorExploration.Models.Sensorimotor.ILGMM_SM2 import GMM_SM as ILGMM_old
 
-# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
-# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
+from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
+from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
 
-from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
-from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
+# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
+# from SensorimotorExploration.Algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
 
 
 from SensorimotorExploration.Models.Interest.ExplautoIM import explauto_IM as ea_IM
@@ -52,7 +54,12 @@ models_params_dict = {'igmm_ss': {'min_components': 3,
                                   'max_step_components': 5,
                                   'max_components': 20,
                                   'sm_step': 100,
-                                  'forgetting_factor': 0.05},
+                                  'forgetting_factor': DynamicParameter(
+                                                        **{'function':'log',
+                                                           'init':0.2,
+                                                           'end':0.05,
+                                                           'steps':10000}
+                                                            )},
                       'igmm_old': {'min_components': 3,
                                   'max_step_components': 5,
                                   'max_components': 20,

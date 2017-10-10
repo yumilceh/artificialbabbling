@@ -36,7 +36,7 @@ class ExplautoCons(object):
             motor_command = system.motor_command  #s_g
         
         system.cons_prediction = self.model.forward_prediction(motor_command)
-        return  system.cons_prediction
+        return  system.cons_prediction.copy()
 
     def train(self, simulation_data):
         m = simulation_data.motor.get_last(1).iloc[-1]

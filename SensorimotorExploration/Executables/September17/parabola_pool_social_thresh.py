@@ -35,21 +35,21 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     n_initialization = 100
-    n_experiments = 25000
+    n_experiments = 10000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 500
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_slope_social_test_random_NOINSTRUCTOR_2'
+    directory = 'parabola_IEEESI_10Oct2017_GREC_Bar'
     os.mkdir(directory)
 
     # random_seeds = [8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554, 1234, 1321, 1457, 283, 2469,  12455,  2376324,
     #                 879363, 248979,43087926,564642,256874,344134,434634,34564,534645,344655,36455,31256]
-    random_seeds = range(20)
+    random_seeds = range(500,550,1)
     mode_ops = ['social']
-    social_slopes = [1., 0.999999]
+    social_slopes = [1., 0.999999, 0.99, 0.98,0.95,0.9, 0.8]
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes)
     groups2 = itertools.product(random_seeds, ['autonomous'], [1.])
