@@ -7,7 +7,7 @@ from numpy import linspace
 from numpy import random as np_rnd
 import datetime
 
-now = datetime.datetime.now().strftime("Social_%Y_%m_%d_%H_%M_%S_")
+now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
 
 class OBJECT(object):
     def __init__(self):
@@ -50,8 +50,8 @@ if __name__ == '__main__':
     random_seed = 3487  # 1234 3487 9751
 
     n_initialization = 1000
-    n_experiments = 250000
-    n_save_data = 5000   # np.nan to not save, -1 to save 5 times during exploration
+    n_experiments = 25000
+    n_save_data = 1000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 5000
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     # Creating Agent ##
     system = System()
-    instructor = Instructor(slope = .99)
+    instructor = Instructor(slope = 1.)
 
     # Creating Models ##
     models = OBJECT()
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Creating Simulation object, running simulation and plotting experiments##
     # tree/DP Interest Model
     directory = 'test'
-    file_prefix = directory + '/IEEE_SI_optGMM_' + now
+    file_prefix = directory + '/IEEE_SI_optGMM_gruppies_numpy_' + now
 
     evaluation_sim = SM_ModelEvaluation(system,
                                         models.f_sm, comp_func=comp_func,

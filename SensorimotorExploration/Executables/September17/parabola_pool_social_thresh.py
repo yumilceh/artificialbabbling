@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_slope_social_test_random_INSTRUCTOR'
+    directory = 'parabola_slope_social_test_random_NOINSTRUCTOR_2'
     os.mkdir(directory)
 
     # random_seeds = [8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554, 1234, 1321, 1457, 283, 2469,  12455,  2376324,
@@ -53,14 +53,14 @@ if __name__ == '__main__':
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes)
     groups2 = itertools.product(random_seeds, ['autonomous'], [1.])
-    for group in [groups2]:#[groups1, groups2]:
+    for group in [groups1, groups2]:
         for idx,ops in enumerate(group):
             # Creating Agent ##
             system = System()
-            # if ops[1] is 'social':
-            instructor = Instructor(thresh_slope=ops[2])
-            # else:
-            #     instructor = None
+            if ops[1] is 'social':
+                instructor = Instructor(thresh_slope=ops[2])
+            else:
+                instructor = None
 
             #interest model selection
             f_im_key = 'explauto_im'
