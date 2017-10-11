@@ -120,7 +120,7 @@ if __name__ == '__main__':
     processes = []
     max_processes = 6
 
-    for idx, ops in enumerate([groups1, groups2]):
+    for idx, ops in enumerate(list(groups1)+list(groups2)):
         idx2 = idx
         # Creating Agent ##
         processes += [Process(target=sim_agent, args=(ops,idx2))]
