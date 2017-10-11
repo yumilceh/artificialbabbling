@@ -111,7 +111,7 @@ if __name__ == '__main__':
     random_seeds = [1321,1457, 283, 2469, 147831, 1234]
     mode_ops = ['social']
     social_slopes = [1., 0.999999, 0.99, 0.96, 0.93]
-    vowel_units = [323]#,223,123,50]
+    vowel_units = [223]#323,223,123,50]
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes, vowel_units)
     groups2 = itertools.product(random_seeds, ['autonomous'], [0.999999],vowel_units)
