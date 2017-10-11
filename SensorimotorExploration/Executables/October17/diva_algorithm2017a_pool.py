@@ -38,6 +38,11 @@ f_im_key = 'explauto_im'
 
 def sim_agent(ops,idx):
 
+    n_initialization = 1000
+    n_experiments = 100000
+    n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
+    eval_step = 2500 #np.nan to not evaluate
+
     #random_seeds, mode_ops, social_slopes, vowel_units
     random_seed = ops[0]
     mode_ = ops[1]
@@ -101,12 +106,6 @@ if __name__ == '__main__':
         os.mkdir(directory)
     except OSError:
         print('WARNING. Directory already exists.')
-
-    n_initialization = 1000
-    n_experiments = 100000
-    n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
-
-    eval_step = 2500 #np.nan to not evaluate
 
     # 2469, 147831, 1234
     random_seeds = [1321,1457, 283, 2469, 147831, 1234]
