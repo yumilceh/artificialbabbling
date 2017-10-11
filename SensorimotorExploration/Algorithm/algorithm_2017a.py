@@ -154,7 +154,7 @@ class InteractionAlgorithm(object):
 
         i = 0
         while i < n_experiments:
-            print(i)
+            # print(i)
             self.learner.sensor_instructor.fill(np.nan)
             if self.type is 'proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,

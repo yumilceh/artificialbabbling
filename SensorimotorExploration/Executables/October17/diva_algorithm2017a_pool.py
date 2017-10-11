@@ -15,9 +15,9 @@ from SensorimotorExploration.Algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
 from SensorimotorExploration.Systems.Diva2017a import Diva2017a as System
 from SensorimotorExploration.Systems.Diva2017a import Instructor
-from diva_configurations import model_, comp_func
+from SensorimotorExploration.Executables.September17.diva_configurations import model_, comp_func
 
-directory = 'experiment_IEEE_SI_1'
+directory = 'experiment_IEEE_SI_slopes_cmf'
 
 # Models
 f_sm_key = 'igmm_sm'
@@ -90,28 +90,37 @@ def sim_agent(ops,idx):
     simulation.run(proprio=True)
     simulation.do_evaluation(0, force=True, save_data=True)
 
+    try:
+        import numpy as np
+        np.savetxt(file_prefix + '_instructor_thresh.txt', instructor.unit_threshold)
+    except:
+        pass
+
 if __name__ == '__main__':
     try:
         os.mkdir(directory)
     except OSError:
         print('WARNING. Directory already exists.')
 
-    n_initialization = 100
+    n_initialization = 1000
     n_experiments = 100000
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
 
-    eval_step = 5000 #np.nan to not evaluate
+    eval_step = 2500 #np.nan to not evaluate
 
     # 2469, 147831, 1234
-    random_seeds = [1321,1457, 283]
-    mode_ops = ['autonomous','social']
+    random_seeds = [1321,1457, 283, 2469, 147831, 1234]
+    mode_ops = ['social']
     social_slopes = [1., 0.99, 0.96, 0.93]
-    vowel_units = [323,223,123,50]
+    vowel_units = [323]#,223,123,50]
+
+    groups1 = itertools.product(random_seeds, mode_ops, social_slopes, vowel_units)
+    groups2 = itertools.product(random_seeds, ['autonomous'], [1.],vowel_units)
 
     processes = []
     max_processes = 3
 
-    for idx, ops in enumerate(itertools.product(random_seeds, mode_ops, social_slopes, vowel_units)):
+    for idx, ops in enumerate([groups1, groups2]):
         idx2 = idx
         # Creating Agent ##
         processes += [Process(target=sim_agent, args=(ops,idx2))]

@@ -73,7 +73,6 @@ models_params_dict = {'igmm_ss': {'min_components': 3,
                       'random': {'mode': 'sensor'}
                       }
 
-
 def model_(model_key, system, competence_func=None):
     if competence_func is None:
         return model_class[model_key](system, *models_params_list[model_key], **models_params_dict[model_key])
