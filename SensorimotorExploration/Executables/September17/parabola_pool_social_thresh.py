@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
-    directory = 'parabola_IEEESI_10Oct2017_GREC_Mf'
+    directory = 'parabola_IEEESI_10Oct2017_GREC_Bar_socialeval'
     os.mkdir(directory)
 
     # random_seeds = [8975, 91324,752324,1264183, 82376, 92835, 823975,147831, 234096, 2453, 2340554, 1234, 1321, 1457, 283, 2469,  12455,  2376324,
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             evaluation_sim = SM_ModelEvaluation(system,
                                                 models.f_sm, comp_func=comp_func)
 
-            evaluation_sim.load_eval_dataset('../../Systems/datasets/parabola_v2_dataset.h5')#('../../Systems/datasets/instructor_parabola_1.h5')'../../Systems/datasets/parabola_v2_dataset.h5'
+            evaluation_sim.load_eval_dataset('../../Systems/datasets/instructor_parabola_1.h5')#('../../Systems/datasets/instructor_parabola_1.h5')'../../Systems/datasets/parabola_v2_dataset.h5'
 
             simulation = Algorithm(system,
                                    models,
