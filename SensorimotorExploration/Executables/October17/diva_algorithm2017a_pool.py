@@ -108,7 +108,7 @@ if __name__ == '__main__':
         print('WARNING. Directory already exists.')
 
     # 2469, 147831, 1234
-    random_seeds = [1321,1457, 283, 2469, 147831, 1234]
+    random_seeds = [2469, 147831, 1234]
     mode_ops = ['social']
     social_slopes = [0.96]#[1., 0.999999, 0.99, 0.96, 0.93]
     vowel_units = [123]#323,223,123,50]
