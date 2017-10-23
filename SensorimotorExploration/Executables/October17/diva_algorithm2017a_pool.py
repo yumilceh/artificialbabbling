@@ -108,18 +108,18 @@ if __name__ == '__main__':
         print('WARNING. Directory already exists.')
 
     # 2469, 147831, 1234
-    random_seeds = [2469, 147831, 1234]
+    random_seeds = [1321,1457, 283, 2469, 147831, 1234]
     mode_ops = ['social']
-    social_slopes = [0.96]#[1., 0.999999, 0.99, 0.96, 0.93]
-    vowel_units = [123]#323,223,123,50]
+    social_slopes = [1., 0.999999]# [1., 0.999999, 0.99, 0.96, 0.93]
+    vowel_units = [223]#323,223,123,50]
 
     groups1 = itertools.product(random_seeds, mode_ops, social_slopes, vowel_units)
     groups2 = itertools.product(random_seeds, ['autonomous'], [0.999999],vowel_units)
 
     processes = []
-    max_processes = 4
+    max_processes = 3
 
-    for idx, ops in enumerate(list(groups1)):#+list(groups2)):
+    for idx, ops in enumerate(list(groups1)+list(groups2)):
         idx2 = idx
         # Creating Agent ##
         processes += [Process(target=sim_agent, args=(ops,idx2))]
