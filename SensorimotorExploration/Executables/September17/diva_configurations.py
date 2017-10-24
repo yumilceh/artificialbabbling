@@ -3,6 +3,7 @@ Created on Feb 21, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
+from igmm import DynamicParameter
 
 #from SensorimotorExploration.Models.Interest.GMM_IM import GMM_IM
 #from SensorimotorExploration.Models.Somatomotor.GMM_SS import GMM_SS
@@ -42,7 +43,12 @@ models_params_dict = {'igmm_sm': {'min_components': 3,
                                   'max_step_components': 10,
                                   'max_components': 30,
                                   'sm_step': 400,
-                                  'forgetting_factor': 0.1,
+                                  'forgetting_factor': DynamicParameter(
+                                                        **{'function':'log',
+                                                           'init':0.2,
+                                                           'end':0.01,
+                                                           'steps':100000}
+                                                            ),
                                   'sigma_explo_ratio': 0.},
                       'igmm_old': {'min_components': 3,
                                   'max_step_components': 10,

@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
 
     proprio = True
-    mode = 'autonomous'
+    mode = 'social'
     expl_space = 'sensor'  # 'sensor' for salient and 'somato' for haptic
 
     if expl_space is 'sensor':

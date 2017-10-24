@@ -18,15 +18,12 @@ def show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val, thr
     tmp = simulation.evaluation_error
     tmp = np.array(tmp)
     plt.plot(tmp[:-1], 'b') #last sample has i=-1 to force plot (Fix it!!!!!!)
-    plt.hold(True)
     plt.xlabel('Evaluation training step')
     plt.ylabel('Mean error')
 
     fig3, ax3 =  plt.subplots(1,1)
     fig3.suptitle('Validation: Sensor1 vs Sensor2  para {}'.format(thres))
-    plt.hold(True)
     val_sm_data.plot_2D('sensor_goal', 0, 'sensor_goal', 1, color="xr", axes=ax3)
-    plt.hold(True)
     val_sm_data.plot_2D('sensor', 0, 'sensor', 1, color=".b", axes=ax3)
     ax3.legend(['Goal', 'Result'])
 
@@ -86,4 +83,4 @@ def show_results(system, simulation, val_sm_data, val_ssm_data, proprio_val, thr
     plt.draw()
     plt.pause(0.001)
 
-    plt.show(block=True)
+    plt.show()
