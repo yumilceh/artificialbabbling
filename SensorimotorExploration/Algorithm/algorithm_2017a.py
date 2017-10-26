@@ -181,8 +181,8 @@ class InteractionAlgorithm(object):
                     self.instructor.interaction(self.learner.sensor_out.copy())
                 if reinforce is 1:
                     # self.imitation += [i, self.instructor.min_idx]
-                    if self.mode is 'social':
-                        if self.type is 'proprio':
+                    if self.mode == 'social':
+                        if self.type == 'proprio':
                             tmp_goal = self.learner.sensor_instructor
                             tmp_motor = self.models.f_sm.get_action(self.learner, sensor_goal=tmp_goal)
                             tmp_cons = self.models.f_cons.predict_cons(self.learner, motor_command=tmp_motor)
