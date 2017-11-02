@@ -185,6 +185,14 @@ class Diva2017a(object):
         idx_pw1 = 2
         idx_pw2 = int(self.params['duration_m1']/ts) + 3   # +2 or +3???
         # First perception time window
+
+        for index in range(len(minaf)):
+            if not ((self.art_states[index , 11] > 0) and (self.art_states[index , 12] > 0) and (minaf[index ] > 0)):
+                auditory_states[index , 0] *= 0
+                auditory_states[index , 1] *= 0
+                auditory_states[index , 2] *= 0
+                auditory_states[index , 3] *= 0
+
         for index in range(n_percep_samples):
             # print(index)
             # print(n_percep_samples)
@@ -307,7 +315,8 @@ class Diva2017a(object):
         if axes is None:
             fig, axes = plt.subplots(1,1)
         plt.sca(axes)
-        plt.plot(np.float128(xrange(0, len(self.soundWave))) * self.ts, self.soundWave)
+        duration = self.params['duration_m1'] + self.params['duration_m2']
+        plt.plot(np.array(range(0, len(self.soundWave))).astype(np.float) * duration/len(self.soundWave), self.soundWave)
 
     def playSoundWave(self):  # keep in mind that DivaMatlab works with ts=0.005
         import pyaudio

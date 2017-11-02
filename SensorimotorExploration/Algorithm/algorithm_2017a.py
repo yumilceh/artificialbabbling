@@ -156,7 +156,7 @@ class InteractionAlgorithm(object):
         while i < n_experiments:
             # print(i)
             self.learner.sensor_instructor.fill(np.nan)
-            if self.type is 'proprio':
+            if self.type == 'proprio':
                 self.learner.sensor_goal = self.models.f_im.get_goal_proprio(self.learner,
                                                                              self.models.f_sm,
                                                                              self.models.f_cons)
@@ -179,7 +179,7 @@ class InteractionAlgorithm(object):
             if self.instructor is not None:
                 reinforce, self.learner.sensor_instructor =\
                     self.instructor.interaction(self.learner.sensor_out.copy())
-                if reinforce is 1:
+                if reinforce == 1:
                     # self.imitation += [i, self.instructor.min_idx]
                     if self.mode == 'social':
                         if self.type == 'proprio':
