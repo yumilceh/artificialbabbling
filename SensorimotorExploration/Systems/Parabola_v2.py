@@ -333,7 +333,7 @@ class ParabolicRegion:
 
         return motor_command
 
-    def drawSystem(self, axes=None):
+    def drawSystem(self, axes=None, flip=False):
         if axes is None:
             fig, axes = plt.subplots(1,1)
         plt.sca(axes)
@@ -352,30 +352,57 @@ class ParabolicRegion:
 
         r = c - a
 
-        x_p = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
-        y_p = (x_p - b) ** 2 +f
+        if not flip:
+            x_p = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_p = (x_p - b) ** 2 +f
 
-        circle = plt.Circle((b, a), r, color='red')
+            circle = plt.Circle((b, a), r, color='red')
 
-        x_l1 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
-        y_l1 = d + m1 * x_l1
+            x_l1 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_l1 = d + m1 * x_l1
 
-        x_l2 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
-        y_l2 = e + m2 * x_l2
+            x_l2 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_l2 = e + m2 * x_l2
 
-        plt.sca(axes)
+            plt.sca(axes)
 
-        plt.plot(x_l1, y_l1, "--r")
-        plt.plot(x_l2, y_l2, "--r")
-        gap = d - e
-        for i in range(100):
-            plt.plot(x_l2, y_l2 + i * gap / 100, "r")
+            plt.plot(x_l1, y_l1, "--r")
+            plt.plot(x_l2, y_l2, "--r")
+            gap = d - e
+            for i in range(100):
+                plt.plot(x_l2, y_l2 + i * gap / 100, "r")
 
-        axes.add_artist(circle)
-        axes.set_xlim([-3.0, 9.0])
-        axes.set_ylim([-1.0, 11.0])
+            axes.add_artist(circle)
+            axes.set_xlim([-3.0, 9.0])
+            axes.set_ylim([-1.0, 11.0])
 
-        plt.plot(x_p, y_p, "b")
+            plt.plot(x_p, y_p, "b")
+
+        else:
+            x_p = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_p = (x_p - b) ** 2 + f
+
+            circle = plt.Circle((a, b), r, color='red')
+
+            x_l1 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_l1 = d + m1 * x_l1
+
+            x_l2 = np.linspace(min_sensor_values[0], max_sensor_values[0], 100)
+            y_l2 = e + m2 * x_l2
+
+            plt.sca(axes)
+
+            plt.plot(y_l1,x_l1, "--r")
+            plt.plot(y_l2,x_l2, "--r")
+            gap = d - e
+            for i in range(100):
+                plt.plot(y_l2 + i * gap / 100, x_l2, "r")
+
+            axes.add_artist(circle)
+            axes.set_ylim([-3.0, 9.0])
+            axes.set_xlim([-1.0, 11.0])
+
+            plt.plot(y_p, x_p, "b")
 
 class Instructor(ParabolicRegion):
     def __init__(self, thresh_slope=1.):
