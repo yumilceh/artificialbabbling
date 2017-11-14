@@ -76,7 +76,7 @@ class GMM_SM(object):
                                     sensor_data.get_all()], axis=1)
         self.model.train(train_data_tmp.as_matrix(columns=None))
 
-    def train_incremental(self, simulation_data, all=True):
+    def train_incremental(self, simulation_data, all=False):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
         if all:
             data = np.zeros((simulation_data.motor.current_idx,
