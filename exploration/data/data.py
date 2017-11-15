@@ -8,6 +8,7 @@ from .DataTemplates.TabularData import TabularData
 import matplotlib.pyplot as plt
 from .PlotTools import movingAverage
 import pandas as pd
+import os
 
 class Object(object):
     def __init__(self):
@@ -35,6 +36,7 @@ class SimulationData():
         self.cons.appendData(system.cons_out)
 
     def save_data(self, file_name):
+        file_name = file_name.replace('/', os.sep)
         self.motor.data.to_hdf(file_name, 'motor')
         self.sensor.data.to_hdf(file_name, 'sensor')
         self.sensor_goal.data.to_hdf(file_name, 'sensor_goal')
@@ -108,6 +110,7 @@ class SimulationData():
 
 
 def load_sim_h5(file_name, system=None):
+    file_name = file_name.replace('/', os.sep)
     motor = pd.read_hdf(file_name, 'motor')
     sensor = pd.read_hdf(file_name, 'sensor')
     sensor_goal = pd.read_hdf(file_name, 'sensor_goal')
@@ -319,6 +322,7 @@ class SimulationDataSocial(SimulationData):
         self.social.appendData(system.sensor_instructor.flatten())
 
     def save_data(self, file_name):
+        file_name = file_name.replace('/', os.sep)
         SimulationData.save_data(self, file_name)
         self.social.data.to_hdf(file_name, 'social')
 

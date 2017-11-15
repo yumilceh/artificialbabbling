@@ -5,10 +5,10 @@ Modified on Nov 15, 2017
 @author: Juan Manuel Acevedo Valle
 """
 
-import numpy as np
-
+# import numpy as np
+import os
 from ..data.data import SimulationData, load_sim_h5
-from .utils.functions import get_random_sensor_set
+# from .utils.functions import get_random_sensor_set
 
 from .utils.competence_funcs import comp_Moulin2013
 
@@ -31,10 +31,12 @@ class Evaluation():
         self.agent = system
         self.data = {}
         self.comp_func = comp_func
+        file_prefix = file_prefix.replace('/', os.sep)
         self.file_prefix = file_prefix
         self.model = model
 
     def load_eval_dataset(self, file_name, name=None):
+        file_name = file_name.replace('/', os.sep)
         if self.data is None:
             self.data = {}
         data, foo = load_sim_h5(file_name)

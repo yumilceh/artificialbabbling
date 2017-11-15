@@ -69,7 +69,7 @@ class explauto_IM(object):
         else:
             self.params.sensor_space = 'sensor'
 
-
+        self.params.model_type, self.params.model_conf = model_type, model_conf
         self.params.im_step = 1 #only ok with non-parametric
         self.params.n_training_samples = 1  # only ok with non-parametric
 
@@ -100,6 +100,47 @@ class explauto_IM(object):
             s_g[i,:] = self.model.sample()
         pass
 
+    def generate_log(self):
+        attr_to_logs = ['conf']
+        params_to_logs = ['space', 'im_step', 'n_training_samples', 'model_type', 'model_conf']
+        log = 'model: EXPLAUTO_IM\n'
+
+        for attr_ in attr_to_logs:
+            if hasattr(self, attr_):
+                try:
+                    attr_log = getattr(self, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in ILGMM log generation")
+                except AttributeError:
+                    if isinstance(getattr(self, attr_), dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
+
+        for attr_ in params_to_logs:
+            if hasattr(self.params, attr_):
+                try:
+                    attr_log = getattr(self.params, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in ILGMM log generation")
+                except AttributeError:
+                    if isinstance(attr_, dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
+        return log
 
 def generateConfigurationExplauto(system, somato=False):
     conf = PARAMS()

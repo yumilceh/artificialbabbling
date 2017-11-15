@@ -4,6 +4,8 @@ Created on Feb 21, 2017
 @author: Juan Manuel Acevedo Valle
 """
 
+from exploration.models.Somatomotor.ExplautoSS import ExplautoSS as ea_SS
+
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
 from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
@@ -13,9 +15,8 @@ from exploration.models.Random import Random
 from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
 from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 from exploration.models.Sensorimotor.trash.GMM_SM import GMM_SM
-from exploration.models.Somatomotor.ExplautoSS import ExplautoSS as ea_SS
-from exploration.models.Somatomotor.GMM_SS import GMM_SS
 from exploration.models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
+from exploration.models.Somatomotor.trash.GMM_SS import GMM_SS
 
 model_class = {'gmm_sm': GMM_SM,
                'gmm_ss': GMM_SS,

@@ -5,7 +5,7 @@ Modified on Nov 15, 2017
 @author: Juan Manuel Acevedo Valle
 """
 import numpy as np
-import random
+import random, os
 from numpy import linalg
 import datetime
 from ..data.data import SimulationData as SimulationData
@@ -80,6 +80,7 @@ class Algorithm(object):
 
         # Analyze whether is necessary to  sum 1 and 2
         self.data = SimulationData(learner, prelocated_samples=n_experiments + 2 * n_initialization_experiments + 1)
+        file_prefix = file_prefix.replace('/', os.sep)
         self.data.file_prefix = file_prefix
 
         self.evaluation = evaluation

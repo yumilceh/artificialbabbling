@@ -30,6 +30,8 @@ class ExplautoCons(object):
         self.set_sigma_explo(0.)  # For conssensory data we are not interested on exploratory noise
         self.params = PARAMS()
         self.params.cons_step=1 #only ok with non-parametric
+        self.params.model_type = model_type
+        self.params.model_conf = model_conf
        
     def predict_cons(self, system, motor_command=None):
         if motor_command is None:
@@ -63,7 +65,49 @@ class ExplautoCons(object):
 
     def get_sigma_explo(self):
         return self.model.sigma_expl
-        
+
+    def generate_log(self):
+        attr_to_logs = ['conf']
+        params_to_logs = ['cons_step','model_type','model_conf']
+        log = 'model: EXPLAUTO_CONS\n'
+
+        for attr_ in attr_to_logs:
+            if hasattr(self, attr_):
+                try:
+                    attr_log = getattr(self, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in ILGMM log generation")
+                except AttributeError:
+                    if isinstance(getattr(self, attr_), dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
+
+        for attr_ in params_to_logs:
+            if hasattr(self.params, attr_):
+                try:
+                    attr_log = getattr(self.params, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in ILGMM log generation")
+                except AttributeError:
+                    if isinstance(attr_, dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
+        return log
+
 def generateConfigurationExplauto(system):
     conf = PARAMS()
     conf.m_maxs = system.max_motor_values
