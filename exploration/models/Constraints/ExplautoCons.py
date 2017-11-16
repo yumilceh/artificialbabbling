@@ -22,7 +22,7 @@ class ExplautoCons(object):
         conf = generateConfigurationExplauto(system)
         self.conf = conf
 
-        if model_type is 'non_parametric':
+        if model_type == 'non_parametric':
             self.model = NonParametric(conf, **model_conf)
         else:
             self.model = SensorimotorModel.from_configuration(conf, model_type, model_conf)
@@ -67,27 +67,8 @@ class ExplautoCons(object):
         return self.model.sigma_expl
 
     def generate_log(self):
-        attr_to_logs = ['conf']
         params_to_logs = ['cons_step','model_type','model_conf']
-        log = 'model: EXPLAUTO_CONS\n'
-
-        for attr_ in attr_to_logs:
-            if hasattr(self, attr_):
-                try:
-                    attr_log = getattr(self, attr_).generate_log()
-                    log += attr_ + ': {\n'
-                    log += attr_log
-                    log += '}\n'
-                except IndexError:
-                    print("INDEX ERROR in ILGMM log generation")
-                except AttributeError:
-                    if isinstance(getattr(self, attr_), dict):
-                        log += attr_ + ': {\n'
-                        for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
-                        log += ('}\n')
-                    else:
-                        log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
+        log = 'cons_model: EXPLAUTO_CONS\n'
 
         for attr_ in params_to_logs:
             if hasattr(self.params, attr_):
@@ -97,16 +78,58 @@ class ExplautoCons(object):
                     log += attr_log
                     log += '}\n'
                 except IndexError:
-                    print("INDEX ERROR in ILGMM log generation")
+                    print("INDEX ERROR in EXPLAUTO_CONS log generation")
                 except AttributeError:
-                    if isinstance(attr_, dict):
-                        log += attr_ + ': {\n'
-                        for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
+                    attr_tmp = getattr(self.params, attr_)
+                    if isinstance(attr_tmp, dict):
+                        log += attr_ + ': {'
+                        for key in attr_tmp.keys():
+                            log += key + ': ' + str(attr_tmp[key]) + ','
                         log += ('}\n')
                     else:
-                        log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
+                        log += attr_ + ': ' + str(attr_tmp) + '\n'
         return log
+
+    def save_model(self, file_name, data_file = 'None'):
+         with open(file_name, "w") as log_file:
+            log_file.write('data_file: ' + data_file + '\n')
+            log_file.write(self.generate_log())
+
+
+def load_model(system, file_name, data=None):
+    from exploration.data.data import load_sim_h5
+    import string
+    conf = {}
+    with open(file_name) as f:
+        for line in f:
+            line = line.replace('\n', '')
+            (key, val) = string.split(line,': ', maxsplit=1)
+            conf.update({key: val})
+    if ':' in conf['model_conf']:
+        model_conf = {}
+        line = conf['model_conf'].replace('\n', '')
+        line = line.replace(',}', '')
+        line = string.split(line, ',')
+        for line_ in line:
+            (key, val) = string.split(line_, ': ', maxsplit=1)
+            key = key.replace('{','')
+            model_conf.update({key: val})
+            if model_conf[key]:
+                try:
+                    model_conf[key] = float(model_conf[key])
+                    if key == 'k':
+                        model_conf[key] = int(model_conf[key])
+                except ValueError:
+                    pass
+    conf['model_conf'] = model_conf
+    model = ExplautoCons(system, model_type=conf['model_type'], model_conf =conf['model_conf'])
+    data, foo = load_sim_h5(conf['data_file'])
+    motor = data.motor.data
+    cons = data.cons.data
+    for i in range(len(cons.index)):
+        model.model.update(motor.iloc[i], cons.iloc[i])
+    return model
+
 
 def generateConfigurationExplauto(system):
     conf = PARAMS()

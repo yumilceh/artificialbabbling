@@ -1,5 +1,5 @@
 """
-Created on Abr 6, 2016
+Created on March, 2017
 This sensorimor system defines the DIVA agent used for the Epirob 2017's paper
 but using divapy
 @author: Juan Manuel Acevedo Valle
@@ -14,9 +14,8 @@ from scipy.integrate import odeint
 from scipy import linspace
 from divapy import Diva
 import matplotlib.pyplot as plt
-
-import Tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os, random
+from exploration.data.data import load_sim_h5
 
 english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [532.0, 1656.0, 1.0],
                   'ae': [667.0, 1565.0, 1.0], 'A': [661.0, 1296.0, 1.0], 'a': [680.0, 1193.0, 1.0],
@@ -26,7 +25,7 @@ english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [53
 # Write down german vowels here
 diva_output_scale = [100.0, 500.0, 1500.0, 3000.0]
 
-class Diva2017a(object):
+class Diva2017a():
     def __init__(self):
         motor_names = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15',
                        'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M26']
@@ -335,13 +334,32 @@ class Diva2017a(object):
         except:
             pass
 
-class Instructor(object):
+    def generate_log(self):
+        log = 'system: ' +  self.name + '\n'
+        for key in self.params.keys():
+            try:
+                attr_log = self.params[key].generate_log()
+                log += key + ': {\n'
+                log += attr_log
+                log += '}\n'
+            except IndexError:
+                print("INDEX ERROR in Divapy2017a log generation")
+            except AttributeError:
+                if isinstance(self.params[key], dict):
+                    log += key + ': {\n'
+                    for key_ in self.params[key].keys():
+                        log += key_ + ': ' + str(self.params[key][key_])
+                    log += ('}\n')
+                else:
+                    log += key + ': ' + str(self.params[key]) + '\n'
+        return log
+
+class Instructor():
     def __init__(self, n_su = None, slope = 1.): #n_su -> n_sensor_units
-        import os, random
-        from exploration.data.data import load_sim_h5_v2 as load_sim_h5
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
         self.instructor_file = abs_path + '/datasets/german_dataset_somato.h5'
+        self.instructor_file = self.instructor_file.replace('/', os.sep)
 
         self.name = 'diva2017a-memorydata'
         self.data, sys = load_sim_h5(self.instructor_file)
@@ -358,7 +376,30 @@ class Instructor(object):
         self.n_sensor = len(self.sensor_out)
         self.n_units = len(self.data.sensor.data.index)
 
-        self.unit_threshold = 0.5 * np.ones((self.n_su,))
+        self.threshold = 0.5
+        self.unit_threshold = self.threshold * np.ones((self.n_su,))
+
+    def generate_log(self):
+        params_to_logs = ['instructo_file', 'n_units', 'idx_sensor', 'slope', 'threshold']
+        log = 'instructor: ' +  self.name + '\n'
+        for attr_ in params_to_logs:
+            if hasattr(self, attr_):
+                try:
+                    attr_log = getattr(self, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in Diva2017aInstructor log generation")
+                except AttributeError:
+                    if isinstance(getattr(self, attr_), dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
+        return log
 
     def interaction(self, sensor):
         dist = np.array(self.get_distances(sensor))

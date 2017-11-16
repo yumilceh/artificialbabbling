@@ -134,7 +134,7 @@ class GMM_SM(object):
                           'forgetting_factor',
                           'sigma_explo_ratio',
                           'somato']
-        log = 'model: IGMM_SM\n'
+        log = 'sm_model: IGMM_SM\n'
 
         for attr_ in params_to_logs:
             if hasattr(self.params, attr_):

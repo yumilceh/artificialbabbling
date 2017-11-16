@@ -24,12 +24,12 @@ class Evaluation():
     def __init__(self, system,
                  model,
                  comp_func=comp_Moulin2013,
-                 data=None,
                  file_prefix='',
                  type='sensorimotor' #'sensorimotor', 'somatosensorimotor'
                  ):
         self.agent = system
         self.data = {}
+        self.data_file = {}
         self.comp_func = comp_func
         file_prefix = file_prefix.replace('/', os.sep)
         self.file_prefix = file_prefix
@@ -37,13 +37,14 @@ class Evaluation():
 
     def load_eval_dataset(self, file_name, name=None):
         file_name = file_name.replace('/', os.sep)
-        if self.data is None:
-            self.data = {}
+        #if self.data is None:
+        #    self.data = {}
         data, foo = load_sim_h5(file_name)
         key = name
         if key is None:
             key = file_name
         self.data.update({key: data})
+        self.data_file.update({key: file_name})
 
     def set_eval_dataset(self, data, name=None):
         if isinstance(data, SimulationData):
@@ -53,9 +54,10 @@ class Evaluation():
                 while str(i) in keys():
                     i += 1
                 name = str(i)
-            self.data.update({name: data})
-        else:
-            self.data.update(data)
+        self.data.update({name: data})
+        self.data_file.update({name: name+('_custom_dataset')})
+        #else:
+        #    self.data.update(data)
 
     def evaluate(self, save_data=False, space='sensor'):
         # Validation against evaluation_dataset

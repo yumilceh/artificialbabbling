@@ -33,7 +33,7 @@ model_conf = {'discretized_progress': {'x_card': 1000,
              }
 
     
-class PARAMS(object):
+class OBJECT(object):
     def __init__(self):
         pass
 
@@ -62,7 +62,7 @@ class explauto_IM(object):
         
         self.model = InterestModel(conf, conf.s_dims, **model_conf[model_type])
         
-        self.params = PARAMS()
+        self.params = OBJECT()
         
         if somato:
             self.params.sensor_space = 'somato'
@@ -101,27 +101,8 @@ class explauto_IM(object):
         pass
 
     def generate_log(self):
-        attr_to_logs = ['conf']
         params_to_logs = ['space', 'im_step', 'n_training_samples', 'model_type', 'model_conf']
-        log = 'model: EXPLAUTO_IM\n'
-
-        for attr_ in attr_to_logs:
-            if hasattr(self, attr_):
-                try:
-                    attr_log = getattr(self, attr_).generate_log()
-                    log += attr_ + ': {\n'
-                    log += attr_log
-                    log += '}\n'
-                except IndexError:
-                    print("INDEX ERROR in ILGMM log generation")
-                except AttributeError:
-                    if isinstance(getattr(self, attr_), dict):
-                        log += attr_ + ': {\n'
-                        for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
-                        log += ('}\n')
-                    else:
-                        log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
+        log = 'im_model: EXPLAUTO_IM\n'
 
         for attr_ in params_to_logs:
             if hasattr(self.params, attr_):
@@ -131,19 +112,19 @@ class explauto_IM(object):
                     log += attr_log
                     log += '}\n'
                 except IndexError:
-                    print("INDEX ERROR in ILGMM log generation")
+                    print("INDEX ERROR in ExplautoIM log generation")
                 except AttributeError:
-                    if isinstance(attr_, dict):
+                    if isinstance(getattr(self.params, attr_), dict):
                         log += attr_ + ': {\n'
-                        for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
+                        for key in getattr(self.params, attr_).keys():
+                            log += key + ': ' + str(getattr(self.params, attr_)[key])
                         log += ('}\n')
                     else:
                         log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
         return log
 
 def generateConfigurationExplauto(system, somato=False):
-    conf = PARAMS()
+    conf = OBJECT()
     conf.m_maxs = system.max_motor_values
     conf.m_mins = system.min_motor_values
     if somato:

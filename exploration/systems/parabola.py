@@ -99,6 +99,27 @@ class ParabolicRegion:
         self.sensor_instructor = np.empty((self.n_sensor,))
         self.sensor_instructor.fill(np.nan)
 
+    def generate_log(self):
+        params_to_logs = ['f', 'sigma_noise']
+        log = 'system: ' +  self.name + '\n'
+        for attr_ in params_to_logs:
+            if hasattr(self.params, attr_):
+                try:
+                    attr_log = getattr(self.params, attr_).generate_log()
+                    log += attr_ + ': {\n'
+                    log += attr_log
+                    log += '}\n'
+                except IndexError:
+                    print("INDEX ERROR in Parabola log generation")
+                except AttributeError:
+                    if isinstance(getattr(self.params, attr_), dict):
+                        log += attr_ + ': {\n'
+                        for key in attr_.keys():
+                            log += key + ': ' + str(attr_[key])
+                        log += ('}\n')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
+        return log
 
     def set_f(self, f):
         a = 2.0 + f
@@ -418,8 +439,33 @@ class Instructor(ParabolicRegion):
         self.intructor_file = abs_path + '/datasets/instructor_parabola_1.h5'
         self.data, foo = load_sim_h5(self.intructor_file)
         self.n_units = len(self.data.sensor.data.index)
-        self.unit_threshold = 0.3 * np.ones((self.n_units,))
+        self.threshold = 0.3
+        self.unit_threshold = self.threshold * np.ones((self.n_units,))
         self.slope = thresh_slope
+
+    def generate_log(self):
+        params_to_logs = ['f', 'sigma_noise']
+        attr_to_logs = ['instructor_file', 'n_units', 'slope', 'threshold']
+        log = 'instructor: ' + self.name + '\n'
+        for item, params in zip([self.params, self], [params_to_logs, attr_to_logs]):
+            for attr_ in params:
+                if hasattr(item, attr_):
+                    try:
+                        attr_log = getattr(item, attr_).generate_log()
+                        log += attr_ + ': {\n'
+                        log += attr_log
+                        log += '}\n'
+                    except IndexError:
+                        print("INDEX ERROR in Parabola log generation")
+                    except AttributeError:
+                        if isinstance(getattr(item, attr_), dict):
+                            log += attr_ + ': {\n'
+                            for key in attr_.keys():
+                                log += key + ': ' + str(attr_[key])
+                            log += ('}\n')
+                        else:
+                            log += attr_ + ': ' + str(getattr(item, attr_)) + '\n'
+        return log
 
     def plot(self, axes=None):
         if axes is None:
