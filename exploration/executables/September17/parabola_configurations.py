@@ -9,7 +9,7 @@ from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as
 # from exploration.models.Sensorimotor.GMM_SM import GMM_SM
 from exploration.models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
-from exploration.models.Random import Random
+from exploration.models.Interest.Random import Random
 # from exploration.models.Interest.GMM_IM import GMM_IM
 # from exploration.models.Somatomotor.GMM_SS import GMM_SS
 from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM

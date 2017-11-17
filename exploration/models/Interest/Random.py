@@ -3,7 +3,7 @@ Created on Jan 26, 2017
 
 @author: Juan Manuel Acevedo Valle
 '''
-from ..algorithm.utils.functions import get_random_motor_set, get_random_sensor_set
+from exploration.algorithm.utils.functions import get_random_motor_set, get_random_sensor_set
 
 class OBJECT(object):
     def __init__(self):

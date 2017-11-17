@@ -33,14 +33,16 @@ def write_config_log(alg, file_name):
                     log += attr_ + ': {\n'
                     log += attr_log
                     log += '}\n'
+                    log = log.replace('\n}', '}')
                 except IndexError:
                     print("INDEX ERROR in Algorithm (root_attr_names) log generation")
                 except AttributeError:
                     if isinstance(getattr(alg, attr_), dict):
                         log += attr_ + ': {\n'
                         for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
+                            log += key + ': ' + str(attr_[key]) + ','
                         log += ('}\n')
+                        log = log.replace(',}', '}')
                     else:
                         log += attr_ + ': ' + str(getattr(alg, attr_)) + '\n'
             log_file.write(log)
@@ -61,14 +63,16 @@ def generate_object_log(OBJECT):
             log += attr_ + ': {\n'
             log += attr_log
             log += '}\n'
+            log = log.replace('\n}', '}')
         except IndexError:
             print("INDEX ERROR in Algorithm log generation")
         except AttributeError:
             if isinstance(getattr(OBJECT, attr_), dict):
                 log += attr_ + ': {\n'
                 for key in attr_.keys():
-                    log += key + ': ' + str(attr_[key])
+                    log += key + ': ' + str(attr_[key]) + ','
                 log += ('}\n')
+                log = log.replace(',}', '}')
             else:
                 log += attr_ + ': ' + str(getattr(OBJECT, attr_)) + '\n'
     return log

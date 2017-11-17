@@ -109,14 +109,16 @@ class ParabolicRegion:
                     log += attr_ + ': {\n'
                     log += attr_log
                     log += '}\n'
+                    log = log.replace('\n}', '}')
                 except IndexError:
                     print("INDEX ERROR in Parabola log generation")
                 except AttributeError:
                     if isinstance(getattr(self.params, attr_), dict):
                         log += attr_ + ': {\n'
                         for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
+                            log += key + ': ' + str(attr_[key]) + ','
                         log += ('}\n')
+                        log = log.replace(',}', '}')
                     else:
                         log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
         return log
@@ -455,14 +457,16 @@ class Instructor(ParabolicRegion):
                         log += attr_ + ': {\n'
                         log += attr_log
                         log += '}\n'
+                        log = log.replace('\n}', '}')
                     except IndexError:
                         print("INDEX ERROR in Parabola log generation")
                     except AttributeError:
                         if isinstance(getattr(item, attr_), dict):
-                            log += attr_ + ': {\n'
+                            log += attr_ + ': {'
                             for key in attr_.keys():
-                                log += key + ': ' + str(attr_[key])
+                                log += key + ': ' + str(attr_[key]) + ','
                             log += ('}\n')
+                            log = log.replace(',}', '}')
                         else:
                             log += attr_ + ': ' + str(getattr(item, attr_)) + '\n'
         return log

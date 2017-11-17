@@ -11,7 +11,7 @@ from exploration.models.Somatomotor.ExplautoSS import ExplautoSS as ea_SS
 from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
 from exploration.models.Interest.GMM_IM import GMM_IM
-from exploration.models.Random import Random
+from exploration.models.Interest.Random import Random
 from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
 from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 from exploration.models.Sensorimotor.trash.GMM_SM import GMM_SM

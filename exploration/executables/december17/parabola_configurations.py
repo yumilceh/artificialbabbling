@@ -6,11 +6,14 @@ Created on May 17, 2017
 
 
 
+from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
+from exploration.algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func_
+
 # from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
 # from exploration.models.Sensorimotor.GMM_SM import GMM_SM
 from exploration.models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
-from exploration.models.Random import Random
+from exploration.models.Interest.Random import Random
 # from exploration.models.Interest.GMM_IM import GMM_IM
 # from exploration.models.Somatomotor.GMM_SS import GMM_SS
 from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
@@ -18,12 +21,10 @@ from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
 from exploration.models.Sensorimotor.trash.ILGMM_SM2 import GMM_SM as ILGMM_old
 from igmm import DynamicParameter
 
-from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
-from exploration.algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
-
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
 
+comp_func = comp_func_
 model_class = {'igmm_sm': IGMM_SM,
                'igmm_old': ILGMM_old,
                'igmm_ss': IGMM_SM,
@@ -53,12 +54,7 @@ models_params_dict = {'igmm_ss': {'min_components': 3,
                                   'max_step_components': 5,
                                   'max_components': 20,
                                   'sm_step': 100,
-                                  'forgetting_factor': DynamicParameter(
-                                                        **{'function':'log',
-                                                           'init':0.2,
-                                                           'end':0.05,
-                                                           'steps':10000}
-                                                            )},
+                                  'forgetting_factor': 0.05},
                       'igmm_old': {'min_components': 3,
                                   'max_step_components': 5,
                                   'max_components': 20,

@@ -108,17 +108,18 @@ class explauto_IM(object):
             if hasattr(self.params, attr_):
                 try:
                     attr_log = getattr(self.params, attr_).generate_log()
-                    log += attr_ + ': {\n'
+                    log += attr_ + ': {'
                     log += attr_log
                     log += '}\n'
                 except IndexError:
                     print("INDEX ERROR in ExplautoIM log generation")
                 except AttributeError:
                     if isinstance(getattr(self.params, attr_), dict):
-                        log += attr_ + ': {\n'
+                        log += attr_ + ': {'
                         for key in getattr(self.params, attr_).keys():
-                            log += key + ': ' + str(getattr(self.params, attr_)[key])
+                            log += key + ': ' + str(getattr(self.params, attr_)[key]) + ','
                         log += ('}\n')
+                        log = log.replace(',}', '}')
                     else:
                         log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
         return log

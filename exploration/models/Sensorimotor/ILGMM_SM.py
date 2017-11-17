@@ -27,7 +27,7 @@ class GMM_SM(object):
                        forgetting_factor = 0.05,
                        sigma_explo_ratio = 0.0,
                        somato=False,
-                       plot = False, plot_dims=[0,1]):
+                       plot = False, plot_dims=[0,1], **kargs):
         '''
         Constructor
         '''
@@ -69,6 +69,10 @@ class GMM_SM(object):
                        forgetting_factor = forgetting_factor,
                        x_dims = m_dims,
                        y_dims = s_dims)
+
+    def set_forgetting_factor(self, value):
+        self.params.forgetting_factor = value
+        self.model.params['forgetting_factor'] = value
 
     def train(self, simulation_data):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
@@ -133,9 +137,111 @@ class GMM_SM(object):
                           'a_split',
                           'forgetting_factor',
                           'sigma_explo_ratio',
-                          'somato']
+                          'sensor_space',
+                          'n_motor',
+                          'n_sensor']
         log = 'sm_model: IGMM_SM\n'
 
+        for attr_ in params_to_logs:
+            if hasattr(self.params, attr_):
+                try:
+                    attr_log = getattr(self.params, attr_).generate_log()
+                    log += attr_ + ': {'
+                    log += attr_log
+                    log += '}\n'
+                    log = log.replace('\n}', '}')
+                except IndexError:
+                    print("INDEX ERROR in ILGMM_SM log generation")
+                except AttributeError:
+                    if isinstance(getattr(self.params, attr_), dict):
+                        log += attr_ + ': {'
+                        for key in getattr(self.params, attr_).keys():
+                            log += key + ': ' + str(getattr(self.params, attr_)[key]) + ','
+                        log += ('}\n')
+                        log = log.replace(',}', '}')
+                    else:
+                        log += attr_ + ': ' + str(getattr(self.params, attr_)) + '\n'
+        return log
+
+    def save(self, file_name):
+         with open(file_name, "w") as log_file:
+            log_file.write(self.generate_log())
+         file_prefix = file_name.replace('.txt', '')
+         self.model.save(file_prefix)
+
+def load_model(system, file_name):
+    from igmm import DynamicParameter
+    from igmm import load_gmm
+    import string
+    conf = {}
+    with open(file_name) as f:
+        for line in f:
+            line = line.replace('\n', '')
+            (key, val) = string.split(line,': ', maxsplit=1)
+            conf.update({key: val})
+            if ':' in conf[key]:
+                dict_ = {}
+                line_ = conf[key].replace('\n', '')
+                line_ = string.split(line_, ',')
+                for line__ in line_:
+                    (key_, val) = string.split(line__, ': ', maxsplit=1)
+                    key_ = key_.replace('{','')
+                    val = val.replace('}', '')
+                    dict_.update({key_: val})
+                    try:
+                        dict_[key_] = float(dict_[key_])
+                        if key_ == 'k':
+                            dict_[key_] = int(dict_[key_])
+                    except ValueError:
+                        pass
+                conf[key] = dict_
+    forgetting_factor = DynamicParameter(**conf['forgetting_factor'])
+    conf['forgetting_factor'] = forgetting_factor
+    model = GMM_SM(system, **conf)
+    gmm_ = load_gmm(file_name.replace('.txt',''))
+
+    x_dims = np.arange(0, int(conf['n_motor']), 1)
+    y_dims = np.arange(int(conf['n_motor']), int(conf['n_motor']) + int(conf['n_sensor']), 1)
+    # print (m_dims)
+    # print(s_dims)
+    # gmm_.params['x_dims'] = m_dims
+    # gmm_.params['y_dims'] = s_dims
+
+    # gmm_.i.params['infer_fixed'] = True
+    model.model.n_components = gmm_.n_components
+    model.model.means_ = gmm_.means_
+    model.model.weights_ = gmm_.weights_
+    model.model.covariances_ = gmm_.covariances_
+
+    # y_dims = gmm_.params['y_dims']
+    # x_dims = gmm_.params['x_dims']
+
+    SIGMA_YY_inv = np.zeros((gmm_.n_components, len(y_dims), len(y_dims)))
+    SIGMA_XY = np.zeros((gmm_.n_components, len(x_dims), len(y_dims)))
+    for k, (Mu, Sigma) in enumerate(zip(gmm_.means_, gmm_.covariances_)):
+        Sigma_yy = Sigma[:, y_dims]
+        Sigma_yy = Sigma_yy[y_dims, :]
+
+        Sigma_xy = Sigma[x_dims, :]
+        Sigma_xy = Sigma_xy[:, y_dims]
+        Sigma_yy_inv = np.linalg.inv(Sigma_yy)
+
+        SIGMA_YY_inv[k, :, :] = Sigma_yy_inv
+        SIGMA_XY[k, :, :] = Sigma_xy
+
+    model.model.SIGMA_YY_inv = SIGMA_YY_inv
+    model.model.SIGMA_XY = SIGMA_XY
+    # model = ExplautoCons(system, model_type=conf['model_type'], model_conf =conf['model_conf'])
+    # data, foo = load_sim_h5(conf['data_file'])
+    # motor = data.motor.data
+    # cons = data.cons.data
+    # for i in range(len(cons.index)):
+    #     model.model.update(motor.iloc[i], cons.iloc[i])
+    return model
+
+
+
+"""
         for attr_ in params_to_logs:
             if hasattr(self.params, attr_):
                 try:
@@ -148,6 +254,10 @@ class GMM_SM(object):
                 except AttributeError:
                     log+=(attr_ + ': ' + str(getattr(self.params, attr_)) + '\n')
         return log
+"""
+
+
+
 
 def boundMotorCommand(system,motor_command):
     n_motor=system.n_motor

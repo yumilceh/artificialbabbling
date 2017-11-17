@@ -74,9 +74,10 @@ class ExplautoCons(object):
             if hasattr(self.params, attr_):
                 try:
                     attr_log = getattr(self.params, attr_).generate_log()
-                    log += attr_ + ': {\n'
+                    log += attr_ + ': {'
                     log += attr_log
                     log += '}\n'
+                    log = log.replace('\n}', '}')
                 except IndexError:
                     print("INDEX ERROR in EXPLAUTO_CONS log generation")
                 except AttributeError:
@@ -86,11 +87,12 @@ class ExplautoCons(object):
                         for key in attr_tmp.keys():
                             log += key + ': ' + str(attr_tmp[key]) + ','
                         log += ('}\n')
+                        log = log.replace(',}', '}')
                     else:
                         log += attr_ + ': ' + str(attr_tmp) + '\n'
         return log
 
-    def save_model(self, file_name, data_file = 'None'):
+    def save(self, file_name, data_file = 'None'):
          with open(file_name, "w") as log_file:
             log_file.write('data_file: ' + data_file + '\n')
             log_file.write(self.generate_log())
@@ -108,11 +110,11 @@ def load_model(system, file_name, data=None):
     if ':' in conf['model_conf']:
         model_conf = {}
         line = conf['model_conf'].replace('\n', '')
-        line = line.replace(',}', '')
         line = string.split(line, ',')
         for line_ in line:
             (key, val) = string.split(line_, ': ', maxsplit=1)
             key = key.replace('{','')
+            val = val.replace('}', '')
             model_conf.update({key: val})
             if model_conf[key]:
                 try:

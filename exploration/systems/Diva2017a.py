@@ -342,14 +342,16 @@ class Diva2017a():
                 log += key + ': {\n'
                 log += attr_log
                 log += '}\n'
+                log = log.replace('\n}', '}')
             except IndexError:
                 print("INDEX ERROR in Divapy2017a log generation")
             except AttributeError:
                 if isinstance(self.params[key], dict):
                     log += key + ': {\n'
                     for key_ in self.params[key].keys():
-                        log += key_ + ': ' + str(self.params[key][key_])
+                        log += key_ + ': ' + str(self.params[key][key_]) + ','
                     log += ('}\n')
+                    log = log.replace(',}', '}')
                 else:
                     log += key + ': ' + str(self.params[key]) + '\n'
         return log
@@ -389,14 +391,16 @@ class Instructor():
                     log += attr_ + ': {\n'
                     log += attr_log
                     log += '}\n'
+                    log = log.replace('\n}', '}')
                 except IndexError:
                     print("INDEX ERROR in Diva2017aInstructor log generation")
                 except AttributeError:
                     if isinstance(getattr(self, attr_), dict):
                         log += attr_ + ': {\n'
                         for key in attr_.keys():
-                            log += key + ': ' + str(attr_[key])
+                            log += key + ': ' + str(attr_[key]) + ','
                         log += ('}\n')
+                        log = log.replace(',}','}')
                     else:
                         log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
         return log

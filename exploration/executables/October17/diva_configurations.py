@@ -8,11 +8,9 @@ from exploration.models.Sensorimotor.ILGMM_SM_old import GMM_SM as ILGMM_old
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
 from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
-from exploration.algorithm.utils.competence_funcs import comp_Moulin2013 as comp_func
-
 from exploration.models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
-from exploration.models.Random import Random
+from exploration.models.Interest.Random import Random
 # from exploration.models.Interest.GMM_IM import GMM_IM
 # from exploration.models.Somatomotor.GMM_SS import GMM_SS
 from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
