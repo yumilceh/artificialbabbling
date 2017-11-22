@@ -3,7 +3,7 @@ Created on Feb 21, 2017
 
 @author: Juan Manuel Acevedo Valle
 """
-from exploration.models.Sensorimotor.ILGMM_SM_old import GMM_SM as ILGMM_old
+from exploration.models.sensorimotor.ILGMM_SM_old import GMM_SM as ILGMM_old
 
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015 as comp_func
@@ -13,7 +13,7 @@ from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
 from exploration.models.Interest.Random import Random
 # from exploration.models.Interest.GMM_IM import GMM_IM
 # from exploration.models.Somatomotor.GMM_SS import GMM_SS
-from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
+from exploration.models.sensorimotor.IGMM_SM import GMM_SM as IGMM_SM
 from igmm import DynamicParameter
 
 # from exploration.models.Somatomotor.ILGMM_SM import GMM_SS as IGMM_SS

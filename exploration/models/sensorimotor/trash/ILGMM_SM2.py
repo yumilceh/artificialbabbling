@@ -115,7 +115,7 @@ class GMM_SM(object):
         motor_command = boundMotorCommand(system, motor_command)
         system.motor_command = motor_command
         
-        # return boundMotorCommand(system,self.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
+        # return bound_action(system,self.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
         return motor_command.copy()
 
     def set_sigma_explo_ratio(self, new_value):

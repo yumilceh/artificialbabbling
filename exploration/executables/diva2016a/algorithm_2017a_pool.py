@@ -9,7 +9,7 @@ import os
 import time
 from multiprocessing import Process
 
-from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
+from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
 from exploration.algorithm.trash.ModelEvaluation import SM_ModelEvaluation
 from exploration.algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##

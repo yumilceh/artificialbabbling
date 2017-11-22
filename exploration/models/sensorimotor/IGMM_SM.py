@@ -7,17 +7,13 @@ from igmm import IGMM as GMM
 import numpy as np
 import pandas as pd
 import copy 
-
+from exploration.models.Sensorimotor import Sensorimotor
 class PARAMS(object):
     def __init__(self):
         pass;
     
     
-class GMM_SM(object):
-    '''
-    classdocs
-    '''
-
+class GMM_SM(Sensorimotor):
     def __init__(self, system,
                        sm_step = 100,
                        min_components = 3,
@@ -25,13 +21,10 @@ class GMM_SM(object):
                        max_components = 60,
                        a_split = 0.8,
                        forgetting_factor = 0.05,
-                       sigma_explo_ratio = 0.0,
+                       sigma_expl_ratio = 0.0,
                        somato=False,
-                       plot = False, plot_dims=[0,1], **kargs):
-        '''
-        Constructor
-        '''
-
+                       **kargs):
+        Sensorimotor.__init__(self,system,sm_step=sm_step,somato=somato,sigma_expl_ratio=sigma_expl_ratio)
         if somato:
             n_sensor = system.n_somato
             sensor_names = system.somato_names
@@ -41,28 +34,28 @@ class GMM_SM(object):
             sensor_names = system.sensor_names
             sensor_space = 'sensor'
 
-        self.params = PARAMS()
-        self.params.sensor_space = sensor_space
-        self.params.size_data = system.n_motor+ n_sensor
-        self.params.motor_names = system.motor_names
-        self.params.sensor_names = sensor_names
-
-        self.params.n_motor=system.n_motor
-        self.params.n_sensor = n_sensor
-
-        self.params.min_components = min_components
-        self.params.max_step_components = max_step_components
-        self.params.forgetting_factor = forgetting_factor
-        self.params.sm_step = sm_step
-
-        self.delta_motor_values = system.max_motor_values - system.min_motor_values
-        self.sigma_expl = self.delta_motor_values * float(sigma_explo_ratio)
-        self.mode = 'exploit'
+        # self.params = PARAMS()
+        # self.params.sensor_space = sensor_space
+        # self.params.size_data = system.n_motor+ n_sensor
+        # self.params.motor_names = system.motor_names
+        # self.params.sensor_names = sensor_names
+        #
+        # self.params.n_motor=system.n_motor
+        # self.params.n_sensor = n_sensor
+        #
+        # self.params.min_components = min_components
+        # self.params.max_step_components = max_step_components
+        # self.params.forgetting_factor = forgetting_factor
+        # self.params.sm_step = sm_step
+        #
+        # self.delta_motor_values = system.max_motor_values - system.min_motor_values
+        # self.sigma_expl = self.delta_motor_values * float(sigma_expl_ratio)
+        # self.params.mode = 'exploit'
 
         m_dims = np.arange(0,self.params. n_motor, 1)
         s_dims = np.arange(self.params.n_motor, self.params.n_motor + self.params.n_sensor, 1)
 
-        self.model=GMM(min_components = min_components,
+        self.params.model=GMM(min_components = min_components,
                        max_step_components = max_step_components,
                        max_components = max_components,
                        a_split = a_split,
@@ -72,13 +65,13 @@ class GMM_SM(object):
 
     def set_forgetting_factor(self, value):
         self.params.forgetting_factor = value
-        self.model.params['forgetting_factor'] = value
+        self.params.model.params['forgetting_factor'] = value
 
     def train(self, simulation_data):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
         train_data_tmp = pd.concat([simulation_data.motor.get_all(),
                                     sensor_data.get_all()], axis=1)
-        self.model.train(train_data_tmp.as_matrix(columns=None))
+        self.params.model.train(train_data_tmp.as_matrix(columns=None))
 
     def train_incremental(self, simulation_data, all=False):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
@@ -96,7 +89,7 @@ class GMM_SM(object):
             data_s = sensor_data.get_last(self.params.sm_step).as_matrix()
             data[:,:self.params.n_motor] = data_m
             data[:, self.params.n_motor:] = data_s
-        self.model.train(data)
+        self.params.model.train(data)
     
     def get_action(self, system, sensor_goal=None):
         n_motor=system.n_motor
@@ -108,26 +101,23 @@ class GMM_SM(object):
         m_dims=np.arange(0, n_motor, 1)
         s_dims= np.arange(n_motor, n_motor+n_sensor, 1)
 
-        motor_command = self.model.infer(m_dims, s_dims, sensor_goal)
+        motor_command = self.params.model.infer(m_dims, s_dims, sensor_goal)
 
-        if self.mode == 'explore':
-            motor_command[self.sigma_expl > 0] = np.random.normal(motor_command[self.sigma_expl > 0],
-                                                                  self.sigma_expl[self.sigma_expl > 0])
-
-        motor_command = boundMotorCommand(system, motor_command)
+        motor_command = self.apply_sigma_expl(motor_command)
+        # motor_command = bound_action(system, motor_command)
         system.motor_command = motor_command
         
-        # return boundMotorCommand(system,self.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
+        # return bound_action(system,self.params.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
         return motor_command.copy()
 
-    def set_sigma_explo_ratio(self, new_value):
-        self.sigma_expl = self.delta_motor_values * float(new_value)
+    def set_sigma_expl_ratio(self, new_value):
+        self.params.sigma_expl = self.delta_motor_values * float(new_value)
 
-    def set_sigma_explo(self, new_sigma):
-        self.sigma_expl = new_sigma
+    def set_sigma_expl(self, new_sigma):
+        self.params.sigma_expl = new_sigma
 
-    def get_sigma_explo(self):
-        return self.sigma_expl
+    def get_sigma_expl(self):
+        return copy.copy(self.params.sigma_expl)
 
     def generate_log(self):
         params_to_logs = ['sm_step',
@@ -136,7 +126,7 @@ class GMM_SM(object):
                           'max_components',
                           'a_split',
                           'forgetting_factor',
-                          'sigma_explo_ratio',
+                          'sigma_expl_ratio',
                           'sensor_space',
                           'n_motor',
                           'n_sensor']
@@ -167,7 +157,7 @@ class GMM_SM(object):
          with open(file_name, "w") as log_file:
             log_file.write(self.generate_log())
          file_prefix = file_name.replace('.txt', '')
-         self.model.save(file_prefix)
+         self.params.model.save(file_prefix)
 
 def load_model(system, file_name):
     from igmm import DynamicParameter
@@ -240,6 +230,17 @@ def load_model(system, file_name):
     return model
 
 
+def bound_action(system, motor_command):
+    n_motor=system.n_motor
+    min_motor_values = system.min_motor_values
+    max_motor_values = system.max_motor_values
+    for i in range(n_motor):
+        if (motor_command[i] < min_motor_values[i]):
+            motor_command[i] = min_motor_values[i]
+        elif (motor_command[i] > max_motor_values[i]):
+            motor_command[i] = max_motor_values[i]
+    return motor_command
+
 
 """
         for attr_ in params_to_logs:
@@ -255,18 +256,4 @@ def load_model(system, file_name):
                     log+=(attr_ + ': ' + str(getattr(self.params, attr_)) + '\n')
         return log
 """
-
-
-
-
-def boundMotorCommand(system,motor_command):
-    n_motor=system.n_motor
-    min_motor_values = system.min_motor_values
-    max_motor_values = system.max_motor_values
-    for i in range(n_motor):
-        if (motor_command[i] < min_motor_values[i]):
-            motor_command[i] = min_motor_values[i]
-        elif (motor_command[i] > max_motor_values[i]):
-            motor_command[i] = max_motor_values[i]
-    return motor_command
 

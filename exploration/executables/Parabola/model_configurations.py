@@ -10,9 +10,9 @@ from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl 
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
 from exploration.models.Interest.GMM_IM import GMM_IM
 from exploration.models.Interest.Random import Random
-from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
-from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
-from exploration.models.Sensorimotor.trash.GMM_SM import GMM_SM
+from exploration.models.sensorimotor.ExplautoSM import ExplautoSM as ea_SM
+from exploration.models.sensorimotor.IGMM_SM import GMM_SM as IGMM_SM
+from exploration.models.sensorimotor.trash.GMM_SM_ import GMM_SM
 from exploration.models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
 from exploration.models.Somatomotor.trash.GMM_SS import GMM_SS
 

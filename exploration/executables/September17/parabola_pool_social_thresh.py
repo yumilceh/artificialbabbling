@@ -16,7 +16,7 @@ if __name__ == '__main__':
     #  Adding libraries##
     from exploration.systems.parabola import ParabolicRegion as System
     from exploration.systems.parabola import Instructor
-    from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
+    from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
     from exploration.algorithm.trash.algorithm_2015 import OBJECT
     from exploration.algorithm.evaluation import Evaluation
     from parabola_configurations import model_, comp_func

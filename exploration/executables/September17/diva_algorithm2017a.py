@@ -22,8 +22,8 @@ if __name__ == '__main__':
     #  Adding libraries##
     from exploration.systems.Diva2017a import Diva2017a as System
     from exploration.systems.Diva2017a import Instructor
-    from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
-    from exploration.algorithm.algorithm_2017 import OBJECT
+    from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
+    from exploration.algorithm.algorithm2017 import OBJECT
     from exploration.algorithm.evaluation import Evaluation
     from exploration.data.PlotTools import *
 

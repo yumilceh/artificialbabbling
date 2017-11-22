@@ -163,7 +163,7 @@ class Algorithm_CCIA2015(object):
                     self.models.f_im.train(self.data.simulation_data)
                 
                 
-            ''' Train Sensorimotor Model'''
+            ''' Train sensorimotor Model'''
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 print('algorithm 1 (Non-proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY
@@ -282,7 +282,7 @@ class Algorithm_CCIA2015(object):
                     self.models.f_im.train(self.data.simulation_data)
                 
                 
-            ''' Train Sensorimotor Model'''
+            ''' Train sensorimotor Model'''
             if ((i+1)%self.models.f_sm.params.sm_step) == 0:
                 print('algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
                 if (i < n_init or self.params.sm_all_samples): ###BE CAREFUL WITH MEMORY

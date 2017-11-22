@@ -10,7 +10,7 @@ import time
 from multiprocessing import Process
 
 from exploration.algorithm.evaluation import Evaluation
-from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
+from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
 from exploration.algorithm.trash.algorithm_2015 import OBJECT
 #  Adding libraries##
 from exploration.systems.Diva2017a import Diva2017a as System

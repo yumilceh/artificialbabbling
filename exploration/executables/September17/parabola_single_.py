@@ -18,7 +18,7 @@ if __name__ == '__main__':
     #  Adding libraries##
     from exploration.systems.parabola import ParabolicRegion as System
     from exploration.systems.parabola import Instructor
-    from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
+    from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
     from exploration.algorithm.evaluation import Evaluation
     from exploration.data.PlotTools import *
     from exploration.algorithm.utils.functions import generate_motor_grid

@@ -5,14 +5,14 @@ Created on May 17, 2017
 """
 
 from exploration.algorithm.utils.competence_funcs import comp_Moulin2013_expl as comp_func_expl
-# from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
-# from exploration.models.Sensorimotor.GMM_SM import GMM_SM
+# from exploration.models.sensorimotor.ExplautoSM import ExplautoSM as ea_SM
+# from exploration.models.sensorimotor.GMM_SM import GMM_SM
 from exploration.models.Constraints.ExplautoCons import ExplautoCons as ea_cons
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
 from exploration.models.Interest.Random import Random
 # from exploration.models.Interest.GMM_IM import GMM_IM
 # from exploration.models.Somatomotor.GMM_SS import GMM_SS
-from exploration.models.Sensorimotor.ILGMM_SM import GMM_SM as IGMM_SM
+from exploration.models.sensorimotor.IGMM_SM import GMM_SM as IGMM_SM
 
 # from exploration.models.Somatomotor.ILGMM_SS import GMM_SS as IGMM_SS
 # from exploration.algorithm.utils.competence_funcs import comp_Baraglia2015_expl as comp_func_expl

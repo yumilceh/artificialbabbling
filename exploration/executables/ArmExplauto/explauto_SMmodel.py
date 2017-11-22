@@ -8,7 +8,7 @@ if __name__ == '__main__':
     import numpy as np
     sys.path.append("../../")
     
-    from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as SM_Model
+    from exploration.models.sensorimotor.ExplautoSM import ExplautoSM as SM_Model
     from exploration.systems.trash.Parabola import ParabolicRegion as System
     from exploration.algorithm.RndSensorimotorFunctions import get_random_motor_set
     from exploration.data.data import SimulationData

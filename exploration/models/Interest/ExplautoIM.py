@@ -32,16 +32,17 @@ model_conf = {'discretized_progress': {'x_card': 1000,
                                        'n_components': 6}             
              }
 
-    
+
 class OBJECT(object):
     def __init__(self):
         pass
+
 
 class explauto_IM(object):
     '''
     Implemented for non-parametric models
     '''
-    def __init__(self, system,competence_func,  model_type, model_conf = model_conf, somato=False):
+    def __init__(self, system, competence_func,  model_type, model_conf = model_conf, somato=False):
         model_competence_conf = {'discretized_progress': {'measure': competence_func},
                                  'tree':{'competence_measure': lambda target,reached : competence_func(target, reached)},
                                  'gmm_progress_beta':    {'measure': competence_func}             

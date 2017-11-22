@@ -11,8 +11,8 @@ from exploration.models.ILGMM_SS import GMM_SS as IGMM_SS
 
 from exploration.models.Interest.ExplautoIM import explauto_IM as ea_IM
 from exploration.models.Interest.Random import RandomModel as RdnM
-from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM as ea_SM
-from exploration.models.Sensorimotor.trash.GMM_SM import GMM_SM
+from exploration.models.sensorimotor.ExplautoSM import ExplautoSM as ea_SM
+from exploration.models.sensorimotor.trash.GMM_SM_ import GMM_SM
 from exploration.models.Somatomotor.trash.ExplautoSS import ExplautoSS as ea_SS
 
 model_class = {'gmm_sm': GMM_SM,

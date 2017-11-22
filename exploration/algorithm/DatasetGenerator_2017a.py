@@ -32,7 +32,7 @@ class DatasetGenerator(object):
                         file_prefix = now
                         ): 
         '''
-        system,                                         Sensorimotor System
+        system,                                         sensorimotor System
         min_dist = 0.1,                                 Minimum distance between samples
         n_experiments = 1000,                           Number of samples to be explored
         random_seed = np.random.random((1,1)),          Random seed (NOT WORKING YET)

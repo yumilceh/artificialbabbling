@@ -286,7 +286,7 @@ class Algorithm_2015(object):
             # print('algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
             self.models.f_im.train(self.data)
 
-        """Train Sensorimotor Model"""
+        """Train sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
             self.models.f_sm.train_incremental(self.data)

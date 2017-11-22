@@ -13,7 +13,7 @@ if __name__ == '__main__':
     #  Adding libraries##
     from exploration.systems.trash.Parabola import ParabolicRegion as System
     from exploration.systems.trash.Parabola import Instructor
-    from exploration.algorithm.algorithm_2017 import Algorithm as Algorithm
+    from exploration.algorithm.algorithm2017 import Algorithm as Algorithm
     from exploration.algorithm.trash.algorithm_2015 import OBJECT
     from exploration.algorithm.trash.ModelEvaluation import SM_ModelEvaluation
     from exploration.data.PlotTools import *

@@ -6,7 +6,7 @@ Created on Jan 23, 2017
 if __name__ == '__main__':
     import numpy as np
     
-    from exploration.models.Sensorimotor.ExplautoSM import ExplautoSM
+    from exploration.models.sensorimotor.ExplautoSM import ExplautoSM
     from exploration.models.Interest.ExplautoIM import explauto_IM
     from exploration.data.data import SimulationData
     

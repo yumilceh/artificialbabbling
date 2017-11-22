@@ -8,7 +8,7 @@ import numpy as np
 from exploration.DataVisualization.PlotTools import *
 
 from exploration.data.data import SimulationData
-from exploration.models.Sensorimotor.trash.GMM_SM import GMM_SM
+from exploration.models.sensorimotor.trash.GMM_SM_ import GMM_SM
 from exploration.systems.Diva2015a import DivaProprio2015a
 
 if __name__ == '__main__':

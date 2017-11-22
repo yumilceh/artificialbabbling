@@ -213,7 +213,7 @@ class Algorithm(object):
                             self.do_evaluation(i)
 
             # print('SM Exploration (Simple), Line 4-22: Experiment: {} of {}'.format(i + 1, n_experiments)) # Slow
-            if (i + 1) % n_save_data == 0:
+            if (i + 1) % n_save_data == 0 or (reinforce and i % n_save_data == 0):
                 print('SM Exploration ({}, {}), Line 4-22: Experiment: Saving data at samples {} of {}'. \
                       format(self.type, self.mode, i + 1, n_experiments))
                 self.data.save_data(self.data.file_prefix + 'sim_data.h5')
@@ -221,7 +221,7 @@ class Algorithm(object):
 
         self.do_training(i, up_=['sm', 'cons', 'im'], force=True)
 
-        self.models.f_sm.set_sigma_explo_ratio(0.)
+        self.models.f_sm.set_sigma_expl_ratio(0.)
         self.do_evaluation(-1)
         self.data.cut_final_data()
 
@@ -254,7 +254,7 @@ class Algorithm(object):
             # print('algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model IM')
             self.models.f_im.train(self.data)
 
-        """Train Sensorimotor Model"""
+        """Train sensorimotor Model"""
         if 'sm' in up_ and ((i + 1) % self.models.f_sm.params.sm_step == 0 or force):
             # print('algorithm 1 (Proprioceptive), Line 4-22: Experiment: Training Model SM')
             self.models.f_sm.train_incremental(self.data, all=all)
@@ -265,9 +265,9 @@ class Algorithm(object):
 
     def do_evaluation(self, i, force=False, save_data=False):
         if self.evaluate and (i + 1) % self.params.eval_step == 0 or force:
-            tmp_sigma = self.evaluation.model.get_sigma_explo()
+            tmp_sigma = self.evaluation.model.get_sigma_expl()
             self.evaluation.model = self.models.f_sm
-            self.evaluation.model.set_sigma_explo_ratio(0)
+            self.evaluation.model.set_sigma_expl_ratio(0)
             eval_data = self.evaluation.evaluate(save_data=save_data)
             for key in eval_data.keys():
                 error_ = np.linalg.norm(eval_data[key].sensor_goal.get_all().as_matrix() -
@@ -277,5 +277,5 @@ class Algorithm(object):
                     with open(self.data.file_prefix + '_' + key + '_eval_error.txt', "a") as log_file:
                         log_file.write('{}: {}\n'.format(i, np.mean(error_)))
             print('Evaluations finished. Resuming exploration...')
-            self.evaluation.model.set_sigma_explo(tmp_sigma)
-            #  print(self.evaluation.model.get_sigma_explo())
+            self.evaluation.model.set_sigma_expl(tmp_sigma)
+            #  print(self.evaluation.model.get_sigma_expl())
