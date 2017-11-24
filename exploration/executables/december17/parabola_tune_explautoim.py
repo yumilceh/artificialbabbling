@@ -34,7 +34,7 @@ def sim_agent(ops):
 
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
 
-    file_prefix = directory + '/' + file_prefix  + '_'+ now
+    file_prefix = directory + '/' + file_prefix + '_' + now
 
     simulation = Algorithm(system,
                            models,
@@ -71,7 +71,7 @@ def sim_pool(*args, **ops):
     # 2469, 147831, 1234
 
     processes = []
-    max_processes = 3
+    max_processes = 2
 
     system = []
     instructor = []
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     from exploration.systems.parabola import ParabolicRegion
     from exploration.systems.parabola import Instructor
     from parabola_configurations import model_, comp_func, comp_func_expl
-    from exploration.models.Constraints.ExplautoCons import ExplautoCons
+    from exploration.models.Interest.ExplautoIM import explauto_IM
 
     FLAGS = None
 
@@ -140,6 +140,7 @@ if __name__ == '__main__':
         try:
             trials = pickle.load(open(results_folder + 'trials.hyperopt', "rb"))
         except:
+            trials = Trials()
             print('no trials found')
     else:
         trials = Trials()
@@ -149,7 +150,9 @@ if __name__ == '__main__':
     experiment_specs = {}
     space = {'x_card': choice('x_card', np.arange(500, 1500)),
              'win_size': choice('win_size', np.arange(1, 20)),
-             'eps': uniform('eps', 0.01, .99)}
+             'eps_random': uniform('eps_random', 0.01, .99)}
+
+
 
     # Cross validation
     max_evals = 150
@@ -163,12 +166,13 @@ if __name__ == '__main__':
 
         # Specs
         specs = space_.copy()
+        specs.update(model_specs)
 
         ops = {}
         directory = 'test/parabola_IMmodel'
         ops['random_seeds'] =  range(k_folds) # [1321, 1457, 283, 2469, 147831, 1234]
         ops['directory_results'] = directory
-        ops['file_prefix'] = 'tune IM model_' + str(len(trials.losses())) + '_'
+        ops['file_prefix'] = 'tune IM model_' + str(len(trials.losses()))
         ops['n_initialization'] = 100
         ops['n_experiments'] = 10000
         ops['n_save_data'] = 5000
@@ -179,29 +183,23 @@ if __name__ == '__main__':
         ops['comp_func'] = comp_func
         ops['comp_func_expl'] = comp_func_expl
 
-
-
-        system = ParabolicRegion()
-
         f_sm_key, f_cons_key = 'igmm_sm', 'explauto_cons'
         models = OBJECT()
-        models.f_sm = model_(f_sm_key, system)
-        models.f_cons = model_(f_cons_key, system)
+        models.f_sm = model_(f_sm_key, ParabolicRegion())
+        models.f_cons = model_(f_cons_key, ParabolicRegion())
 
         model_conf = {specs['model_type']: {'x_card': specs['x_card'],
                                             'win_size': specs['win_size'],
                                             'eps_random': specs['eps_random']}}  # 'discretized_progress'
 
-        f_im = ExplautoCons(system, **{'competence_func': specs['comp_func_expl'],
-                                       'model_type': specs['model_type'],
-                                       'model_conf': model_conf})
+        f_im = explauto_IM(ParabolicRegion(),  ops['comp_func_expl'], specs['model_type'], **{'model_conf': model_conf})
 
         models.f_im = f_im
 
         val1_name, val1_file = 'whole', '../../systems/datasets/parabola_v2_dataset.h5'.replace('/', os.sep)
         val2_name, val2_file = 'social', '../../systems/datasets/instructor_parabola_1.h5'.replace('/', os.sep)
 
-        evaluation = Evaluation(system,
+        evaluation = Evaluation(ParabolicRegion(),
                                 models.f_sm,
                                 comp_func=comp_func,
                                 file_prefix=ops['file_prefix'])
@@ -209,32 +207,39 @@ if __name__ == '__main__':
         evaluation.load_eval_dataset(val1_file, name=val1_name)
         evaluation.load_eval_dataset(val2_file, name=val2_name)
 
-        args = [system, Instructor(), models, evaluation]
+        args = [ParabolicRegion(), Instructor(), models, evaluation]
 
         sim_pool(*args, **ops)
 
-        #Recover simulations
+        social_eva_errors = []
+        whole_eva_errors = []
+        data_files = os.listdir(directory)
+        for data_file in (d_f for d_f in data_files if (ops['file_prefix'] in d_f and '_social_eval_error.txt' in d_f)):
+            with open(directory + '/' + data_file, 'r') as f:
+                for line in f:
+                    line.replace('\n', '')
+                    eva_errors_str = line.split(': ')
+                social_eva_errors += [float(eva_errors_str[1])]
+            with open(directory + '/' + data_file.replace('social','whole'), 'r') as f:
+                for line in f:
+                    line.replace('\n', '')
+                    eva_errors_str = line.split(': ')
+                whole_eva_errors += [float(eva_errors_str[1])]
 
-        #compute loss_value
+        loss_av = 0.6*np.mean(social_eva_errors)+0.4*np.mean(whole_eva_errors[-1])
 
-        # Save best configuration and weights
-        # save = False
-        # if len(trials.losses()) == 1:
-        #     save = True
-        # elif loss_av < np.min(trials.losses()[:-1]):
-        #     save = True
-        # if save:
-        #     best_iteration = len(trials.losses())
-        #     with open(results_folder + 'best_model__.txt', 'wt') as file:
-        #         for key in specs.keys():
-        #             file.write("{}: {}".format(key, specs[key]))
-        #     model.save(results_folder + 'best_model')
-        # else:
-        best_iteration = np.argmin(trials.losses()[:-1]) + 1
+        if len(trials.losses()) == 1:
+            best_iteration = len(trials.losses())
+        elif loss_av < np.min(trials.losses()[:-1]):
+            best_iteration = len(trials.losses())
+        else:
+            best_iteration = np.argmin(trials.losses()[:-1]) + 1
 
         # Best iteration
         print("Best iterarion is: {}".format(best_iteration))
-        print("This iteration model got val_loss={}, social_error={} and whole_error={} with:".format())
+        print("This iteration model got val_loss={}, social_error={} and whole_error={} with:".format(loss_av,
+                                                                                                      social_eva_errors[-1],
+                                                                                                      whole_eva_errors[-1]))
         for key in specs.keys():
             print("{}: {}".format(key, specs[key]))
 
@@ -244,10 +249,9 @@ if __name__ == '__main__':
                 pickle.dump(trials, f)
             f.close()
 
-        return 0 #{'loss': loss_av, 'status': STATUS_OK}
+        return {'loss': loss_av, 'status': STATUS_OK}
 
     def optimize():
-
         best_param = hyperopt.fmin(
             objective,
             space=space,
