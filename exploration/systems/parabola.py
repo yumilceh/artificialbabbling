@@ -21,6 +21,7 @@ class CustomObject:
 
 class ParabolicRegion:
     def __init__(self, sigma_noise=0.0000001):
+        self.norm = [3., 6.6158, 5.3034, 5.0783]
 
         f = 0.
 
@@ -48,7 +49,7 @@ class ParabolicRegion:
         min_sensor_values = np.array([0.0, 0.0 + f])
         max_sensor_values = np.array([b * 2.0, b ** 2 + f])
 
-        min_somato_values = np.array([0.3, -0.5, -0.20, -0.20])
+        min_somato_values = np.array([0., 0., 0.0, 0.0])
         max_somato_values = np.array([1.0, 1.0, 1.0, 1.0])
 
         min_cons_values = np.array([0])
@@ -160,8 +161,8 @@ class ParabolicRegion:
         self.execute_action_unconstrained()
         self.applyConstraints()
 
-        #self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
-        #self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        self.sensor_out[0] = self.sensor_out[0] + np.random.normal(0.0, self.params.sigma_noise, 1)
+        self.sensor_out[1] = self.sensor_out[1] + np.random.normal(0.0, self.params.sigma_noise, 1)
 
         self.applyConstraints()
 
@@ -202,14 +203,20 @@ class ParabolicRegion:
         down_line.y_0 = e
         down_line.m = m2
 
-        foo1, foo2, som1 = closestPointInParabola(parabola=parabola, point=point)
-        foo1, foo2, som2 = closestPointInCircle(circle=circle, point=point)
-        foo1, foo2, som3 = closestPointToLine(line=down_line, point=point)
-        foo1, foo2, som4 = closestPointToLine(line=up_line, point=point)
-        self.somato_out[0] = 1.-som1/4.5
-        self.somato_out[1] = 1.-som2/4.5
-        self.somato_out[2] = 1.-som3/4.5
-        self.somato_out[3] = 1.-som4/4.5
+        som = [0, 0, 0, 0]
+        foo1, foo2, som[0] = closestPointInParabola(parabola=parabola, point=point)
+        foo1, foo2, som[1] = closestPointInCircle(circle=circle, point=point)
+        foo1, foo2, som[2] = closestPointToLine(line=down_line, point=point)
+        foo1, foo2, som[3] = closestPointToLine(line=up_line, point=point)
+        self.somato_out[0] = 1.-som[0]/self.norm[0]
+        self.somato_out[1] = 1.-som[1]/self.norm[1]
+        self.somato_out[2] = 1.-som[2]/self.norm[2]
+        self.somato_out[3] = 1.-som[3]/self.norm[3]
+        for i, somato_value in enumerate(self.somato_out):
+            if somato_value < 0. or somato_value > 1.:
+                self.norm[i] = som[i]
+                print(self.norm)
+
 
 
         # ---------------------------------------- while self.applyConstraints():
