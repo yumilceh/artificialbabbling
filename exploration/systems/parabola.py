@@ -212,10 +212,10 @@ class ParabolicRegion:
         self.somato_out[1] = 1.-som[1]/self.norm[1]
         self.somato_out[2] = 1.-som[2]/self.norm[2]
         self.somato_out[3] = 1.-som[3]/self.norm[3]
-        for i, somato_value in enumerate(self.somato_out):
-            if somato_value < 0. or somato_value > 1.:
-                self.norm[i] = som[i]
-                print(self.norm)
+        # for i, somato_value in enumerate(self.somato_out):
+        #     if somato_value < 0. or somato_value > 1.:
+        #         self.norm[i] = som[i]
+        #         print(self.norm)
 
 
 
