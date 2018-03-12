@@ -152,8 +152,6 @@ if __name__ == '__main__':
              'win_size': choice('win_size', np.arange(1, 20)),
              'eps_random': uniform('eps_random', 0.01, .99)}
 
-
-
     # Cross validation
     max_evals = 150
     k_folds = 100
@@ -267,7 +265,13 @@ if __name__ == '__main__':
         print('best hyperparameters: ' + str(best_param))
         print('number of iterations: ' + str(len(trials.trials)))
 
+        with open('best_params.pickle', 'wb') as handle:
+            pickle.dump(best_param, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
         return best_param
+
+
+
 
     best_param = optimize()
 

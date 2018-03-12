@@ -167,7 +167,7 @@ class Algorithm(object):
                 if self.learner.cons_out > self.learner.cons_threshold:
                     self.learner.competence_result = 0.7 * self.learner.competence_result
             else:
-                self.learner.sensor_goal = self.models.f_im.get_goal(self.learner)
+                self.learner.sensor_goal = self.models.f_im.get_goal()
                 self.models.f_sm.get_action(self.learner)
                 self.learner.execute_action()
                 self.get_competence(self.learner)

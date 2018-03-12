@@ -60,7 +60,7 @@ class SM_ModelEvaluation(object):
             self.n_samples_val = n_samples
             self.random_indexes_val = range(n_samples)
         else:
-            n_samples = len(self.data.motor.data)
+            n_samples = len(self.data.action.data)
             self.n_samples = n_samples
             ratio_samples_val = self.ratio_samples_val
             n_samples_val = np.ceil(ratio_samples_val * n_samples).astype(int)

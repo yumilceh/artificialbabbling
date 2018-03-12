@@ -51,7 +51,7 @@ class Evaluation():
             if name is None:
                 keys = self.data.keys()
                 i = 0
-                while str(i) in keys():
+                while str(i) in keys:
                     i += 1
                 name = str(i)
         self.data.update({name: data})

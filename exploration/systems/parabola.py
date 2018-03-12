@@ -276,7 +276,7 @@ class ParabolicRegion:
             point.x = x
             point.y = y
 
-        # if math.pow(self.motor_command[0]-b,2.0) > self.sensor_out[1]: #Parabola
+        # if math.pow(self.action[0]-b,2.0) > self.sensor_out[1]: #Parabola
         if math.pow(self.sensor_out[0] - b, 2.0) + f > self.sensor_out[1]:  # Parabola
             changed = True
             onParabola = True
@@ -485,7 +485,7 @@ class Instructor(ParabolicRegion):
         x=[]
         y=[]
         for i in range(self.n_units):
-            self.set_action(self.data.motor.data.iloc[i])
+            self.set_action(self.data.action.data.iloc[i])
             self.execute_action()
             x += [self.sensor_out[0]]
             y += [self.sensor_out[1]]
@@ -497,7 +497,7 @@ class Instructor(ParabolicRegion):
         min_idx = np.argmin(dist)
         self.min_idx = min_idx
         if dist[min_idx] <= self.unit_threshold[min_idx]:
-            self.set_action(self.data.motor.data.iloc[min_idx])
+            self.set_action(self.data.action.data.iloc[min_idx])
             self.unit_threshold[min_idx] = self.slope * self.unit_threshold[min_idx]
             self.execute_action()
             return 1, self.sensor_out.copy()
@@ -525,7 +525,7 @@ def closestPointInParabola(parabola, point):  # Parabola: y=ax^2+bx+c
     x = point.x
     y = point.y
 
-    # self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other art command
+    # self.sensor_out[0] = self.action[1] #Simply takes the value of the other art command
 
     coeff = [2.0 * a ** 2, 3.0 * a * b, b ** 2 + 2 * a * (c - y) + 1, b * (c - y) - x]
 
@@ -564,7 +564,7 @@ def intersectionParabolaLine(parabola, line):  # Parabola: y=ax^2+bx+c
     y_0 = line.y_0
     m = line.m
 
-    # self.sensor_out[0] = self.motor_command[1] #Simply takes the value of the other art command
+    # self.sensor_out[0] = self.action[1] #Simply takes the value of the other art command
 
     coeff = [a, b - m, c - y_0]
 

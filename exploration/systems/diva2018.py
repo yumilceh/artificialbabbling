@@ -16,6 +16,7 @@ from divapy import Diva
 import matplotlib.pyplot as plt
 import os, random
 from exploration.data.data import load_sim_h5
+import python_speech_features as psf
 
 english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [532.0, 1656.0, 1.0],
                   'ae': [667.0, 1565.0, 1.0], 'A': [661.0, 1296.0, 1.0], 'a': [680.0, 1193.0, 1.0],
@@ -25,53 +26,70 @@ english_vowels = {'i': [296.0, 2241.0, 1.0], 'I': [396.0, 1839.0, 1.0], 'e': [53
 # Write down german vowels here
 diva_output_scale = [100.0, 500.0, 1500.0, 3000.0]
 
-class Diva2018():
-    def __init__(self, **kargs):
 
+class Diva2018():
+    def __init__(self, sensori_out='formant', **kargs):
 
         motor_names = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15',
                        'M16', 'M17', 'M18', 'M19', 'M20', 'M21', 'M22', 'M23', 'M24', 'M25', 'M26']
-        sensor_names = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
-        somato_names = ['SS1', 'SS2', 'SS3', 'SS4', 'SS5', 'SS6', 'SS7', 'SS8', 'SS9', 'SS10', 'SS11', 'SS12', 'SS13', 'SS14', 'SS15',
-                       'SS16']
+
+        if sensori_out == 'formant':
+            sensor_names = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
+            n_sensor = len(sensor_names)
+
+        somato_names = ['SS1', 'SS2', 'SS3', 'SS4', 'SS5', 'SS6', 'SS7', 'SS8', 'SS9', 'SS10', 'SS11', 'SS12', 'SS13',
+                        'SS14', 'SS15',
+                        'SS16']
         cons_names = ['P1']
 
         n_motor = 26
-        n_sensor = 6
+
         n_somato = 16
         n_cons = 1
+
         outputScale = [100.0, 500.0, 1500.0, 3000.0]
+
         min_motor_values = np.array([-3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -0.25, -0.25, -0.25] * 2)
         max_motor_values = np.array([3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1] * 2)
 
         min_motor_values_init = np.array([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0] * 2)
         max_motor_values_init = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] * 2)
 
-        min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        max_sensor_values = np.array([2.0, 2.0, 1.0, 2.0, 2.0, 1.0])
+        if sensori_out == 'formant':
+            min_sensor_values = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+            max_sensor_values = np.array([2.0, 2.0, 1.0, 2.0, 2.0, 1.0])
 
-        min_somato_values = np.array([-1.0] *n_somato)
-        max_somato_values = np.array([1.0] *n_somato)
-
+        min_somato_values = np.array([-1.0] * n_somato)
+        max_somato_values = np.array([1.0] * n_somato)
 
         min_cons_values = np.array([0])
         max_cons_values = np.array([1])
 
         ts = 0.01
 
-        name = 'Diva2017a_py'
+        name = 'Diva2018'
         self.name = name
 
-        self.params={'duration_m1': 0.4,
-                     'duration_m2': 0.4,
-                     'duration_s1': [0.,0.4],
-                     'duration_s2': [0.4,0.8],
-                     'sound':  0, #sensor out is sound
-                     'damping_factor': 1.01,
-                     'w0': 2 * math.pi / 0.01}
+        self.params = {'duration_m1': 0.4,
+                       'duration_m2': 0.4,
+                       'duration_s1': [0., 0.4],
+                       'duration_s2': [0.4, 0.8],
+                       'sensori_out': sensori_out,
+                       'damping_factor': 1.01,
+                       'w0': 2 * math.pi / 0.01,
+                       'mfcc': {'winlen': 0.025, 'winstep': 0.01, 'samplerate': 11025, 'n_feat': 13}}
 
         self.ts = ts
         total_time = self.params['duration_m1'] + self.params['duration_m2']
+
+        if sensori_out == 'mfcc':
+            # n_sensor = int((total_time + self.params['mfcc']['winstep'])/(self.params['mfcc']['winlen']-self.params['mfcc']['winstep'])* self.params['mfcc']['n_feat'])
+            n_sensor = int((total_time / self.params['mfcc']['winstep']) * self.params['mfcc']['n_feat'])
+            # print(n_sensor)
+            sensor_names = ['mffc_' + str(x) for x in range(n_sensor)]
+            min_sensor_values = np.array([-10.0] * self.params['mfcc']['n_feat'])
+            max_sensor_values = np.array([10.0] * self.params['mfcc']['n_feat'])
+
         self.time = linspace(0, total_time, int(total_time / ts) + 1)
         self.n_motor = n_motor
         self.n_sensor = n_sensor
@@ -99,7 +117,7 @@ class Diva2018():
         self.sensor_goal = np.array([0.0] * n_sensor)
         self.somato_out = np.array([0.0] * n_somato)
         self.somato_goal = np.array([0.0] * n_somato)
-        self.cons_out = 0.0 #Constraint violations flag
+        self.cons_out = 0.0  # Constraint violations flag
         self.cons_threshold = 0.5
         self.competence_result = 0.0
         self.sensor_instructor = np.empty((self.n_sensor,))
@@ -116,13 +134,26 @@ class Diva2018():
         self.motor_command = motor_command
 
     def execute_action(self):
-        sound = 0
-        self.get_motor_dynamics(sound =sound)
-        self.vocalize()
+        if self.params['sensori_out'] == 'formant':
+            sound = 0
+            self.get_motor_dynamics(sound=sound)
+            self.vocalize()
+        elif self.params['sensori_out'] == 'mfcc':
+            sound = 0
+            self.get_motor_dynamics(sound=sound)
+            self.vocalize()
+            self.get_sound()
+            sound_wave = self.sound_wave.copy()
+            sound_mfcc = psf.mfcc(sound_wave, samplerate=self.params['mfcc']['samplerate'],
+                                  winlen=self.params['mfcc']['winlen'],
+                                  winstep=self.params['mfcc']['winstep'])
+            self.sensor_out = np.array(sound_mfcc).flatten()
+        else:
+            raise ValueError
 
     def get_motor_dynamics(self,
-                           sound = 0):
-        
+                           sound=0):
+
         duration_m1 = self.params['duration_m1']
         duration_m2 = self.params['duration_m2']
 
@@ -146,29 +177,28 @@ class Diva2018():
         m1 = self.motor_command[:13]
         t1 = linspace(0.0, duration_m1, nSamples1)
         art_states1 = odeint(motor_dynamics, y0, t1, args=(self, m1,
-                               damping_factor,
-                               w0))
+                                                           damping_factor,
+                                                           w0))
         t2 = linspace(0.0, duration_m2, nSamples2)
         m2 = self.motor_command[13:]
         art_states2 = odeint(motor_dynamics, art_states1[-1, :], t2, args=(self, m2,
-                               damping_factor,
-                               w0))
+                                                                           damping_factor,
+                                                                           w0))
 
         self.art_states = np.zeros((nSamples, 26))
         self.art_states[:nSamples1, :] = art_states1
         self.art_states[nSamples1 - 1:, :] = art_states2
 
-
     def vocalize(self):
         ts = self.ts
-        #perceptionWindowDuration = np.min([self.params['duration_m1'],self.params['duration_m1']])-0.02
-        #perceptionTime = linspace(ts, perceptionWindowDuration, int(perceptionWindowDuration / ts))
-        #n_percep_samples = (len(perceptionTime))
+        # perceptionWindowDuration = np.min([self.params['duration_m1'],self.params['duration_m1']])-0.02
+        # perceptionTime = linspace(ts, perceptionWindowDuration, int(perceptionWindowDuration / ts))
+        # n_percep_samples = (len(perceptionTime))
 
         cons_av = [0.0] * 2
 
-        auditory_states, somato_states, tr__, af = self.synth.get_audsom(self.art_states[:,0:13],scale=True)
-        
+        auditory_states, somato_states, tr__, af = self.synth.get_audsom(self.art_states[:, 0:13], scale=True)
+
         self.auditory_states = auditory_states
         self.somato_states = somato_states
         self.af = af
@@ -187,10 +217,10 @@ class Diva2018():
         # time_pw2 = linspace(time0_pw2, time1_pw2, int((time1_pw2 - time0_pw2) / ts))
         # n_pw2 = len(time_pw2)
 
-        sample0_pw1 = int(np.floor(self.params['duration_s1'][0]/ts))
-        sample1_pw1 = int(np.floor(self.params['duration_s1'][1]/ts))
-        sample0_pw2 = int(np.floor(self.params['duration_s2'][0]/ts))
-        sample1_pw2 = int(np.floor(self.params['duration_s2'][1]/ts))
+        sample0_pw1 = int(np.floor(self.params['duration_s1'][0] / ts))
+        sample1_pw1 = int(np.floor(self.params['duration_s1'][1] / ts))
+        sample0_pw2 = int(np.floor(self.params['duration_s2'][0] / ts))
+        sample1_pw2 = int(np.floor(self.params['duration_s2'][1] / ts))
         samples_pw1 = range(sample0_pw1, sample1_pw1)
         n_pw1 = len(samples_pw1)
         samples_pw2 = range(sample0_pw2, sample1_pw2)
@@ -200,11 +230,11 @@ class Diva2018():
         # idx_pw2 = int(self.params['duration_m1']/ts) + 3   # +2 or +3???
         # First perception time window
         for index in range(len(minaf)):
-            if not ((self.art_states[index , 11] > 0) and (self.art_states[index , 12] > 0) and (minaf[index ] > 0)):
-                auditory_states[index , 0] *= 0
-                auditory_states[index , 1] *= 0
-                auditory_states[index , 2] *= 0
-                auditory_states[index , 3] *= 0
+            if not ((self.art_states[index, 11] > 0) and (self.art_states[index, 12] > 0) and (minaf[index] > 0)):
+                auditory_states[index, 0] *= 0
+                auditory_states[index, 1] *= 0
+                auditory_states[index, 2] *= 0
+                auditory_states[index, 3] *= 0
 
         for index in samples_pw1:
             if (self.art_states[index, 11] > 0) and (self.art_states[index, 12] > 0) and (minaf[index] > 0):
@@ -212,7 +242,7 @@ class Diva2018():
                 self.sensor_out[1] = self.sensor_out[1] + auditory_states[index, 2]
                 self.sensor_out[2] = self.sensor_out[2] + 1.0
             for jj in range(8):
-                self.somato_out[jj] += somato_states[index+2, jj]/n_pw1
+                self.somato_out[jj] += somato_states[index + 2, jj] / n_pw1
             cons_av[0] = cons_av[0] + (minaf[index] / n_pw1)
         self.sensor_out[0] = self.sensor_out[0] / n_pw1
         self.sensor_out[1] = self.sensor_out[1] / n_pw1
@@ -227,7 +257,7 @@ class Diva2018():
                 self.sensor_out[4] = self.sensor_out[4] + auditory_states[index, 2]
                 self.sensor_out[5] = self.sensor_out[5] + 1.0
             for jj in range(8):
-                self.somato_out[jj+8] += somato_states[index, jj] / n_pw2
+                self.somato_out[jj + 8] += somato_states[index, jj] / n_pw2
             cons_av[1] = cons_av[1] + (minaf[index] / n_pw2)
         self.sensor_out[3] = self.sensor_out[3] / n_pw2
         self.sensor_out[4] = self.sensor_out[4] / n_pw2
@@ -239,48 +269,61 @@ class Diva2018():
 
     def plot_arts_evo(self, arts_idx, axes=None):
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         for index in range(len(arts_idx)):
             plt.plot(self.time, self.art_states[:, arts_idx[index]])
 
     def plot_aud_out(self, aud_out, axes=None):
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         for index in range(len(aud_out)):
             plt.plot(self.time, self.auditory_states[:, aud_out[index]])
 
     def plot_som_out(self, som_idx, axes=None):
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         for index in range(len(som_idx)):
             plt.plot(self.time, self.somato_states[:, som_idx[index]])
 
     def plot_cons_out(self, axes=None):
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         plt.plot(self.time, self.cons_states)
 
     def get_vt_shape(self, sound=False):
         self.get_motor_dynamics(sound=sound)
-        a, b, outline, af = self.synth.get_audsom(self.art_states[:,0:13])
+        a, b, outline, af = self.synth.get_audsom(self.art_states[:, 0:13])
         self.vt_shape = outline
         self.af = af
 
     def plot_vt_shape(self, index=-1, time=None, axes=None):
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         self.get_vt_shape()
         if time is not None:
             ts = self.ts
             index = int(np.floor(time / ts))
-        plt.plot(np.real(self.vt_shape[index]), np.imag(self.vt_shape[index]))
+        plt.plot(np.real(self.vt_shape[index]), np.imag(self.vt_shape[index]),lw=2.0)
         plt.axis('off')
 
+
+    def plot_af_shape(self, index=-1, time=None, axes=None):
+        if axes is None:
+            fig, axes = plt.subplots(1, 1)
+        plt.sca(axes)
+        self.get_vt_shape()
+        if time is not None:
+            ts = self.ts
+            index = int(np.floor(time / ts))
+        plt.plot(self.af[index],lw=2.0)
+        plt.xlabel("Index",weight='bold')
+        plt.ylabel('Area Function ($a_f$)',weight='bold')
+        axes.xaxis.set_ticks(np.arange(0,len(self.af[index])+29,30))
 
     def get_video(self, show=0, file_name='vt', keep_audio=0):
         Writer = animation.writers['ffmpeg']
@@ -290,7 +333,7 @@ class Diva2018():
         self.get_sound(save=1, file_name=file_name)
         self.get_vt_shape()
         nSamples = self.art_states.shape[0]
-        #print(nSamples)
+        # print(nSamples)
         sequence = []
         for index in range(nSamples):
             sequence += [plt.plot(np.real(self.vt_shape[index]), np.imag(self.vt_shape[index]))]
@@ -313,21 +356,22 @@ class Diva2018():
             plt.close(figVocalTract)
 
     def get_sound(self, play=0, save=0, file_name='vt'):  # based on explauto
-        self.get_motor_dynamics(sound = True)
-        self.soundWave = self.synth.get_sound(self.art_states[:,0:13])
+        self.get_motor_dynamics(sound=True)
+        self.sound_wave = self.synth.get_sound(self.art_states[:, 0:13])
         if (play):
             self.playSoundWave()
         if (save):
-            scaled = np.int16(self.soundWave / np.max(np.abs(self.soundWave)) * 32767)
+            scaled = np.int16(self.sound_wave / np.max(np.abs(self.sound_wave)) * 32767)
             write(file_name + '.wav', 11025, scaled)
 
     def plot_sound(self, axes=None):
         self.get_sound()
         if axes is None:
-            fig, axes = plt.subplots(1,1)
+            fig, axes = plt.subplots(1, 1)
         plt.sca(axes)
         duration = self.params['duration_m1'] + self.params['duration_m2']
-        plt.plot(np.array(range(0, len(self.soundWave))).astype(np.float) * duration/len(self.soundWave), self.soundWave)
+        plt.plot(np.array(range(0, len(self.sound_wave))).astype(np.float) * duration / len(self.sound_wave),
+                 self.sound_wave)
 
     def playSoundWave(self):  # keep in mind that DivaMatlab works with ts=0.005
         import pyaudio
@@ -337,7 +381,7 @@ class Diva2018():
                                    rate=11025,
                                    output=True)
         self.stream.start_stream()
-        self.stream.write(self.soundWave.astype(np.float32).tostring())
+        self.stream.write(self.sound_wave.astype(np.float32).tostring())
         self.stream.close()
 
     def releaseAudioDevice(self):  # any sound in the buffer will be removed
@@ -347,7 +391,7 @@ class Diva2018():
             pass
 
     def generate_log(self):
-        log = 'system: ' +  self.name + '\n'
+        log = 'system: ' + self.name + '\n'
         for key in self.params.keys():
             try:
                 attr_log = self.params[key].generate_log()
@@ -368,8 +412,9 @@ class Diva2018():
                     log += key + ': ' + str(self.params[key]) + '\n'
         return log
 
+
 class Instructor():
-    def __init__(self, n_su = None, slope = 1.): #n_su -> n_sensor_units
+    def __init__(self, n_su=None, slope=1.):  # n_su -> n_sensor_units
         abs_path = os.path.dirname(os.path.abspath(__file__))
         # self.instructor_file = abs_path + '/datasets/vowels_dataset_1.h5'
         self.instructor_file = abs_path + '/datasets/german_dataset_somato.h5'
@@ -383,7 +428,7 @@ class Instructor():
         self.n_su = n_samples
         if n_su is not None:
             self.n_su = n_su
-            random.seed(1234)#To gurantee that the first samples are going to be equal in any subset
+            random.seed(1234)  # To gurantee that the first samples are going to be equal in any subset
             self.idx_sensor = random.sample(range(n_samples), n_su)
             self.data = self.data.get_samples(sys, self.idx_sensor)
         self.sensor_out = 0. * self.data.sensor.data.iloc[0].as_matrix()
@@ -395,7 +440,7 @@ class Instructor():
 
     def generate_log(self):
         params_to_logs = ['instructo_file', 'n_units', 'idx_sensor', 'slope', 'threshold']
-        log = 'instructor: ' +  self.name + '\n'
+        log = 'instructor: ' + self.name + '\n'
         for attr_ in params_to_logs:
             if hasattr(self, attr_):
                 try:
@@ -412,7 +457,7 @@ class Instructor():
                         for key in attr_.keys():
                             log += key + ': ' + str(attr_[key]) + ','
                         log += ('}\n')
-                        log = log.replace(',}','}')
+                        log = log.replace(',}', '}')
                     else:
                         log += attr_ + ': ' + str(getattr(self, attr_)) + '\n'
         return log
@@ -432,7 +477,7 @@ class Instructor():
 
     def get_distances(self, sensor):
         dist = []
-        s_data = self.data.sensor.data.as_matrix()#.iloc[self.idx_sensor].as_matrix()
+        s_data = self.data.sensor.data.as_matrix()  # .iloc[self.idx_sensor].as_matrix()
         for i in range(self.n_su):
             dist += [np.linalg.norm(sensor - s_data[i, :])]
         return dist
@@ -440,7 +485,7 @@ class Instructor():
     def change_dataset(self, file):
         import os
         from ..data.data import load_sim_h5
-        
+
         self.instructor_file = file
 
         self.data = load_sim_h5(self.instructor_file)
@@ -448,7 +493,6 @@ class Instructor():
 
 
 def motor_dynamics(y, t, self, m, damping_factor, w0):
-
     dy1 = y[13]
     dy2 = y[14]
     dy3 = y[15]

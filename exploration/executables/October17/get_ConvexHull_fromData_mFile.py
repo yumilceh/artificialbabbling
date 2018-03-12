@@ -51,7 +51,7 @@ hull_volumes = {key: None for key in directories}
 for i in range(n_directories):    
     mat = h5py.File(directories[i] + 'SMdata.mat','r')
     data = np.array(mat.get('SMdata'))
-    #motor = data[6:,:]
+    #action = data[6:,:]
     sensor_data = data[[0,1,3,4],:]
     
     

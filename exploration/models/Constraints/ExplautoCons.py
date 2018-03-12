@@ -41,13 +41,13 @@ class ExplautoCons(object):
         return  system.cons_prediction.copy()
 
     def train(self, simulation_data):
-        m = simulation_data.motor.get_last(1).iloc[-1]
+        m = simulation_data.action.get_last(1).iloc[-1]
         s = simulation_data.cons.get_last(1).iloc[-1]
         # print('Trainign with m {} and som {}'.format(m,s))
         self.model.update(m,s)
 
     def train_old(self, simulation_data):
-        m = simulation_data.motor.data.iloc[-1]
+        m = simulation_data.action.data.iloc[-1]
         s = simulation_data.cons.data.iloc[-1]
         # print('Trainign with m {} and som {}'.format(m,s))
         self.model.update(m,s)
@@ -126,7 +126,7 @@ def load_model(system, file_name, data=None):
     conf['model_conf'] = model_conf
     model = ExplautoCons(system, model_type=conf['model_type'], model_conf =conf['model_conf'])
     data, foo = load_sim_h5(conf['data_file'])
-    motor = data.motor.data
+    motor = data.action.data
     cons = data.cons.data
     for i in range(len(cons.index)):
         model.model.update(motor.iloc[i], cons.iloc[i])

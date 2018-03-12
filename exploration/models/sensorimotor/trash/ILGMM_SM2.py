@@ -76,7 +76,7 @@ class GMM_SM(object):
         self.model.train(data)
 
     # def train_old(self,simulation_data):
-    #     train_data_tmp=pd.concat([simulation_data.motor.data,
+    #     train_data_tmp=pd.concat([simulation_data.action.data,
     #                               simulation_data.sensor.data], axis=1)
     #     self.model.train(train_data_tmp.as_matrix(columns=None))
     #
@@ -84,14 +84,14 @@ class GMM_SM(object):
     #     #=======================================================================
     #     # sm_step=self.params.sm_step
     #     # alpha=self.params.alpha
-    #     # motor_data_size=len(simulation_data.motor.data.index)
-    #     # motor=simulation_data.motor.data[motor_data_size-sm_step:-1]
+    #     # motor_data_size=len(simulation_data.action.data.index)
+    #     # action=simulation_data.action.data[motor_data_size-sm_step:-1]
     #     # sensor_data_size=len(simulation_data.sensor.data.index)
     #     # sensor=simulation_data.sensor.data[sensor_data_size-sm_step:-1]
-    #     # new_data=pd.concat([motor,sensor],axis=1)
+    #     # new_data=pd.concat([action,sensor],axis=1)
     #     # self.model.trainIncrementalLearning(new_data, alpha)
     #     #=======================================================================
-    #     train_data_tmp=pd.concat([simulation_data.motor.data,
+    #     train_data_tmp=pd.concat([simulation_data.action.data,
     #                               simulation_data.sensor.data], axis=1)
     #     self.model.train(train_data_tmp.as_matrix(columns=None))
          

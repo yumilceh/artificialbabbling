@@ -30,7 +30,7 @@ if __name__ == '__main__':
     
     sm_model.get_action(system, sensor_goal = s_g)
     
-    # system.set_action(np.array([system.motor_command[1], system.motor_command[0]]))
+    # system.set_action(np.array([system.action[1], system.action[0]]))
     
     system.executeMotorCommand()
     

@@ -38,7 +38,7 @@ def loadSimulationData(file_name, agent):  #To be deleted... eventually
     for partial_file_name in tar.getnames():
         var_name = partial_file_name[0:-3]
         tmp = SimulationData(agent)
-        tmp.motor.data = pd.read_hdf(partial_file_name, 'art')
+        tmp.action.data = pd.read_hdf(partial_file_name, 'art')
         tmp.sensor.data = pd.read_hdf(partial_file_name, 'sensor')
         tmp.sensor_goal.data = pd.read_hdf(partial_file_name, 'sensor_goal')
         tmp.somato.data = pd.read_hdf(partial_file_name, 'somato')

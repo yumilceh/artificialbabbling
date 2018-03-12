@@ -69,23 +69,23 @@ class GMM_SM(Sensorimotor):
 
     def train(self, simulation_data):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
-        train_data_tmp = pd.concat([simulation_data.motor.get_all(),
+        train_data_tmp = pd.concat([simulation_data.action.get_all(),
                                     sensor_data.get_all()], axis=1)
         self.params.model.train(train_data_tmp.as_matrix(columns=None))
 
     def train_incremental(self, simulation_data, all=False):
         sensor_data = getattr(simulation_data, self.params.sensor_space)
         if all:
-            data = np.zeros((simulation_data.motor.current_idx,
+            data = np.zeros((simulation_data.action.current_idx,
                              self.params.n_motor+self.params.n_sensor))
-            data_m = simulation_data.motor.get_all().as_matrix()
+            data_m = simulation_data.action.get_all().as_matrix()
             data_s = sensor_data.get_all().as_matrix()
             data[:,:self.params.n_motor] = data_m
             data[:, self.params.n_motor:] = data_s
         else:
             data = np.zeros((self.params.sm_step,
                              self.params.n_motor+self.params.n_sensor))
-            data_m = simulation_data.motor.get_last(self.params.sm_step).as_matrix()
+            data_m = simulation_data.action.get_last(self.params.sm_step).as_matrix()
             data_s = sensor_data.get_last(self.params.sm_step).as_matrix()
             data[:,:self.params.n_motor] = data_m
             data[:, self.params.n_motor:] = data_s
@@ -104,7 +104,7 @@ class GMM_SM(Sensorimotor):
         motor_command = self.params.model.infer(m_dims, s_dims, sensor_goal)
 
         motor_command = self.apply_sigma_expl(motor_command)
-        # motor_command = bound_action(system, motor_command)
+        # action = bound_action(system, action)
         system.motor_command = motor_command
         
         # return bound_action(system,self.params.model.predict(m_dims, s_dims, sensor_goal))  #Maybe this is wrong
@@ -223,10 +223,10 @@ def load_model(system, file_name):
     model.model.SIGMA_XY = SIGMA_XY
     # model = ExplautoCons(system, model_type=conf['model_type'], model_conf =conf['model_conf'])
     # data, foo = load_sim_h5(conf['data_file'])
-    # motor = data.motor.data
+    # action = data.action.data
     # cons = data.cons.data
     # for i in range(len(cons.index)):
-    #     model.model.update(motor.iloc[i], cons.iloc[i])
+    #     model.model.update(action.iloc[i], cons.iloc[i])
     return model
 
 

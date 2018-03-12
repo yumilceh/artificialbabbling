@@ -76,7 +76,7 @@ class explauto_IM(object):
 
     def train(self,simulation_data): 
         sensor_data = getattr(simulation_data, self.params.sensor_space)
-        m = simulation_data.motor.get_last(1).as_matrix()
+        m = simulation_data.action.get_last(1).as_matrix()
         s = sensor_data.get_last(1).as_matrix()
         sensor_goal_data = getattr(simulation_data, self.params.sensor_space+'_goal')
         s_g =  sensor_goal_data.get_last(1).as_matrix()

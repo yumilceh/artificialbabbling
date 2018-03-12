@@ -75,7 +75,7 @@ class Sensorimotor():
         if self.params.mode == 'explore':
             # n_motor = self.params.n_motor
             # for i in range(n_motor):
-            #     motor_command[i] += np.random.normal(0.0, self.params.sigma_expl[i], 1)
+            #     action[i] += np.random.normal(0.0, self.params.sigma_expl[i], 1)
             idx = np.where(self.params.sigma_expl > 0)
             motor_command[idx] = np.random.normal(motor_command[idx],self.params.sigma_expl[idx])
         return self.bound_action(motor_command)

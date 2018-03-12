@@ -246,7 +246,7 @@ class ParabolicRegion:
             point.x = x
             point.y = y
 
-        # if math.pow(self.motor_command[0]-b,2.0) > self.somato_out[1]: #Parabola
+        # if math.pow(self.action[0]-b,2.0) > self.somato_out[1]: #Parabola
         if math.pow(self.somato_out[0] - b, 2.0) + f > self.somato_out[1]:  # Parabola
             changed = True
             onParabola = True
@@ -439,7 +439,7 @@ def closestPointInParabola(parabola, point):  # Parabola: y=ax^2+bx+c
     x = point.x
     y = point.y
 
-    # self.somato_out[0] = self.motor_command[1] #Simply takes the value of the other art command
+    # self.somato_out[0] = self.action[1] #Simply takes the value of the other art command
 
     coeff = [2.0 * a ** 2, 3.0 * a * b, b ** 2 + 2 * a * (c - y) + 1, b * (c - y) - x]
 
@@ -478,7 +478,7 @@ def intersectionParabolaLine(parabola, line):  # Parabola: y=ax^2+bx+c
     y_0 = line.y_0
     m = line.m
 
-    # self.somato_out[0] = self.motor_command[1] #Simply takes the value of the other art command
+    # self.somato_out[0] = self.action[1] #Simply takes the value of the other art command
 
     coeff = [a, b - m, c - y_0]
 

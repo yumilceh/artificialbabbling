@@ -4,9 +4,9 @@ Created on Feb 22, 2016
 @author: Juan Manuel Acevedo Valle
 """
 
-from .DataTemplates.TabularData import TabularData
+from exploration.data.DataTemplates.TabularData import TabularData
 import matplotlib.pyplot as plt
-from .PlotTools import movingAverage
+from exploration.data.PlotTools import movingAverage
 import pandas as pd
 import os
 
@@ -16,7 +16,7 @@ class Object(object):
 
 class SimulationData():
     def __init__(self, system, prelocated_samples=100000):
-        self.motor = TabularData(system.motor_names, prelocated_samples=prelocated_samples)
+        self.action = TabularData(system.motor_names, prelocated_samples=prelocated_samples)
         self.sensor = TabularData(system.sensor_names, prelocated_samples=prelocated_samples)
         self.sensor_goal = TabularData(system.sensor_names, prelocated_samples=prelocated_samples)
         self.somato = TabularData(system.somato_names, prelocated_samples=prelocated_samples)
@@ -26,7 +26,7 @@ class SimulationData():
         self.cons = TabularData(['cons'], prelocated_samples = prelocated_samples)
 
     def append_data(self, system):
-        self.motor.appendData(system.motor_command.flatten())
+        self.action.appendData(system.motor_command.flatten())
         self.sensor.appendData(system.sensor_out)
         self.sensor_goal.appendData(system.sensor_goal)
         self.somato.appendData(system.somato_out)
@@ -37,7 +37,7 @@ class SimulationData():
 
     def save_data(self, file_name):
         file_name = file_name.replace('/', os.sep)
-        self.motor.data.to_hdf(file_name, 'motor')
+        self.action.data.to_hdf(file_name, 'action')
         self.sensor.data.to_hdf(file_name, 'sensor')
         self.sensor_goal.data.to_hdf(file_name, 'sensor_goal')
         self.somato.data.to_hdf(file_name, 'somato')
@@ -48,7 +48,7 @@ class SimulationData():
 
     def cut_data(self, system, start, stop):
         simulationdata_tmp = SimulationData(system)
-        simulationdata_tmp.motor.data = self.motor.data.iloc[start:stop]
+        simulationdata_tmp.action.data = self.action.data.iloc[start:stop]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[start:stop]
         simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[start:stop]
         simulationdata_tmp.somato.data = self.somato.data.iloc[start:stop]
@@ -60,7 +60,7 @@ class SimulationData():
 
     def get_samples(self, system, idx):
         simulationdata_tmp = SimulationData(system)
-        simulationdata_tmp.motor.data = self.motor.data.iloc[idx]
+        simulationdata_tmp.action.data = self.action.data.iloc[idx]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[idx]
         simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[idx]
         simulationdata_tmp.somato.data = self.somato.data.iloc[idx]
@@ -71,7 +71,7 @@ class SimulationData():
         return simulationdata_tmp
 
     def cut_final_data(self):
-        self.motor.data = self.motor.get_all()
+        self.action.data = self.action.get_all()
         self.sensor.data = self.sensor.get_all()
         self.sensor_goal.data = self.sensor_goal.get_all()
         self.somato.data = self.somato.get_all()
@@ -82,7 +82,7 @@ class SimulationData():
 
     def mix_datasets(self, system, sim_2):
         sim_1 = SimulationData(system)
-        sim_1.motor.data = self.motor.data.append(sim_2.motor.data)
+        sim_1.action.data = self.action.data.append(sim_2.motor.data)
         sim_1.sensor.data = self.sensor.data.append(sim_2.sensor.data)
         sim_1.sensor_goal.data = self.sensor_goal.data.append(sim_2.sensor.data)
         sim_1.somato.data = self.somato.data.append(sim_2.somato.data)
@@ -93,7 +93,7 @@ class SimulationData():
 
     def copy(self, system):
         tmp = SimulationData(system)
-        tmp.motor.data = self.motor.data.copy(deep=True)
+        tmp.action.data = self.action.data.copy(deep=True)
         tmp.sensor.data = self.sensor.data.copy(deep=True)
         tmp.sensor_goal.data = self.sensor_goal.data.copy(deep=True)
         tmp.somato.data = self.somato.data.copy(deep=True)
@@ -111,7 +111,11 @@ class SimulationData():
 
 def load_sim_h5(file_name, system=None):
     file_name = file_name.replace('/', os.sep)
-    motor = pd.read_hdf(file_name, 'motor')
+    try:
+        motor = pd.read_hdf(file_name, 'action')
+    except:
+        motor = pd.read_hdf(file_name, 'motor')
+        print("Warning: Old version data file")
     sensor = pd.read_hdf(file_name, 'sensor')
     sensor_goal = pd.read_hdf(file_name, 'sensor_goal')
     competence = pd.read_hdf(file_name, 'competence')
@@ -143,7 +147,7 @@ def load_sim_h5(file_name, system=None):
 
     tmp = SimulationData(system,prelocated_samples=1)
 
-    tmp.motor.data = motor
+    tmp.action.data = motor
     tmp.sensor.data = sensor
     tmp.sensor_goal.data = sensor_goal
     if is_somato:
@@ -205,21 +209,21 @@ load_sim_h5_v2 = load_sim_h5  #To be deleted... eventually
 """
 class SimulationData(object):
     def __init__(self, system, prelocated_samples = 100000):
-        self.motor = TabularData(system.motor_names, prelocated_samples = prelocated_samples)
+        self.action = TabularData(system.motor_names, prelocated_samples = prelocated_samples)
         self.sensor = TabularData(system.sensor_names, prelocated_samples = prelocated_samples)
         self.sensor_goal = TabularData(system.sensor_names, prelocated_samples = prelocated_samples)
         self.somato = TabularData(system.somato_names, prelocated_samples = prelocated_samples)
         self.competence = TabularData(['competence'], prelocated_samples = prelocated_samples)
 
     def append_data(self, system):
-        self.motor.append_data(system.motor_command.flatten())
+        self.action.append_data(system.action.flatten())
         self.sensor.append_data(system.sensor_out)
         self.sensor_goal.append_data(system.sensor_goal)
         self.somato.append_data(system.somato_out)
         self.competence.append_data(system.competence_result)
 
     def save_data(self, file_name):
-        self.motor.data.to_hdf(file_name, 'motor')
+        self.action.data.to_hdf(file_name, 'action')
         self.sensor.data.to_hdf(file_name, 'sensor')
         self.sensor_goal.data.to_hdf(file_name, 'sensor_goal')
         self.somato.data.to_hdf(file_name, 'somato')
@@ -227,7 +231,7 @@ class SimulationData(object):
 
     def cut_data(self, system, start, stop):
         simulationdata_tmp = SimulationData(system)
-        simulationdata_tmp.motor.data = self.motor.data.iloc[start:stop]
+        simulationdata_tmp.action.data = self.action.data.iloc[start:stop]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[start:stop]
         simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[start:stop]
         simulationdata_tmp.somato.data = self.somato.data.iloc[start:stop]
@@ -235,7 +239,7 @@ class SimulationData(object):
         return simulationdata_tmp
 
     def cut_final_data(self):
-        self.motor.data = self.motor.get_all()
+        self.action.data = self.action.get_all()
         self.sensor.data = self.sensor.get_all()
         self.sensor_goal.data = self.sensor_goal.get_all()
         self.somato.data = self.somato.get_all()
@@ -243,7 +247,7 @@ class SimulationData(object):
 
     def mix_datasets(self, system, sim_2):
         sim_1 = SimulationData(system)
-        sim_1.motor.data = self.motor.data.append(sim_2.motor.data)
+        sim_1.action.data = self.action.data.append(sim_2.action.data)
         sim_1.sensor.data = self.sensor.data.append(sim_2.sensor.data)
         sim_1.sensor_goal.data = self.sensor_goal.data.append(sim_2.sensor.data)
         sim_1.somato.data = self.somato.data.append(sim_2.somato.data)
@@ -252,7 +256,7 @@ class SimulationData(object):
 
     def copy(self, system):
         tmp = SimulationData(system)
-        tmp.motor.data = self.motor.data.copy(deep=True)
+        tmp.action.data = self.action.data.copy(deep=True)
         tmp.sensor.data = self.sensor.data.copy(deep=True)
         tmp.sensor_goal.data = self.sensor_goal.data.copy(deep=True)
         tmp.somato.data = self.somato.data.copy(deep=True)
@@ -276,10 +280,10 @@ class SimulationData(object):
 def load_sim_h5(file_name, system=None):
     # Keeping support to old datamanager files
     try:
-        motor = pd.read_hdf(file_name, 'motor')
+        action = pd.read_hdf(file_name, 'action')
         suff = ''
     except KeyError:
-        motor = pd.read_hdf(file_name, 'motor_data')
+        action = pd.read_hdf(file_name, 'motor_data')
         suff = '_data'
 
     sensor = pd.read_hdf(file_name, 'sensor' + suff)
@@ -294,7 +298,7 @@ def load_sim_h5(file_name, system=None):
 
     if system is None:
         system = Object()
-        system.motor_names = ['M' + str(x) for x in range(motor.shape[0])]
+        system.motor_names = ['M' + str(x) for x in range(action.shape[0])]
         system.sensor_names = ['S' + str(x) for x in range(sensor.shape[0])]
         system.somato_names = ['Som' + str(x) for x in range(somato.shape[0])]
 
@@ -304,7 +308,7 @@ def load_sim_h5(file_name, system=None):
     else:
         tmp = SimulationData(system,prelocated_samples=1)
 
-    tmp.motor.data = motor
+    tmp.action.data = action
     tmp.sensor.data = sensor
     tmp.sensor_goal.data = sensor_goal
     tmp.somato.data = somato
@@ -328,7 +332,7 @@ class SimulationDataSocial(SimulationData):
 
     def cut_data(self, system, start, stop):
         simulationdata_tmp = SimulationDataSocial(system)
-        simulationdata_tmp.motor.data = self.motor.data.iloc[start:stop]
+        simulationdata_tmp.action.data = self.action.data.iloc[start:stop]
         simulationdata_tmp.sensor.data = self.sensor.data.iloc[start:stop]
         simulationdata_tmp.sensor_goal.data = self.sensor_goal.data.iloc[start:stop]
         simulationdata_tmp.somato.data = self.somato.data.iloc[start:stop]

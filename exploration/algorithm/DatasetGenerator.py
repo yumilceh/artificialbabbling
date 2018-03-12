@@ -101,5 +101,5 @@ def reduce_(data, min_distance, system):
                     
     dataset = SimulationData(system)
     dataset.sensor.data = pd.DataFrame(sensor_data_as_matrix)
-    dataset.motor.data = pd.DataFrame(motor_data_as_matrix)
+    dataset.action.data = pd.DataFrame(motor_data_as_matrix)
     return dataset
