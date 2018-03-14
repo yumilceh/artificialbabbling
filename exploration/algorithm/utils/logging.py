@@ -87,7 +87,10 @@ def read_config_log(file_name):
     conf = {}
     with open(file_name) as f:
         for line in f:
-            line = line.replace('\n','')
-            (key, val) = line.split(': ')
-            conf[key] = val
+            try:
+                line = line.replace('\n','')
+                (key, val) = line.split(': ')
+                conf[key] = val
+            except:
+                pass
     return conf
