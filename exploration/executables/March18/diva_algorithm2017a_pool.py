@@ -62,7 +62,7 @@ def sim_agent(ops,idx):
     # tree/DP Interest Model
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
 
-    file_prefix = directory + '/simple' + str(idx) + '_'+ now
+    file_prefix = directory + '/proprio' + str(idx) + '_'+ now
 
     evaluation_sim = Evaluation(system,
                                 models.f_sm, comp_func=comp_func,
@@ -91,7 +91,7 @@ def sim_agent(ops,idx):
 
     simulation.mode = mode_
 
-    simulation.run(proprio=False)
+    simulation.run(proprio=True)
     simulation.do_evaluation(0, force=True, save_data=True)
 
     try:
