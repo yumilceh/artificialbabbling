@@ -94,7 +94,7 @@ class Algorithm(object):
                 eval_step = np.floor(n_experiments / 5)
         self.params.eval_step = eval_step
 
-    def run(self, proprio=True):
+    def run(self,  goal, proprio=True):
         if proprio:
             self.type = 'proprio'
         if self.params.n_save_data is not np.nan:
@@ -177,7 +177,6 @@ class Algorithm(object):
             self.do_training(i, up_=['sm', 'cons', 'im'])
             self.do_evaluation(i)
 
-            reinforce = 0 #ADDED on 15/03/2018
             if self.instructor is not None:
                 reinforce, self.learner.sensor_instructor =\
                     self.instructor.interaction(self.learner.sensor_out.copy())
