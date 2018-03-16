@@ -107,7 +107,7 @@ class Algorithm(object):
         if self.params.g_im_initialization_method is 'non-painful':
             print('G_IM, init: non-painful method not defined for non-proprioceptive agents.')
             print('G_IM, init: Switching to all samples method')
-            self.params.g_im_initialization_method = 'all'
+            #self.params.g_im_initialization_method = 'all' #Commented on 16th March 2018
         n_init = self.params.n_initialization_experiments
         motor_commands = self.init_motor_commands
 
