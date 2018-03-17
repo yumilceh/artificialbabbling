@@ -274,6 +274,7 @@ class Algorithm(object):
                 error_ = np.linalg.norm(eval_data[key].sensor_goal.get_all().as_matrix() -
                                         eval_data[key].sensor.get_all().as_matrix(), axis=1)
                 self.evaluation_error[key] += [i, np.mean(error_)]
+                constraints = np.sum(eval_data[key].cons.data.iloc[:].as_matrix())
                 if self.params.n_save_data is not np.nan:
                     try:
                         with open(self.data.file_prefix + '_' + key + '_eval_error.txt', "a") as log_file:
@@ -281,6 +282,12 @@ class Algorithm(object):
                     except:
                         with open(self.data.file_prefix + '_' + key + '_eval_error.txt', "w") as log_file:
                             log_file.write('{}: {}\n'.format(i, np.mean(error_)))
+                    try:
+                        with open(self.data.file_prefix + '_' + key + '_eval_cons.txt', "a") as log_file:
+                            log_file.write('{}: {}\n'.format(i, constraints))
+                    except:
+                        with open(self.data.file_prefix + '_' + key + '_eval_cons.txt', "w") as log_file:
+                            log_file.write('{}: {}\n'.format(i, constraints))
             print('Evaluations finished. Resuming exploration...')
             self.evaluation.model.set_sigma_expl(tmp_sigma)
             #  print(self.evaluation.model.get_sigma_expl())

@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # To guarantee reproducible experiments
     n_initialization = 100
-    n_experiments = 10000
+    n_experiments = 16000
     n_save_data = 2000   # np.nan to not save, -1 to save 5 times during exploration
 
     eval_step = 500
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # random.seed(random_seed)
     # np_rnd.seed(random_seed)
 
-    directory = 'parabola_experiment_thesis_chap_5_short'
+    directory = 'parabola_experiment_thesis_chap_5_with_consevo'
     try:
         os.mkdir(directory)
     except:
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         models.f_cons = model_(f_cons_key, system)
 
         now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_")
-        file_prefix = directory + '/proprio_' + str(idx) + '_' + now
+        file_prefix = directory + '/simple_' + str(idx) + '_' + now
 
         #  Creating Simulation object, running simulation and plotting experiments##
         evaluation_sim = Evaluation(system,
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         simulation.f_cons_key = f_cons_key
         simulation.f_im_key = f_im_key
 
-        simulation.run(proprio=True)
+        simulation.run(proprio=False)
 
         #evaluate sensorimotor
         evaluation_sim = Evaluation(system,
