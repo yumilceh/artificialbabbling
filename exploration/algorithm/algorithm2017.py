@@ -274,7 +274,7 @@ class Algorithm(object):
                 error_ = np.linalg.norm(eval_data[key].sensor_goal.get_all().as_matrix() -
                                         eval_data[key].sensor.get_all().as_matrix(), axis=1)
                 self.evaluation_error[key] += [i, np.mean(error_)]
-                constraints = np.sum(eval_data[key].cons.data.iloc[:].as_matrix())
+                constraints = np.sum(eval_data[key].cons.data.iloc[:].as_matrix())/len(eval_data[key].cons.data.index)
                 if self.params.n_save_data is not np.nan:
                     try:
                         with open(self.data.file_prefix + '_' + key + '_eval_error.txt', "a") as log_file:
