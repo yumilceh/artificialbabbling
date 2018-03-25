@@ -17,7 +17,7 @@ from exploration.systems.Diva2017a import Diva2017a as System
 from exploration.systems.Diva2017a import Instructor
 from diva_configurations import model_, comp_func
 
-directory = 'diva_experiment_thesis_chap_5_codevalidity'
+directory = 'diva_experiment_thesis_chap_5_250'
 
 # models
 f_sm_key = 'igmm_sm'
@@ -39,7 +39,7 @@ f_im_key = 'explauto_im'
 def sim_agent(ops,idx):
 
     n_initialization = 1000
-    n_experiments = 100000
+    n_experiments = 250000
     n_save_data = 10000  # np.nan to not save, -1 to save 5 times during exploration
     eval_step = 2500 #np.nan to not evaluate
 
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     groups2 = itertools.product(random_seeds, ['autonomous'], [0.999999],vowel_units)
 
     processes = []
-    max_processes = 2
+    max_processes = 3
 
     for idx, ops in enumerate(list(groups2)):#+list(groups2)):
         idx2 = idx
