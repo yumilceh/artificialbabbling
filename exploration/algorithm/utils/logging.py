@@ -89,6 +89,7 @@ def read_config_log(file_name):
         for line in f:
             try:
                 line = line.replace('\n','')
+                line = line.replace('\r', '')
                 (key, val) = line.split(': ')
                 conf[key] = val
             except:
